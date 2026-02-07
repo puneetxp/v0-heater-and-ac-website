@@ -25,37 +25,69 @@ export default function LoginPage() {
     setIsLoading(true)
     setError(null)
 
+    // Trim whitespace from inputs
+    const trimmedEmail = email.trim().toLowerCase()
+    const trimmedPassword = password.trim()
+
     // Static admin credentials
     const STATIC_ADMIN_EMAIL = "admin@comfortrent.com"
     const STATIC_ADMIN_PASSWORD = "admin123"
 
+    console.log("[v0] Login attempt:", { email: trimmedEmail, passwordLength: trimmedPassword.length })
+
     // Check if using static admin credentials
-    if (email === STATIC_ADMIN_EMAIL && password === STATIC_ADMIN_PASSWORD) {
+    if (trimmedEmail === STATIC_ADMIN_EMAIL && trimmedPassword === STATIC_ADMIN_PASSWORD) {
+      console.log("[v0] Admin login successful")
       const adminSession = {
         id: "static-admin",
         email: STATIC_ADMIN_EMAIL,
         role: "admin",
         loginTime: new Date().toISOString(),
       }
-      localStorage.setItem("admin_session", JSON.stringify(adminSession))
-      router.push("/admin/dashboard")
-      return
+      
+      // Set cookie via API route
+      try {
+        const response = await fetch("/api/auth/set-admin-session", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(adminSession),
+        })
+
+        if (response.ok) {
+          console.log("[v0] Admin session cookie set")
+          router.push("/admin/dashboard")
+          router.refresh()
+          return
+        } else {
+          throw new Error("Failed to set admin session")
+        }
+      } catch (err) {
+        console.error("[v0] Error setting admin session:", err)
+        setError("Failed to login. Please try again.")
+        setIsLoading(false)
+        return
+      }
     }
+
+    console.log("[v0] Not admin credentials, trying Supabase auth")
 
     try {
       const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: trimmedEmail,
+        password: trimmedPassword,
       })
 
       if (authError) {
         console.error("[v0] Auth error:", authError)
-        setError(authError.message || "Invalid credentials")
+        setError(authError.message || "Invalid email or password")
         setIsLoading(false)
         return
       }
 
       if (data?.user) {
+        console.log("[v0] User login successful:", data.user.id)
         router.push("/dashboard")
         router.refresh()
       }
