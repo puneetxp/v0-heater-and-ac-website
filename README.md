@@ -16,6 +16,13 @@ Your project is live at:
 
 **[https://vercel.com/puneet-sharmas-projects-2ade9773/v0-heater-and-ac-website](https://vercel.com/puneet-sharmas-projects-2ade9773/v0-heater-and-ac-website)**
 
+### Vercel Analytics setup
+
+1. Install `@vercel/analytics` (already listed in `package.json`). Update with `pnpm add @vercel/analytics` (or npm/yarn) if needed.
+2. Ensure `<Analytics />` from `@vercel/analytics/next` is rendered in `app/layout.tsx` (already wired up).
+3. Deploy to Vercel and visit the deployed site with blockers disabled. First visits can take ~30 seconds to appear in the Analytics dashboard.
+4. If the dashboard still shows onboarding, verify Analytics is enabled for this project in the Vercel dashboard.
+
 ## Build your app
 
 Continue building your app on:
