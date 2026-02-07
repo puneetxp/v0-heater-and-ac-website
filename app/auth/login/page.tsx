@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useSupabaseClient } from "@/lib/hooks/use-supabase"
+import { useSupabase } from "@/app/providers"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -18,24 +18,76 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const supabase = useSupabaseClient()
+  const supabase = useSupabase()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
 
+    // Trim whitespace from inputs
+    const trimmedEmail = email.trim().toLowerCase()
+    const trimmedPassword = password.trim()
+
+    // Static admin credentials
+    const STATIC_ADMIN_EMAIL = "admin@comfortrent.com"
+    const STATIC_ADMIN_PASSWORD = "admin123"
+
+    // Check if using static admin credentials
+    if (trimmedEmail === STATIC_ADMIN_EMAIL && trimmedPassword === STATIC_ADMIN_PASSWORD) {
+      // Store admin session in localStorage and sessionStorage
+      const adminSession = {
+        id: "static-admin",
+        email: STATIC_ADMIN_EMAIL,
+        role: "admin",
+        loginTime: new Date().toISOString(),
+      }
+      
+      try {
+        // Try to set via API route for server-side cookie
+        const response = await fetch("/api/auth/set-admin-session", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(adminSession),
+        })
+
+        // Store in localStorage as backup (works in preview)
+        localStorage.setItem("admin_session", JSON.stringify(adminSession))
+        sessionStorage.setItem("admin_authenticated", "true")
+
+        setIsLoading(false)
+        router.push("/admin/dashboard")
+        return
+      } catch (err) {
+        console.error("[v0] Error with admin login:", err)
+        setError("Failed to login. Please try again.")
+        setIsLoading(false)
+        return
+      }
+    }
+
+    // Not admin credentials, try Supabase auth
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: trimmedEmail,
+        password: trimmedPassword,
       })
-      if (error) throw error
-      router.push("/dashboard")
-      router.refresh()
+
+      if (authError) {
+        setError(authError.message || "Invalid email or password")
+        setIsLoading(false)
+        return
+      }
+
+      if (data?.user) {
+        setIsLoading(false)
+        router.push("/dashboard")
+        return
+      }
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
-    } finally {
+      setError(error instanceof Error ? error.message : "An error occurred. Please try again.")
       setIsLoading(false)
     }
   }
@@ -156,6 +208,17 @@ export default function LoginPage() {
             </form>
           </CardContent>
         </Card>
+
+        {/* Demo Credentials Box */}
+        <div className="mt-6 rounded-lg bg-blue-50 border border-blue-200 p-4">
+          <p className="text-sm font-semibold text-blue-900 mb-2">Demo Admin Credentials:</p>
+          <p className="text-sm text-blue-800">
+            Email: <code className="bg-blue-100 px-2 py-1 rounded font-mono text-xs">admin@comfortrent.com</code>
+          </p>
+          <p className="text-sm text-blue-800">
+            Password: <code className="bg-blue-100 px-2 py-1 rounded font-mono text-xs">admin123</code>
+          </p>
+        </div>
       </div>
     </div>
   )
