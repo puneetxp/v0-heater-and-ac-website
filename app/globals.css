@@ -3,13 +3,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Import system fonts */
-@font-face {
-  font-family: "Geist";
-  src: system-ui, -apple-system, sans-serif;
-  font-weight: 100 900;
-}
-
 :root {
   --background: oklch(0.98 0.005 240);
   --foreground: oklch(0.2 0.01 240);
@@ -52,8 +45,8 @@
 }
 
 @theme inline {
-  --font-sans: "Geist", "Geist Fallback";
-  --font-mono: "Geist Mono", "Geist Mono Fallback";
+  --font-sans: var(--font-sans);
+  --font-mono: monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
