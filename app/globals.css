@@ -3,6 +3,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Import system fonts */
+@font-face {
+  font-family: "Geist";
+  src: system-ui, -apple-system, sans-serif;
+  font-weight: 100 900;
+}
+
 :root {
   --background: oklch(0.98 0.005 240);
   --foreground: oklch(0.2 0.01 240);
