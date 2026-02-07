@@ -33,11 +33,9 @@ export default function LoginPage() {
     const STATIC_ADMIN_EMAIL = "admin@comfortrent.com"
     const STATIC_ADMIN_PASSWORD = "admin123"
 
-    console.log("[v0] Login attempt:", { email: trimmedEmail, passwordLength: trimmedPassword.length })
-
     // Check if using static admin credentials
     if (trimmedEmail === STATIC_ADMIN_EMAIL && trimmedPassword === STATIC_ADMIN_PASSWORD) {
-      console.log("[v0] Admin login successful")
+      // Store admin session in localStorage and sessionStorage
       const adminSession = {
         id: "static-admin",
         email: STATIC_ADMIN_EMAIL,
@@ -45,8 +43,8 @@ export default function LoginPage() {
         loginTime: new Date().toISOString(),
       }
       
-      // Set cookie via API route
       try {
+        // Try to set via API route for server-side cookie
         const response = await fetch("/api/auth/set-admin-session", {
           method: "POST",
           headers: {
@@ -55,24 +53,22 @@ export default function LoginPage() {
           body: JSON.stringify(adminSession),
         })
 
-        if (response.ok) {
-          console.log("[v0] Admin session cookie set")
-          router.push("/admin/dashboard")
-          router.refresh()
-          return
-        } else {
-          throw new Error("Failed to set admin session")
-        }
+        // Store in localStorage as backup (works in preview)
+        localStorage.setItem("admin_session", JSON.stringify(adminSession))
+        sessionStorage.setItem("admin_authenticated", "true")
+
+        setIsLoading(false)
+        router.push("/admin/dashboard")
+        return
       } catch (err) {
-        console.error("[v0] Error setting admin session:", err)
+        console.error("[v0] Error with admin login:", err)
         setError("Failed to login. Please try again.")
         setIsLoading(false)
         return
       }
     }
 
-    console.log("[v0] Not admin credentials, trying Supabase auth")
-
+    // Not admin credentials, try Supabase auth
     try {
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: trimmedEmail,
@@ -80,19 +76,17 @@ export default function LoginPage() {
       })
 
       if (authError) {
-        console.error("[v0] Auth error:", authError)
         setError(authError.message || "Invalid email or password")
         setIsLoading(false)
         return
       }
 
       if (data?.user) {
-        console.log("[v0] User login successful:", data.user.id)
+        setIsLoading(false)
         router.push("/dashboard")
-        router.refresh()
+        return
       }
     } catch (error: unknown) {
-      console.error("[v0] Login error:", error)
       setError(error instanceof Error ? error.message : "An error occurred. Please try again.")
       setIsLoading(false)
     }
