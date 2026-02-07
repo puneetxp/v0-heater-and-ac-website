@@ -5,12 +5,14 @@
 
 /* Geist Font */
 @theme inline {
-  --font-sans: Geist, "Geist Fallback", system-ui, -apple-system, sans-serif;
+  --font-sans: GeistSans, "GeistSans Fallback", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-mono: "Geist Mono", monospace;
 }
 
 :root {
-  --font-sans: Geist, "Geist Fallback", system-ui, -apple-system, sans-serif;
+  --font-sans: GeistSans, "GeistSans Fallback", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-mono: "Geist Mono", monospace;
   --background: oklch(0.98 0.005 240);
   --foreground: oklch(0.2 0.01 240);
