@@ -6,8 +6,6 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Edit, Trash2 } from "lucide-react"
 import Image from "next/image"
 
-export const dynamic = "force-dynamic"
-
 export default async function AdminProductsPage() {
   await checkAdminAccess()
   const supabase = await createServerClient()

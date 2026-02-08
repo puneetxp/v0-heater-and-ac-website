@@ -3,9 +3,6 @@ import { createServerClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DollarSign, Users, Calendar, Package, TrendingUp, TrendingDown } from "lucide-react"
 
-// Prevent static generation - this page requires server-side rendering
-export const dynamic = "force-dynamic"
-
 export default async function AdminDashboardPage() {
   await checkAdminAccess()
   const supabase = await createServerClient()

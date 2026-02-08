@@ -5,8 +5,6 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 
-export const dynamic = "force-dynamic"
-
 export default async function AdminSettingsPage() {
   await checkAdminAccess()
 
