@@ -1,4 +1,5 @@
 import { ProductCard } from "@/components/product-card"
+import { CategorySection } from "@/components/category-section"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const acProducts = [
@@ -90,80 +91,49 @@ const heaterProducts = [
 
 export function ProductGrid() {
   return (
-    <section id="products" className="py-16 md:py-24 lg:py-32 relative overflow-hidden px-4 md:px-6 lg:px-8">
-      <div className="absolute top-0 left-1/4 w-96 h-96 gradient-primary rounded-full blur-3xl opacity-5" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 gradient-secondary rounded-full blur-3xl opacity-5" />
-
-      <div className="container mx-auto max-w-7xl relative z-10">
-        <div className="text-center space-y-4 mb-12 md:mb-16 animate-slideInUp" style={{ animationFillMode: 'both' }}>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight animate-fadeIn" style={{ animationFillMode: 'both', animationDelay: '0.2s' }}>
-            Our{" "}
-            <span className="bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">Products</span>
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-balance animate-fadeIn" style={{ animationFillMode: 'both', animationDelay: '0.3s' }}>
-            Choose from our wide range of air conditioners and heaters. All units are well-maintained and ready for
-            immediate rental.
-          </p>
+    <section id="products" className="relative overflow-hidden">
+      {/* Header Section */}
+      <div className="py-12 md:py-16 lg:py-20 px-4 md:px-6 lg:px-8 bg-gradient-to-b from-background to-transparent">
+        <div className="container mx-auto max-w-7xl">
+          <div className="text-center space-y-4 animate-slideInUp" style={{ animationFillMode: 'both' }}>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight animate-fadeIn" style={{ animationFillMode: 'both', animationDelay: '0.2s' }}>
+              Our{" "}
+              <span className="bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent">
+                Products
+              </span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-balance animate-fadeIn" style={{ animationFillMode: 'both', animationDelay: '0.3s' }}>
+              Discover our premium collection of air conditioners and heaters, each designed for optimal comfort and efficiency.
+            </p>
+          </div>
         </div>
-
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 mb-12 md:mb-16 h-12 bg-muted/50 p-1 border-2 border-border/40">
-            <TabsTrigger
-              value="all"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold"
-            >
-              All Products
-            </TabsTrigger>
-            <TabsTrigger
-              value="ac"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold"
-            >
-              Air Conditioners
-            </TabsTrigger>
-            <TabsTrigger
-              value="heaters"
-              className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground font-semibold"
-            >
-              Heaters
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="all" className="space-y-12 md:space-y-16">
-            <div>
-              <h3 className="text-2xl font-bold mb-6 md:mb-8">Air Conditioners</h3>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                {acProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold mb-6 md:mb-8">Heaters</h3>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                {heaterProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="ac">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {acProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="heaters">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {heaterProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
       </div>
+
+      {/* Air Conditioners Section - Cooling Theme */}
+      <CategorySection
+        title="Air Conditioners"
+        description="Premium cooling solutions for any space. Efficient, quiet, and ready to keep your environment perfectly cool."
+        category="cooling"
+      >
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          {acProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </CategorySection>
+
+      {/* Heaters Section - Heating Theme */}
+      <CategorySection
+        title="Heaters"
+        description="Reliable heating solutions for winter comfort. Fast, efficient, and perfect for any room size."
+        category="heating"
+      >
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          {heaterProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </CategorySection>
     </section>
   )
 }

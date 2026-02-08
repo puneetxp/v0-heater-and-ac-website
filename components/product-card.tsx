@@ -23,21 +23,19 @@ export function ProductCard({ product }: ProductCardProps) {
   const isCooling = product.category.toLowerCase().includes('ac') || product.category.toLowerCase().includes('window') || product.category.toLowerCase().includes('split')
   const isHeating = product.category.toLowerCase().includes('heater') || product.category.toLowerCase().includes('oil')
   
-  // Select animation based on category
-  const flowAnimation = isCooling ? 'animate-cool-flow' : isHeating ? 'animate-heat-flow' : 'animate-fadeIn'
-  const glowAnimation = isCooling ? 'animate-cool-glow' : isHeating ? 'animate-heat-glow' : ''
+  // Select badge color based on category
   const badgeColor = isCooling ? 'bg-blue-600 text-white' : isHeating ? 'bg-orange-600 text-white' : 'bg-primary'
 
   return (
-    <Card className={`group overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 border hover:border-primary/30 animate-scaleIn ${glowAnimation}`} style={{ animationFillMode: 'both' }}>
+    <Card className="group overflow-hidden hover:shadow-xl transition-all duration-500 border hover:border-primary/40">
       <CardHeader className="p-0">
-        <div className={`relative h-56 overflow-hidden bg-muted/30 ${flowAnimation}`} style={{ animationFillMode: 'both' }}>
+        <div className="relative h-56 overflow-hidden bg-muted/30">
           <img
             src={product.image || "/placeholder.svg?height=300&width=400"}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           />
-          <Badge className={`absolute top-4 right-4 text-white shadow-sm animate-bounceCustom ${badgeColor}`} style={{ animationIterationCount: '2' }}>
+          <Badge className={`absolute top-4 right-4 text-white shadow-sm ${badgeColor}`}>
             {product.capacity}
           </Badge>
         </div>
@@ -49,8 +47,8 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
         <div className="space-y-2.5">
           {product.features.map((feature, index) => (
-            <div key={index} className="flex items-center gap-2.5 text-sm text-muted-foreground hover:text-primary transition-colors" style={{ animationDelay: `${index * 50}ms` }}>
-              <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-all">
+            <div key={index} className="flex items-center gap-2.5 text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300">
+              <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-all duration-300">
                 <Check className="h-3 w-3 text-primary" />
               </div>
               <span>{feature}</span>
@@ -65,7 +63,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </CardContent>
       <CardFooter className="p-6 pt-0">
-        <Button asChild className="w-full bg-primary hover:bg-primary/90 transition-all hover:shadow-lg hover:shadow-primary/30" size="lg">
+        <Button asChild className="w-full bg-primary hover:bg-primary/90 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20" size="lg">
           <Link href={`/booking/${product.id}`}>Rent Now</Link>
         </Button>
       </CardFooter>

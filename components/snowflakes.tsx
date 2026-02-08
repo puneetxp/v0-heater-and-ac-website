@@ -16,13 +16,13 @@ export function Snowflakes() {
   useEffect(() => {
     const generateSnowflakes = () => {
       const flakes: Snowflake[] = []
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < 20; i++) {
         flakes.push({
           id: i,
           left: Math.random() * 100,
-          delay: Math.random() * 2,
-          duration: 8 + Math.random() * 4,
-          size: 10 + Math.random() * 20,
+          delay: Math.random() * 3,
+          duration: 10 + Math.random() * 5,
+          size: 8 + Math.random() * 16,
         })
       }
       setSnowflakes(flakes)
@@ -41,7 +41,7 @@ export function Snowflakes() {
             left: `${flake.left}%`,
             top: '-10px',
             fontSize: `${flake.size}px`,
-            opacity: 0.8,
+            opacity: 0.4,
             animation: `snowfall ${flake.duration}s linear ${flake.delay}s infinite`,
           }}
         >
