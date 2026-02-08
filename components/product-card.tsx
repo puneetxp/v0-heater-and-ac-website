@@ -19,16 +19,25 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  // Determine if it's a cooling or heating product
+  const isCooling = product.category.toLowerCase().includes('ac') || product.category.toLowerCase().includes('window') || product.category.toLowerCase().includes('split')
+  const isHeating = product.category.toLowerCase().includes('heater') || product.category.toLowerCase().includes('oil')
+  
+  // Select animation based on category
+  const flowAnimation = isCooling ? 'animate-cool-flow' : isHeating ? 'animate-heat-flow' : 'animate-fadeIn'
+  const glowAnimation = isCooling ? 'animate-cool-glow' : isHeating ? 'animate-heat-glow' : ''
+  const badgeColor = isCooling ? 'bg-blue-600 text-white' : isHeating ? 'bg-orange-600 text-white' : 'bg-primary'
+
   return (
-    <Card className="group overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 border hover:border-primary/30 animate-scaleIn" style={{ animationFillMode: 'both' }}>
+    <Card className={`group overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 border hover:border-primary/30 animate-scaleIn ${glowAnimation}`} style={{ animationFillMode: 'both' }}>
       <CardHeader className="p-0">
-        <div className="relative h-56 overflow-hidden bg-muted/30">
+        <div className={`relative h-56 overflow-hidden bg-muted/30 ${flowAnimation}`} style={{ animationFillMode: 'both' }}>
           <img
             src={product.image || "/placeholder.svg?height=300&width=400"}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
-          <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground shadow-sm animate-bounceCustom" style={{ animationIterationCount: '2' }}>
+          <Badge className={`absolute top-4 right-4 text-white shadow-sm animate-bounceCustom ${badgeColor}`} style={{ animationIterationCount: '2' }}>
             {product.capacity}
           </Badge>
         </div>
