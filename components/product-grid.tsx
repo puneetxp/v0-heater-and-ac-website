@@ -95,12 +95,12 @@ export function ProductGrid() {
       <div className="absolute bottom-0 right-1/4 w-96 h-96 gradient-secondary rounded-full blur-3xl opacity-5" />
 
       <div className="container mx-auto max-w-7xl relative z-10">
-        <div className="text-center space-y-4 mb-12 md:mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+        <div className="text-center space-y-4 mb-12 md:mb-16 animate-slideInUp" style={{ animationFillMode: 'both' }}>
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight animate-fadeIn" style={{ animationFillMode: 'both', animationDelay: '0.2s' }}>
             Our{" "}
             <span className="bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">Products</span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-balance">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-balance animate-fadeIn" style={{ animationFillMode: 'both', animationDelay: '0.3s' }}>
             Choose from our wide range of air conditioners and heaters. All units are well-maintained and ready for
             immediate rental.
           </p>

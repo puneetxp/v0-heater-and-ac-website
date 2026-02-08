@@ -20,15 +20,15 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   return (
-    <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 border hover:border-primary/30">
+    <Card className="group overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 border hover:border-primary/30 animate-scaleIn" style={{ animationFillMode: 'both' }}>
       <CardHeader className="p-0">
         <div className="relative h-56 overflow-hidden bg-muted/30">
           <img
             src={product.image || "/placeholder.svg?height=300&width=400"}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
-          <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground shadow-sm">
+          <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground shadow-sm animate-bounceCustom" style={{ animationIterationCount: '2' }}>
             {product.capacity}
           </Badge>
         </div>
@@ -40,8 +40,8 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
         <div className="space-y-2.5">
           {product.features.map((feature, index) => (
-            <div key={index} className="flex items-center gap-2.5 text-sm text-muted-foreground">
-              <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <div key={index} className="flex items-center gap-2.5 text-sm text-muted-foreground hover:text-primary transition-colors" style={{ animationDelay: `${index * 50}ms` }}>
+              <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-all">
                 <Check className="h-3 w-3 text-primary" />
               </div>
               <span>{feature}</span>
@@ -56,7 +56,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </CardContent>
       <CardFooter className="p-6 pt-0">
-        <Button asChild className="w-full bg-primary hover:bg-primary/90" size="lg">
+        <Button asChild className="w-full bg-primary hover:bg-primary/90 transition-all hover:shadow-lg hover:shadow-primary/30" size="lg">
           <Link href={`/booking/${product.id}`}>Rent Now</Link>
         </Button>
       </CardFooter>
