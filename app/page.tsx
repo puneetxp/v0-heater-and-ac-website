@@ -9,7 +9,7 @@ import { Snowflakes } from "@/components/snowflakes"
 
 export default function Home() {
   return (
-    <main className="min-h-screen relative">
+    <main className="min-h-screen relative z-10">
       <Snowflakes />
       <Header />
       <div className="space-y-16 md:space-y-24 lg:space-y-32">
