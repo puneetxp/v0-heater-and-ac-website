@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { FileText, Download, Eye } from "lucide-react"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminInvoicesPage() {
   await checkAdminAccess()
   const supabase = await createServerClient()

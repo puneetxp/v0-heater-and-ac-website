@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge"
 import { Trash2, Check, Sun, Snowflake, Calendar } from "lucide-react"
 import { PlanFormDialog } from "@/components/admin/plan-form-dialog"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminPlansPage() {
   await checkAdminAccess()
   const supabase = await createServerClient()
