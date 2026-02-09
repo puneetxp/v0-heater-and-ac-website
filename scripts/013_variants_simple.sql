@@ -4,13 +4,12 @@ CREATE TABLE IF NOT EXISTS public.product_variants (
   product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   description TEXT,
-  sku TEXT UNIQUE,
+  sku TEXT,
   capacity TEXT,
   color TEXT,
-  size TEXT,
   specifications JSONB,
   image_url TEXT,
-  price_multiplier DECIMAL(5, 2) DEFAULT 1.0, -- Price relative to base product (1.0 = same price)
+  price_multiplier DECIMAL(5, 2) DEFAULT 1.0,
   available_quantity INTEGER DEFAULT 0,
   is_active BOOLEAN DEFAULT TRUE,
   display_order INTEGER DEFAULT 0,
@@ -48,34 +47,11 @@ CREATE TABLE IF NOT EXISTS public.product_variant_plans (
   final_price DECIMAL(10, 2) NOT NULL,
   is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(variant_id, plan_id)
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Enable RLS
-ALTER TABLE public.product_variants ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.product_plans ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.product_variant_plans ENABLE ROW LEVEL SECURITY;
-
--- Create RLS policies for product_variants
-CREATE POLICY "Anyone can view active product variants" ON public.product_variants
-  FOR SELECT USING (is_active = TRUE);
-
--- Create RLS policies for product_plans
-CREATE POLICY "Anyone can view active product plans" ON public.product_plans
-  FOR SELECT USING (is_active = TRUE);
-
--- Create RLS policies for product_variant_plans
-CREATE POLICY "Anyone can view active variant plans" ON public.product_variant_plans
-  FOR SELECT USING (is_active = TRUE);
-
--- Create indexes for better query performance
+-- Create indexes
 CREATE INDEX idx_product_variants_product_id ON public.product_variants(product_id);
 CREATE INDEX idx_product_plans_product_id ON public.product_plans(product_id);
 CREATE INDEX idx_product_variant_plans_variant_id ON public.product_variant_plans(variant_id);
 CREATE INDEX idx_product_variant_plans_plan_id ON public.product_variant_plans(plan_id);
-
--- Grant permissions for authenticated users
-GRANT SELECT ON public.product_variants TO authenticated, anon;
-GRANT SELECT ON public.product_plans TO authenticated, anon;
-GRANT SELECT ON public.product_variant_plans TO authenticated, anon;
