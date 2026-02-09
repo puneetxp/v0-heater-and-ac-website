@@ -62,8 +62,11 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         </div>
       </CardContent>
-      <CardFooter className="p-6 pt-0">
-        <Button asChild className="w-full bg-primary hover:bg-primary/90 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20" size="lg">
+      <CardFooter className="p-6 pt-0 flex gap-2">
+        <Button asChild variant="outline" className="flex-1 transition-all duration-300" size="lg">
+          <Link href={`/product/${product.id}`}>View Details</Link>
+        </Button>
+        <Button asChild className="flex-1 bg-primary hover:bg-primary/90 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20" size="lg">
           <Link href={`/booking/${product.id}`}>Rent Now</Link>
         </Button>
       </CardFooter>
