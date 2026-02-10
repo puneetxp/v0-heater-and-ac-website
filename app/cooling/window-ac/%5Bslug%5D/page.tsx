@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
@@ -9,16 +9,39 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowLeft, Check, Wind } from 'lucide-react'
 import Link from 'next/link'
+import { findProductBySlug } from '@/lib/product-data'
 
 export default function WindowACProductPage({ params }: { params: { slug: string } }) {
-  const [selectedVariant, setSelectedVariant] = useState('1.0')
+  // Find product from slug
+  const productData = useMemo(() => findProductBySlug(params.slug, 'window-ac'), [params.slug])
+
+  // Fallback if product not found
+  if (!productData) {
+    return (
+      <main className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold mb-4">Product Not Found</h1>
+            <p className="text-gray-600 mb-6">The product you're looking for doesn't exist.</p>
+            <Button asChild>
+              <Link href="/cooling/window-ac">Back to Window AC</Link>
+            </Button>
+          </div>
+        </div>
+        <Footer />
+      </main>
+    )
+  }
+
+  const [selectedVariant, setSelectedVariant] = useState(productData.capacity.split(' ')[0])
   const [selectedPlan, setSelectedPlan] = useState('monthly')
 
   const product = {
-    name: 'Window AC Unit',
-    category: 'Window AC',
-    basePrice: 899,
-    description: 'Compact and affordable window-mounted AC units with excellent cooling performance.',
+    name: productData.name,
+    category: productData.category,
+    basePrice: productData.basePrice,
+    description: productData.description || 'Compact and affordable window-mounted AC units with excellent cooling performance.',
     image: '/placeholder.svg?height=500&width=600',
     warranty: '2 years on compressor, 1 year on parts',
     slug: params.slug,

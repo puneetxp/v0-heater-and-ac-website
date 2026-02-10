@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
@@ -9,16 +9,39 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowLeft, Check, Flame } from 'lucide-react'
 import Link from 'next/link'
+import { findProductBySlug } from '@/lib/product-data'
 
 export default function OilHeaterProductPage({ params }: { params: { slug: string } }) {
-  const [selectedVariant, setSelectedVariant] = useState('9')
+  // Find product from slug
+  const productData = useMemo(() => findProductBySlug(params.slug, 'oil-heater'), [params.slug])
+
+  // Fallback if product not found
+  if (!productData) {
+    return (
+      <main className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold mb-4">Product Not Found</h1>
+            <p className="text-gray-600 mb-6">The product you're looking for doesn't exist.</p>
+            <Button asChild>
+              <Link href="/heating/oil-heater">Back to Oil Heaters</Link>
+            </Button>
+          </div>
+        </div>
+        <Footer />
+      </main>
+    )
+  }
+
+  const [selectedVariant, setSelectedVariant] = useState(productData.capacity.split(' ')[0])
   const [selectedPlan, setSelectedPlan] = useState('monthly')
 
   const product = {
-    name: 'Oil Heater',
-    category: 'Oil Heater',
-    basePrice: 999,
-    description: 'Portable oil-filled radiator heater with thermostat control and multiple heat settings.',
+    name: productData.name,
+    category: productData.category,
+    basePrice: productData.basePrice,
+    description: productData.description || 'Portable oil-filled radiator heater with thermostat control and multiple heat settings.',
     image: '/placeholder.svg?height=500&width=600',
     warranty: '1 year manufacturer warranty',
     slug: params.slug,
