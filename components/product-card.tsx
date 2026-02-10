@@ -23,19 +23,10 @@ export function ProductCard({ product }: ProductCardProps) {
   const isCooling = product.category.toLowerCase().includes('ac') || product.category.toLowerCase().includes('window') || product.category.toLowerCase().includes('split')
   const isHeating = product.category.toLowerCase().includes('heater') || product.category.toLowerCase().includes('oil')
   
-  // Generate clean SEO-friendly URL directly
+  // Generate clean SEO-friendly URL to unified product route
   const generateCleanUrl = () => {
-    // Map category to slug
-    if (product.category.includes('Window')) {
-      return `/cooling/window-ac/window-ac-${product.capacity.toLowerCase().replace(/\s+/g, '-')}`
-    }
-    if (product.category.includes('Split')) {
-      return `/cooling/split-ac/split-ac-${product.capacity.toLowerCase().replace(/\s+/g, '-')}`
-    }
-    if (product.category.includes('Oil')) {
-      return `/heating/oil-heater/oil-heater-${product.capacity.toLowerCase().replace(/\s+/g, '-')}`
-    }
-    return `/product/${product.id}`
+    const slug = `${product.category.toLowerCase().replace(/\s+/g, '-')}-${product.capacity.toLowerCase().replace(/\s+/g, '-')}`
+    return `/product/${slug}`
   }
   
   const detailsUrl = generateCleanUrl()

@@ -134,7 +134,7 @@ export default function OilHeaterPage() {
                       <span className="text-sm text-gray-600">/month</span>
                     </div>
                     <Button asChild className="w-full bg-orange-600 hover:bg-orange-700 h-10">
-                      <Link href={`/heating/oil-heater/oil-heater-${product.capacity.replace(/\s+/g, '-').toLowerCase()}`}>
+                      <Link href={`/product/oil-heater-${product.capacity.replace(/\s+/g, '-').toLowerCase()}`}>
                         View Details
                       </Link>
                     </Button>

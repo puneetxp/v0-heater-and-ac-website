@@ -125,7 +125,7 @@ export default function WindowACPage() {
                       <span className="text-sm text-gray-600">/month</span>
                     </div>
                     <Button asChild className="w-full bg-blue-600 hover:bg-blue-700 h-10">
-                      <Link href={`/cooling/window-ac/window-ac-${product.capacity.replace(/\s+/g, '-').toLowerCase()}`}>
+                      <Link href={`/product/window-ac-${product.capacity.replace(/\s+/g, '-').toLowerCase()}`}>
                         View Details
                       </Link>
                     </Button>
