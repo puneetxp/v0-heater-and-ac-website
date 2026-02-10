@@ -3,6 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Check } from "lucide-react"
 import Link from "next/link"
+import { generateProductUrl } from "@/lib/product-routes"
 
 interface Product {
   id: string | number // Updated to support both string and number IDs
@@ -22,6 +23,9 @@ export function ProductCard({ product }: ProductCardProps) {
   // Determine if it's a cooling or heating product
   const isCooling = product.category.toLowerCase().includes('ac') || product.category.toLowerCase().includes('window') || product.category.toLowerCase().includes('split')
   const isHeating = product.category.toLowerCase().includes('heater') || product.category.toLowerCase().includes('oil')
+  
+  // Generate SEO-friendly URL
+  const detailsUrl = generateProductUrl(product.id, product.category, product.name, product.capacity)
   
   // Select badge color based on category
   const badgeColor = isCooling ? 'bg-blue-600 text-white' : isHeating ? 'bg-orange-600 text-white' : 'bg-primary'
@@ -64,7 +68,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </CardContent>
       <CardFooter className="p-6 pt-0 flex gap-2">
         <Button asChild variant="outline" className="flex-1 transition-all duration-300" size="lg">
-          <Link href={`/product/${product.id}`}>View Details</Link>
+          <Link href={detailsUrl}>View Details</Link>
         </Button>
         <Button asChild className="flex-1 bg-primary hover:bg-primary/90 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20" size="lg">
           <Link href={`/booking/${product.id}`}>Rent Now</Link>

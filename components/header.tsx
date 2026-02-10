@@ -18,10 +18,16 @@ export function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <Link
-              href="/#products"
+              href="/cooling"
               className="text-sm font-medium text-foreground hover:text-primary transition-colors"
             >
-              Products
+              Cooling
+            </Link>
+            <Link
+              href="/heating"
+              className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+            >
+              Heating
             </Link>
             <Link
               href="/#features"
@@ -34,9 +40,6 @@ export function Header() {
               className="text-sm font-medium text-foreground hover:text-primary transition-colors"
             >
               How It Works
-            </Link>
-            <Link href="/#contact" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-              Contact
             </Link>
             <Link
               href="/admin/login"
