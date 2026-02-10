@@ -1,3 +1,26 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: "Heating Solutions | Oil Heater Rentals | ComfortRent",
+  description: "Rent portable oil heaters starting at ₹799/month. Reliable winter heating with thermostatic control. Flexible rental plans with professional setup.",
+  keywords: ["heater rental", "oil heater rental", "portable heater", "heating rental", "winter heating"],
+  canonical: "https://comfortrent.com/heating",
+  openGraph: {
+    type: "website",
+    url: "https://comfortrent.com/heating",
+    title: "Heating Solutions | Oil Heater Rentals | ComfortRent",
+    description: "Affordable oil heater rentals for winter. Start from ₹799/month with free installation.",
+    images: [
+      {
+        url: "https://comfortrent.com/heating-og.png",
+        width: 1200,
+        height: 630,
+        alt: "Heating Solutions",
+      },
+    ],
+  },
+}
+
 'use client'
 
 import { Header } from '@/components/header'

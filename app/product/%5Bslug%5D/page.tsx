@@ -1,3 +1,70 @@
+import { useState, useMemo } from 'react'
+import type { Metadata } from 'next'
+import { allProducts } from '@/lib/product-data'
+import { Header } from '@/components/header'
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  // Find product from slug
+  let product = null
+  for (const category of [allProducts.windowAC, allProducts.splitAC, allProducts.oilHeater]) {
+    for (const prod of category) {
+      const productSlug = `${prod.category.toLowerCase().replace(/\s+/g, '-')}-${prod.capacity
+        .toLowerCase()
+        .replace(/\s+/g, '-')}`
+      if (productSlug === params.slug) {
+        product = prod
+        break
+      }
+    }
+    if (product) break
+  }
+
+  if (!product) {
+    return {
+      title: "Product Not Found | ComfortRent",
+      description: "The product you're looking for doesn't exist.",
+      robots: { index: false },
+    }
+  }
+
+  const title = `${product.name} for Rent | ComfortRent`
+  const description = `Rent ${product.name} (${product.capacity}) at ₹${product.basePrice}/month. Professional installation included. 24/7 support available.`
+  const url = `https://comfortrent.com/product/${params.slug}`
+
+  return {
+    title,
+    description,
+    keywords: [
+      product.name.toLowerCase(),
+      product.category.toLowerCase(),
+      `${product.capacity.toLowerCase()} rental`,
+      "AC rental",
+      "heater rental",
+    ],
+    canonical: url,
+    openGraph: {
+      type: "product",
+      url,
+      title,
+      description,
+      siteName: "ComfortRent",
+      images: [
+        {
+          url: "https://comfortrent.com/product-og.png",
+          width: 1200,
+          height: 630,
+          alt: product.name,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  }
+}
+
 'use client'
 
 import { useState, useMemo } from 'react'

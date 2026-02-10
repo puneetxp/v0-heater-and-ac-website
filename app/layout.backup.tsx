@@ -81,39 +81,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  // JSON-LD Schema for organization
-  const schemaData = {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    "@id": "https://comfortrent.com",
-    "name": "ComfortRent",
-    "url": "https://comfortrent.com",
-    "telephone": "+91-XXXXXXXXXX",
-    "description": "Premium AC and heater rental services with professional installation and 24/7 support.",
-    "image": "https://comfortrent.com/logo.png",
-    "address": {
-      "@type": "PostalAddress",
-      "addressCountry": "IN",
-      "addressRegion": "India",
-    },
-    "sameAs": [
-      "https://www.facebook.com/comfortrent",
-      "https://twitter.com/comfortrent",
-      "https://www.instagram.com/comfortrent",
-    ],
-    "areaServed": "IN",
-    "priceRange": "₹799 - ₹2399",
-    "knowsAbout": ["AC Rental", "Heater Rental", "Air Conditioning", "Climate Control"],
-  }
-
   return (
     <html lang="en">
-      <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
-        />
-      </head>
       <body className="font-sans antialiased relative">
         <AnimatedBackground />
         <SupabaseProvider>
