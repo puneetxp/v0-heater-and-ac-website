@@ -3,7 +3,6 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Check } from "lucide-react"
 import Link from "next/link"
-import { generateProductUrl } from "@/lib/product-routes"
 
 interface Product {
   id: string | number // Updated to support both string and number IDs
@@ -24,8 +23,22 @@ export function ProductCard({ product }: ProductCardProps) {
   const isCooling = product.category.toLowerCase().includes('ac') || product.category.toLowerCase().includes('window') || product.category.toLowerCase().includes('split')
   const isHeating = product.category.toLowerCase().includes('heater') || product.category.toLowerCase().includes('oil')
   
-  // Generate SEO-friendly URL
-  const detailsUrl = generateProductUrl(product.id, product.category, product.name, product.capacity)
+  // Generate clean SEO-friendly URL directly
+  const generateCleanUrl = () => {
+    // Map category to slug
+    if (product.category.includes('Window')) {
+      return `/cooling/window-ac/window-ac-${product.capacity.toLowerCase().replace(/\s+/g, '-')}`
+    }
+    if (product.category.includes('Split')) {
+      return `/cooling/split-ac/split-ac-${product.capacity.toLowerCase().replace(/\s+/g, '-')}`
+    }
+    if (product.category.includes('Oil')) {
+      return `/heating/oil-heater/oil-heater-${product.capacity.toLowerCase().replace(/\s+/g, '-')}`
+    }
+    return `/product/${product.id}`
+  }
+  
+  const detailsUrl = generateCleanUrl()
   
   // Select badge color based on category
   const badgeColor = isCooling ? 'bg-blue-600 text-white' : isHeating ? 'bg-orange-600 text-white' : 'bg-primary'
