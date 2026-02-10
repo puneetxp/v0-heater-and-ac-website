@@ -134,7 +134,7 @@ export default function SplitACPage() {
                       <span className="text-sm text-gray-600">/month</span>
                     </div>
                     <Button asChild className="w-full bg-blue-600 hover:bg-blue-700 h-10">
-                      <Link href="/cooling/split-ac/product">
+                      <Link href={`/cooling/split-ac/split-ac-${product.capacity.replace(/\s+/g, '-').toLowerCase()}`}>
                         View Details
                       </Link>
                     </Button>

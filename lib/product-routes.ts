@@ -20,9 +20,29 @@ const categoryMap: Record<string, { category: ProductCategory; subcategory: Cool
 
 // Convert product name to URL slug
 export function createSlug(name: string, capacity: string): string {
-  const namePart = name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
-  const capacityPart = capacity.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
-  return `${namePart}-${capacityPart}`
+  // Clean up name: remove "AC" suffix if already in name, convert to lowercase and hyphenate
+  let cleanName = name.toLowerCase()
+    .replace(/\s*ac\s*$/i, '') // Remove trailing "AC"
+    .replace(/\s*heater\s*$/i, '') // Remove trailing "heater"
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/[^\w-]/g, '') // Remove special characters
+
+  // Clean up capacity: convert to lowercase and hyphenate
+  let cleanCapacity = capacity.toLowerCase()
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/[^\w-]/g, '') // Remove special characters
+
+  // Avoid redundant slugs (e.g., "window-ac" + "window-ac-1-ton" -> just "window-ac-1-ton")
+  if (cleanCapacity.startsWith(cleanName)) {
+    return cleanCapacity
+  }
+
+  // Only add capacity if it's not already in the name
+  if (!cleanName.includes(cleanCapacity.split('-')[0])) {
+    return `${cleanName}-${cleanCapacity}`
+  }
+
+  return cleanName
 }
 
 // Get category info from product details
