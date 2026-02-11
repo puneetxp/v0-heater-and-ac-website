@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import type { Metadata } from 'next'
 import { allProducts } from '@/lib/product-data'
 import { Header } from '@/components/header'
+import { ProductAnimatedBackground } from '@/components/product-animated-bg'
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   // Find product from slug
@@ -169,6 +170,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 
   return (
     <main className="min-h-screen relative z-10 flex flex-col">
+      <ProductAnimatedBackground type={isCooling ? 'cooling' : 'heating'} />
       <Header />
       
       <div className="flex-1 py-8 md:py-12 px-4 md:px-6 lg:px-8">

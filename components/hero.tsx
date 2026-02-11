@@ -1,13 +1,14 @@
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Snowflake, Wind } from "lucide-react"
+import { ArrowRight, Snowflake, Wind, Flame } from "lucide-react"
 
 export function Hero() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-blue-50/50 via-white to-white dark:from-blue-950/20 dark:via-background dark:to-background">
-      {/* Decorative blobs */}
+      {/* Decorative blobs with animation */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-200/30 dark:bg-blue-900/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-200/30 dark:bg-cyan-900/20 rounded-full blur-3xl" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-200/30 dark:bg-blue-900/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-200/30 dark:bg-cyan-900/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-orange-200/20 dark:bg-orange-900/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
       <div className="container relative mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
@@ -73,11 +74,11 @@ export function Hero() {
                   alt="Premium AC and heater units"
                   className="w-full h-full object-cover"
                 />
-                {/* Floating cards */}
-                <div className="absolute top-6 right-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                {/* Floating cards with animation */}
+                <div className="absolute top-6 right-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 animate-bounce" style={{ animationDelay: '0s', animationDuration: '3s' }}>
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
-                      <Wind className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                      <Wind className="h-6 w-6 text-blue-600 dark:text-blue-400 animate-spin" style={{ animationDuration: '4s' }} />
                     </div>
                     <div>
                       <div className="font-semibold text-sm">Split AC</div>
@@ -86,10 +87,10 @@ export function Hero() {
                   </div>
                 </div>
 
-                <div className="absolute bottom-6 left-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <div className="absolute bottom-6 left-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '3s' }}>
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center">
-                      <Snowflake className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                      <Flame className="h-6 w-6 text-orange-600 dark:text-orange-400 animate-pulse" />
                     </div>
                     <div>
                       <div className="font-semibold text-sm">Oil Heater</div>

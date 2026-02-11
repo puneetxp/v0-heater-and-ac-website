@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from 'react'
 
-export function AnimatedBackground() {
+interface ProductAnimatedBgProps {
+  type?: 'cooling' | 'heating'
+}
+
+export function ProductAnimatedBackground({ type = 'cooling' }: ProductAnimatedBgProps) {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
 
   useEffect(() => {
@@ -14,16 +18,35 @@ export function AnimatedBackground() {
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [])
 
+  // Determine colors based on product type
+  const colors = type === 'heating' 
+    ? {
+        gradient1: 'from-orange-50 via-yellow-50 to-red-50 dark:from-orange-950 dark:via-yellow-950 dark:to-red-950',
+        blob1: 'rgba(249, 115, 22, 0.4)',
+        blob2: 'rgba(251, 146, 60, 0.4)',
+        blob3: 'rgba(252, 165, 11, 0.3)',
+        gradient1Val: 'rgba(249, 115, 22, 0.1), rgba(251, 146, 60, 0.1)',
+        gradient2Val: 'rgba(245, 158, 11, 0.08), rgba(217, 119, 6, 0.08)',
+      }
+    : {
+        gradient1: 'from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-950 dark:via-blue-950 dark:to-cyan-950',
+        blob1: 'rgba(59, 130, 246, 0.4)',
+        blob2: 'rgba(34, 211, 238, 0.4)',
+        blob3: 'rgba(147, 197, 253, 0.3)',
+        gradient1Val: 'rgba(59, 130, 246, 0.1), rgba(34, 211, 238, 0.1)',
+        gradient2Val: 'rgba(148, 163, 247, 0.08), rgba(56, 189, 248, 0.08)',
+      }
+
   return (
     <div className="fixed inset-0 -z-50 overflow-hidden">
       {/* Base Gradient Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-950 dark:via-blue-950 dark:to-cyan-950" />
+      <div className={`absolute inset-0 bg-gradient-to-br ${colors.gradient1}`} />
 
       {/* Animated Gradient Overlay - Primary */}
       <div
         className="absolute inset-0 opacity-40"
         style={{
-          background: 'linear-gradient(-45deg, rgba(59, 130, 246, 0.1), rgba(34, 211, 238, 0.1))',
+          background: `linear-gradient(-45deg, ${colors.gradient1Val})`,
           backgroundSize: '400% 400%',
           animation: 'gradient-shift 25s ease infinite',
         }}
@@ -33,7 +56,7 @@ export function AnimatedBackground() {
       <div
         className="absolute inset-0 opacity-20"
         style={{
-          background: 'linear-gradient(45deg, rgba(148, 163, 247, 0.08), rgba(56, 189, 248, 0.08))',
+          background: `linear-gradient(45deg, ${colors.gradient2Val})`,
           backgroundSize: '500% 500%',
           animation: 'gradient-shift-reverse 30s ease infinite',
         }}
@@ -43,7 +66,7 @@ export function AnimatedBackground() {
       <div
         className="absolute -top-72 -left-72 w-96 h-96 rounded-full opacity-20"
         style={{
-          background: 'radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, transparent 70%)',
+          background: `radial-gradient(circle, ${colors.blob1} 0%, transparent 70%)`,
           animation: 'blob-float 15s ease-in-out infinite',
           filter: 'blur(60px)',
         }}
@@ -53,7 +76,7 @@ export function AnimatedBackground() {
       <div
         className="absolute -bottom-72 -right-72 w-96 h-96 rounded-full opacity-20"
         style={{
-          background: 'radial-gradient(circle, rgba(34, 211, 238, 0.4) 0%, transparent 70%)',
+          background: `radial-gradient(circle, ${colors.blob2} 0%, transparent 70%)`,
           animation: 'blob-float 18s ease-in-out infinite 2s',
           filter: 'blur(60px)',
         }}
@@ -63,7 +86,7 @@ export function AnimatedBackground() {
       <div
         className="absolute -top-40 -right-40 w-80 h-80 rounded-full opacity-15"
         style={{
-          background: 'radial-gradient(circle, rgba(147, 197, 253, 0.3) 0%, transparent 70%)',
+          background: `radial-gradient(circle, ${colors.blob3} 0%, transparent 70%)`,
           animation: 'blob-float 20s ease-in-out infinite 1s',
           filter: 'blur(50px)',
         }}
