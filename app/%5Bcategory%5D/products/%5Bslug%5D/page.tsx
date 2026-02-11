@@ -96,16 +96,22 @@ export default function ProductPage({ params }: { params: { category: string; sl
 
     const categoryProducts = categoryMap[params.category as keyof typeof categoryMap] || []
     
+    console.log("[v0] Looking for slug:", params.slug)
+    console.log("[v0] In category:", params.category)
+    
     for (const category of categoryProducts) {
       for (const product of category) {
         const productSlug = `${product.category.toLowerCase().replace(/\s+/g, '-')}-${product.capacity
           .toLowerCase()
           .replace(/\s+/g, '-')}`
+        console.log("[v0] Checking product slug:", productSlug, "against", params.slug)
         if (productSlug === params.slug) {
+          console.log("[v0] Found product:", product.name)
           return product
         }
       }
     }
+    console.log("[v0] Product not found")
     return null
   }, [params.slug, params.category])
 
