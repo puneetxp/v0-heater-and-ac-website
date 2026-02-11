@@ -36,15 +36,15 @@ export function Hero() {
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg shadow-blue-500/30 text-base h-12 px-8 transition-all duration-300 hover:shadow-blue-500/50"
+                  className="bg-primary hover:bg-primary/95 text-white shadow-xl shadow-primary/20 text-base h-12 px-8 font-semibold transition-all duration-300 hover:shadow-primary/40 hover:scale-105"
                 >
                   Browse Products
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
-                <Button size="lg" variant="outline" className="text-base h-12 px-8 border-2 bg-transparent transition-all duration-300">
+                <Button size="lg" variant="outline" className="text-base h-12 px-8 border border-primary/30 hover:border-primary/60 bg-transparent transition-all duration-300 font-semibold text-primary hover:bg-primary/5">
                   View Plans
                 </Button>
               </div>
@@ -75,26 +75,26 @@ export function Hero() {
                   className="w-full h-full object-cover"
                 />
                 {/* Floating cards with animation */}
-                <div className="absolute top-6 right-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 animate-bounce" style={{ animationDelay: '0s', animationDuration: '3s' }}>
+                <div className="absolute top-6 right-6 bg-white/98 dark:bg-slate-900/95 backdrop-blur-xl rounded-xl p-5 shadow-xl hover:shadow-2xl transition-all duration-300 animate-bounce border border-primary/10" style={{ animationDelay: '0s', animationDuration: '3s' }}>
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
-                      <Wind className="h-6 w-6 text-blue-600 dark:text-blue-400 animate-spin" style={{ animationDuration: '4s' }} />
+                    <div className="w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center">
+                      <Wind className="h-7 w-7 text-primary animate-spin" style={{ animationDuration: '4s' }} />
                     </div>
                     <div>
-                      <div className="font-semibold text-sm">Split AC</div>
-                      <div className="text-xs text-muted-foreground">₹1,499/month</div>
+                      <div className="font-bold text-sm text-foreground">Split AC</div>
+                      <div className="text-xs text-muted-foreground font-semibold">₹1,499/month</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="absolute bottom-6 left-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '3s' }}>
+                <div className="absolute bottom-6 left-6 bg-white/98 dark:bg-slate-900/95 backdrop-blur-xl rounded-xl p-5 shadow-xl hover:shadow-2xl transition-all duration-300 animate-bounce border border-accent/10" style={{ animationDelay: '0.5s', animationDuration: '3s' }}>
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center">
-                      <Flame className="h-6 w-6 text-orange-600 dark:text-orange-400 animate-pulse" />
+                    <div className="w-14 h-14 rounded-full bg-accent/15 flex items-center justify-center">
+                      <Flame className="h-7 w-7 text-accent animate-pulse" />
                     </div>
                     <div>
-                      <div className="font-semibold text-sm">Oil Heater</div>
-                      <div className="text-xs text-muted-foreground">₹899/month</div>
+                      <div className="font-bold text-sm text-foreground">Oil Heater</div>
+                      <div className="text-xs text-muted-foreground font-semibold">₹899/month</div>
                     </div>
                   </div>
                 </div>

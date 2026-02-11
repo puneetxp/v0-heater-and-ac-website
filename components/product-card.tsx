@@ -35,46 +35,52 @@ export function ProductCard({ product }: ProductCardProps) {
   const badgeColor = isCooling ? 'bg-blue-600 text-white' : isHeating ? 'bg-orange-600 text-white' : 'bg-primary'
 
   return (
-    <Card className="group overflow-hidden hover:shadow-xl transition-all duration-500 border hover:border-primary/40">
+    <Card className="group overflow-hidden hover:shadow-2xl transition-all duration-500 border-0 bg-white dark:bg-slate-900 rounded-xl">
       <CardHeader className="p-0">
-        <div className="relative h-56 overflow-hidden bg-muted/30">
+        <div className="relative h-64 overflow-hidden bg-muted/30">
           <img
             src={product.image || "/placeholder.svg?height=300&width=400"}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           />
-          <Badge className={`absolute top-4 right-4 text-white shadow-sm ${badgeColor}`}>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <Badge className={`absolute top-4 right-4 text-white shadow-lg font-semibold ${badgeColor}`}>
             {product.capacity}
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="p-6 space-y-4">
-        <div className="space-y-1">
-          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{product.category}</div>
-          <h3 className="text-xl font-semibold">{product.name}</h3>
+      <CardContent className="p-7 space-y-5">
+        <div className="space-y-2">
+          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest opacity-75">{product.category}</div>
+          <h3 className="text-2xl font-bold leading-tight text-foreground">{product.name}</h3>
         </div>
-        <div className="space-y-2.5">
-          {product.features.map((feature, index) => (
-            <div key={index} className="flex items-center gap-2.5 text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300">
-              <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-all duration-300">
-                <Check className="h-3 w-3 text-primary" />
+        <div className="space-y-3 pt-1">
+          {product.features.slice(0, 3).map((feature, index) => (
+            <div key={index} className="flex items-start gap-3 text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300">
+              <div className="h-5 w-5 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-primary/25 group-hover:shadow-sm transition-all duration-300">
+                <Check className="h-3.5 w-3.5 text-primary font-bold" />
               </div>
-              <span>{feature}</span>
+              <span className="leading-relaxed">{feature}</span>
             </div>
           ))}
         </div>
-        <div className="pt-2">
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-bold text-foreground">₹{product.price}</span>
-            <span className="text-muted-foreground text-sm">/month</span>
+        <div className="pt-3 border-t border-border/50">
+          <div className="flex items-baseline justify-between">
+            <div>
+              <div className="text-xs font-medium text-muted-foreground mb-1">Starting from</div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-4xl font-bold text-primary">₹{product.price}</span>
+                <span className="text-muted-foreground text-sm font-medium">/month</span>
+              </div>
+            </div>
           </div>
         </div>
       </CardContent>
-      <CardFooter className="p-6 pt-0 flex gap-2">
-        <Button asChild variant="outline" className="flex-1 transition-all duration-300" size="lg">
+      <CardFooter className="px-7 pb-7 pt-2 flex gap-3">
+        <Button asChild variant="outline" className="flex-1 transition-all duration-300 h-11 font-semibold text-sm border-primary/20 hover:border-primary/40" size="lg">
           <Link href={detailsUrl}>View Details</Link>
         </Button>
-        <Button asChild className="flex-1 bg-primary hover:bg-primary/90 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20" size="lg">
+        <Button asChild className="flex-1 bg-primary hover:bg-primary/95 transition-all duration-300 h-11 font-semibold text-sm hover:shadow-lg hover:shadow-primary/25" size="lg">
           <Link href={`/booking/${product.id}`}>Rent Now</Link>
         </Button>
       </CardFooter>

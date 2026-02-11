@@ -5,59 +5,53 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-sm">
       <div className="container mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-sm group-hover:shadow-md transition-shadow">
-              <Wind className="h-5 w-5 text-primary-foreground" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
+              <Wind className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-primary">ComfortRent</span>
+            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">ComfortRent</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-1">
             <Link
               href="/cooling"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+              className="text-sm font-semibold text-foreground/70 hover:text-primary px-3 py-2 rounded-md transition-all duration-300 hover:bg-primary/5"
             >
               Cooling
             </Link>
             <Link
               href="/heating"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+              className="text-sm font-semibold text-foreground/70 hover:text-primary px-3 py-2 rounded-md transition-all duration-300 hover:bg-primary/5"
             >
               Heating
             </Link>
             <Link
               href="/#features"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+              className="text-sm font-semibold text-foreground/70 hover:text-primary px-3 py-2 rounded-md transition-all duration-300 hover:bg-primary/5"
             >
               Features
             </Link>
             <Link
               href="/#how-it-works"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+              className="text-sm font-semibold text-foreground/70 hover:text-primary px-3 py-2 rounded-md transition-all duration-300 hover:bg-primary/5"
             >
               How It Works
             </Link>
-            <Link
-              href="/admin/login"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors"
-            >
-              Admin
-            </Link>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Button
               asChild
               variant="outline"
-              className="hidden md:inline-flex border-primary/20 hover:bg-primary/5 hover:border-primary/30 bg-transparent"
+              className="hidden md:inline-flex border-primary/30 hover:bg-primary/10 hover:border-primary/50 bg-transparent text-primary font-semibold transition-all duration-300"
             >
               <Link href="/auth/login">Sign In</Link>
             </Button>
-            <Button asChild className="hidden md:inline-flex bg-primary hover:bg-primary/90 shadow-sm">
+            <Button asChild className="hidden md:inline-flex bg-primary hover:bg-primary/95 shadow-lg font-semibold transition-all duration-300 hover:shadow-primary/30 hover:shadow-lg">
               <Link href="/auth/sign-up">Get Started</Link>
             </Button>
 
