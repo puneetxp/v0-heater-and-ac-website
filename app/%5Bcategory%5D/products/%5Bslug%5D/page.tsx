@@ -2,7 +2,28 @@ import { useState, useMemo } from 'react'
 import type { Metadata } from 'next'
 import { allProducts } from '@/lib/product-data'
 import { Header } from '@/components/header'
+import { Footer } from '@/components/footer'
 import { ProductAnimatedBackground } from '@/components/product-animated-bg'
+import { Button } from '@/components/ui/button'
+
+export async function generateStaticParams() {
+  const params = []
+  
+  // Generate params for cooling products (window AC & split AC)
+  const coolingProducts = [...allProducts.windowAC, ...allProducts.splitAC]
+  for (const product of coolingProducts) {
+    const slug = `${product.category.toLowerCase().replace(/\s+/g, '-')}-${product.capacity.toLowerCase().replace(/\s+/g, '-')}`
+    params.push({ category: 'cooling', slug })
+  }
+  
+  // Generate params for heating products (oil heater)
+  for (const product of allProducts.oilHeater) {
+    const slug = `${product.category.toLowerCase().replace(/\s+/g, '-')}-${product.capacity.toLowerCase().replace(/\s+/g, '-')}`
+    params.push({ category: 'heating', slug })
+  }
+  
+  return params
+}
 
 export async function generateMetadata({ params }: { params: { category: string; slug: string } }): Promise<Metadata> {
   // Validate category and find product from slug
@@ -96,24 +117,37 @@ export default function ProductPage({ params }: { params: { category: string; sl
 
     const categoryProducts = categoryMap[params.category as keyof typeof categoryMap] || []
     
-    console.log("[v0] Looking for slug:", params.slug)
-    console.log("[v0] In category:", params.category)
-    
     for (const category of categoryProducts) {
       for (const product of category) {
         const productSlug = `${product.category.toLowerCase().replace(/\s+/g, '-')}-${product.capacity
           .toLowerCase()
           .replace(/\s+/g, '-')}`
-        console.log("[v0] Checking product slug:", productSlug, "against", params.slug)
         if (productSlug === params.slug) {
-          console.log("[v0] Found product:", product.name)
           return product
         }
       }
     }
-    console.log("[v0] Product not found")
     return null
   }, [params.slug, params.category])
+
+  // Fallback if product not found
+  if (!productData) {
+    return (
+      <main className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold mb-4">Product Not Found</h1>
+            <p className="text-gray-600 mb-6">The product you're looking for doesn't exist.</p>
+            <Button asChild>
+              <Link href={`/${params.category}`}>Back to {params.category}</Link>
+            </Button>
+          </div>
+        </div>
+        <Footer />
+      </main>
+    )
+  }
 
   // Back link uses category parameter
   const backLink = `/${params.category}`
