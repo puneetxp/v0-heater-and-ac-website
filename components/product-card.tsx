@@ -23,10 +23,12 @@ export function ProductCard({ product }: ProductCardProps) {
   const isCooling = product.category.toLowerCase().includes('ac') || product.category.toLowerCase().includes('window') || product.category.toLowerCase().includes('split')
   const isHeating = product.category.toLowerCase().includes('heater') || product.category.toLowerCase().includes('oil')
   
-  // Generate clean SEO-friendly URL to unified product route
+  // Generate hierarchical SEO-friendly URL with category
   const generateCleanUrl = () => {
+    // Determine parent category from product type
+    const parentCategory = product.category.includes('Oil') ? 'heating' : 'cooling'
     const slug = `${product.category.toLowerCase().replace(/\s+/g, '-')}-${product.capacity.toLowerCase().replace(/\s+/g, '-')}`
-    return `/product/${slug}`
+    return `/${parentCategory}/products/${slug}`
   }
   
   const detailsUrl = generateCleanUrl()

@@ -4,10 +4,17 @@ import { allProducts } from '@/lib/product-data'
 import { Header } from '@/components/header'
 import { ProductAnimatedBackground } from '@/components/product-animated-bg'
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  // Find product from slug
+export async function generateMetadata({ params }: { params: { category: string; slug: string } }): Promise<Metadata> {
+  // Validate category and find product from slug
+  const categoryMap = {
+    cooling: [allProducts.windowAC, allProducts.splitAC],
+    heating: [allProducts.oilHeater],
+  }
+
+  const categoryProducts = categoryMap[params.category as keyof typeof categoryMap] || []
+  
   let product = null
-  for (const category of [allProducts.windowAC, allProducts.splitAC, allProducts.oilHeater]) {
+  for (const category of categoryProducts) {
     for (const prod of category) {
       const productSlug = `${prod.category.toLowerCase().replace(/\s+/g, '-')}-${prod.capacity
         .toLowerCase()
@@ -30,7 +37,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   const title = `${product.name} for Rent | ComfortRent`
   const description = `Rent ${product.name} (${product.capacity}) at ₹${product.basePrice}/month. Professional installation included. 24/7 support available.`
-  const url = `https://comfortrent.com/product/${params.slug}`
+  const url = `https://comfortrent.com/${params.category}/products/${params.slug}`
 
   return {
     title,
@@ -79,11 +86,17 @@ import { ArrowLeft, Check, Flame, Wind, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { allProducts } from '@/lib/product-data'
 
-export default function ProductPage({ params }: { params: { slug: string } }) {
-  // Find product from slug across all products
+export default function ProductPage({ params }: { params: { category: string; slug: string } }) {
+  // Find product from slug with category validation
   const productData = useMemo(() => {
-    // Search across all product categories
-    for (const category of [allProducts.windowAC, allProducts.splitAC, allProducts.oilHeater]) {
+    const categoryMap = {
+      cooling: [allProducts.windowAC, allProducts.splitAC],
+      heating: [allProducts.oilHeater],
+    }
+
+    const categoryProducts = categoryMap[params.category as keyof typeof categoryMap] || []
+    
+    for (const category of categoryProducts) {
       for (const product of category) {
         const productSlug = `${product.category.toLowerCase().replace(/\s+/g, '-')}-${product.capacity
           .toLowerCase()
@@ -94,37 +107,10 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
       }
     }
     return null
-  }, [params.slug])
+  }, [params.slug, params.category])
 
-  // Determine category for back link
-  const getBackLink = () => {
-    if (!productData) return '/'
-    if (productData.category.includes('Window')) return '/cooling/window-ac'
-    if (productData.category.includes('Split')) return '/cooling/split-ac'
-    if (productData.category.includes('Oil')) return '/heating/oil-heater'
-    return '/'
-  }
-
-  // Fallback if product not found
-  if (!productData) {
-    return (
-      <main className="min-h-screen flex flex-col">
-        <Header />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold mb-4">Product Not Found</h1>
-            <p className="text-gray-600 mb-6">The product you're looking for doesn't exist.</p>
-            <Button asChild>
-              <Link href="/">Back Home</Link>
-            </Button>
-          </div>
-        </div>
-        <Footer />
-      </main>
-    )
-  }
-
-  const backLink = getBackLink()
+  // Back link uses category parameter
+  const backLink = `/${params.category}`
   const [selectedVariant, setSelectedVariant] = useState(productData.capacity.split(' ')[0])
   const [selectedPlan, setSelectedPlan] = useState('monthly')
 
