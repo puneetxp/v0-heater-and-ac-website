@@ -97,7 +97,6 @@ export async function generateMetadata({ params }: { params: { category: string;
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -117,16 +116,22 @@ export default function ProductPage({ params }: { params: { category: string; sl
 
     const categoryProducts = categoryMap[params.category as keyof typeof categoryMap] || []
     
+    console.log("[v0] Looking for - Category:", params.category, "Slug:", params.slug)
+    console.log("[v0] Category products count:", categoryProducts.length)
+    
     for (const category of categoryProducts) {
       for (const product of category) {
         const productSlug = `${product.category.toLowerCase().replace(/\s+/g, '-')}-${product.capacity
           .toLowerCase()
           .replace(/\s+/g, '-')}`
+        console.log("[v0] Comparing - Generated slug:", productSlug, "vs Requested:", params.slug)
         if (productSlug === params.slug) {
+          console.log("[v0] Match found! Product:", product.name)
           return product
         }
       }
     }
+    console.log("[v0] No product found")
     return null
   }, [params.slug, params.category])
 
