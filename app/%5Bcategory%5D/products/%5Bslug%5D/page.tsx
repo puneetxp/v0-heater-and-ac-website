@@ -27,25 +27,22 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: { category: string; slug: string } }): Promise<Metadata> {
   // Validate category and find product from slug
-  const categoryMap = {
-    cooling: [allProducts.windowAC, allProducts.splitAC],
-    heating: [allProducts.oilHeater],
+  const categoryMap: Record<string, any[]> = {
+    cooling: [...allProducts.windowAC, ...allProducts.splitAC],
+    heating: [...allProducts.oilHeater],
   }
 
-  const categoryProducts = categoryMap[params.category as keyof typeof categoryMap] || []
+  const categoryProducts = categoryMap[params.category] || []
   
   let product = null
-  for (const category of categoryProducts) {
-    for (const prod of category) {
-      const productSlug = `${prod.category.toLowerCase().replace(/\s+/g, '-')}-${prod.capacity
-        .toLowerCase()
-        .replace(/\s+/g, '-')}`
-      if (productSlug === params.slug) {
-        product = prod
-        break
-      }
+  for (const prod of categoryProducts) {
+    const productSlug = `${prod.category.toLowerCase().replace(/\s+/g, '-')}-${prod.capacity
+      .toLowerCase()
+      .replace(/\s+/g, '-')}`
+    if (productSlug === params.slug) {
+      product = prod
+      break
     }
-    if (product) break
   }
 
   if (!product) {
@@ -109,29 +106,21 @@ import { allProducts } from '@/lib/product-data'
 export default function ProductPage({ params }: { params: { category: string; slug: string } }) {
   // Find product from slug with category validation
   const productData = useMemo(() => {
-    const categoryMap = {
-      cooling: [allProducts.windowAC, allProducts.splitAC],
-      heating: [allProducts.oilHeater],
+    const categoryMap: Record<string, any[]> = {
+      cooling: [...allProducts.windowAC, ...allProducts.splitAC],
+      heating: [...allProducts.oilHeater],
     }
 
-    const categoryProducts = categoryMap[params.category as keyof typeof categoryMap] || []
+    const categoryProducts = categoryMap[params.category] || []
     
-    console.log("[v0] Looking for - Category:", params.category, "Slug:", params.slug)
-    console.log("[v0] Category products count:", categoryProducts.length)
-    
-    for (const category of categoryProducts) {
-      for (const product of category) {
-        const productSlug = `${product.category.toLowerCase().replace(/\s+/g, '-')}-${product.capacity
-          .toLowerCase()
-          .replace(/\s+/g, '-')}`
-        console.log("[v0] Comparing - Generated slug:", productSlug, "vs Requested:", params.slug)
-        if (productSlug === params.slug) {
-          console.log("[v0] Match found! Product:", product.name)
-          return product
-        }
+    for (const product of categoryProducts) {
+      const productSlug = `${product.category.toLowerCase().replace(/\s+/g, '-')}-${product.capacity
+        .toLowerCase()
+        .replace(/\s+/g, '-')}`
+      if (productSlug === params.slug) {
+        return product
       }
     }
-    console.log("[v0] No product found")
     return null
   }, [params.slug, params.category])
 
