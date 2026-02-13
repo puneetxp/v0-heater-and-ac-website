@@ -6,8 +6,10 @@ import { Footer } from '@/components/footer'
 import { ProductAnimatedBackground } from '@/components/product-animated-bg'
 import { Button } from '@/components/ui/button'
 
+export const dynamicParams = true
+
 export async function generateStaticParams() {
-  const params = []
+  const params: Array<{ category: string; slug: string }> = []
   
   // Generate params for cooling products (window AC & split AC)
   const coolingProducts = [...allProducts.windowAC, ...allProducts.splitAC]
@@ -103,7 +105,11 @@ import { ArrowLeft, Check, Flame, Wind, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { allProducts } from '@/lib/product-data'
 
-export default function ProductPage({ params }: { params: { category: string; slug: string } }) {
+export default function ProductPage({ 
+  params 
+}: { 
+  params: { category: string; slug: string } 
+}) {
   // Find product from slug with category validation
   const productData = useMemo(() => {
     const categoryMap: Record<string, any[]> = {
@@ -111,7 +117,7 @@ export default function ProductPage({ params }: { params: { category: string; sl
       heating: [...allProducts.oilHeater],
     }
 
-    const categoryProducts = categoryMap[params.category] || []
+    const categoryProducts = categoryMap[params.category as keyof typeof categoryMap] || []
     
     for (const product of categoryProducts) {
       const productSlug = `${product.category.toLowerCase().replace(/\s+/g, '-')}-${product.capacity
