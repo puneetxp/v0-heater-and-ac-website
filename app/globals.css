@@ -305,6 +305,16 @@
   }
 }
 
+/* Snowfall Animation */
+@keyframes snowfall {
+  0% {
+    transform: translateY(-100vh);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
 /* Cooling Animation - Smooth Downward Flow */
 @keyframes cool-flow {
   0% {
