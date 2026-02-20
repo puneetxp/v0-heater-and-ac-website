@@ -5,10 +5,12 @@ import { SeasonalPlans } from "@/components/seasonal-plans"
 import { Features } from "@/components/features"
 import { HowItWorks } from "@/components/how-it-works"
 import { Footer } from "@/components/footer"
+import { Snowflakes } from "@/components/snowflakes"
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen relative z-10">
+      <Snowflakes />
       <Header />
       <div className="space-y-16 md:space-y-24 lg:space-y-32">
         <Hero />

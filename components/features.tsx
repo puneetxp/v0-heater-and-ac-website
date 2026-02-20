@@ -71,15 +71,15 @@ export function Features() {
             return (
               <div
                 key={index}
-                className={`flex flex-col items-center text-center space-y-4 p-6 md:p-8 rounded-2xl bg-gradient-to-br ${colorClass} border-2 border-transparent hover:border-${feature.color}/30 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group`}
+                className={`flex flex-col items-center text-center space-y-5 p-8 rounded-2xl bg-gradient-to-br ${colorClass} border border-primary/15 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group bg-white/40 dark:bg-white/5 backdrop-blur-sm`}
               >
                 <div
-                  className={`flex h-16 w-16 items-center justify-center rounded-xl ${iconBgClass} shadow-lg group-hover:scale-110 transition-transform`}
+                  className={`flex h-20 w-20 items-center justify-center rounded-2xl ${iconBgClass} shadow-xl group-hover:scale-125 transition-all duration-300 group-hover:shadow-2xl`}
                 >
-                  <Icon className="h-8 w-8 text-white" />
+                  <Icon className="h-10 w-10 text-white" />
                 </div>
-                <h3 className="text-xl font-bold">{feature.title}</h3>
-                <p className="text-muted-foreground text-balance leading-relaxed">{feature.description}</p>
+                <h3 className="text-lg font-bold text-foreground">{feature.title}</h3>
+                <p className="text-muted-foreground text-balance leading-relaxed text-sm">{feature.description}</p>
               </div>
             )
           })}

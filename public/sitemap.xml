@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <!-- Homepage -->
+  <url>
+    <loc>https://comfortrent.com/</loc>
+    <lastmod>2024-02-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Category Pages -->
+  <url>
+    <loc>https://comfortrent.com/cooling</loc>
+    <lastmod>2024-02-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://comfortrent.com/cooling/window-ac</loc>
+    <lastmod>2024-02-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://comfortrent.com/cooling/split-ac</loc>
+    <lastmod>2024-02-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://comfortrent.com/heating</loc>
+    <lastmod>2024-02-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://comfortrent.com/heating/oil-heater</loc>
+    <lastmod>2024-02-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Window AC Products -->
+  <url>
+    <loc>https://comfortrent.com/product/window-ac-1-ton</loc>
+    <lastmod>2024-02-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://comfortrent.com/product/window-ac-1-5-ton</loc>
+    <lastmod>2024-02-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Split AC Products -->
+  <url>
+    <loc>https://comfortrent.com/product/split-ac-1-ton</loc>
+    <lastmod>2024-02-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://comfortrent.com/product/split-ac-1-5-ton</loc>
+    <lastmod>2024-02-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://comfortrent.com/product/split-ac-2-ton</loc>
+    <lastmod>2024-02-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Oil Heater Products -->
+  <url>
+    <loc>https://comfortrent.com/product/oil-heater-7-fins</loc>
+    <lastmod>2024-02-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://comfortrent.com/product/oil-heater-9-fins</loc>
+    <lastmod>2024-02-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://comfortrent.com/product/oil-heater-11-fins</loc>
+    <lastmod>2024-02-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+</urlset>
