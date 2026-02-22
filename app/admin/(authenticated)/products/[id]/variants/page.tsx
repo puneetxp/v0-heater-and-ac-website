@@ -17,8 +17,18 @@ export default async function AdminVariantsPage(
   const supabase = await createClient();
 
   // 2. Get product with error handling
-  const { data: product, error: productError } = await supabase.from("products")
-    .select("*").eq("id", id).maybeSingle();
+  let product = null;
+  let productError = null;
+
+  try {
+    const { data, error } = await supabase.from("products")
+      .select("*").eq("id", id).maybeSingle();
+    product = data;
+    productError = error;
+  } catch (err) {
+    console.error("[v0] Database query crash:", err);
+    productError = err;
+  }
 
   if (productError || !product) {
     console.error("[v0] Product not found or error:", productError);

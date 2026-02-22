@@ -12,6 +12,14 @@ export default function AdminError({
     error: Error & { digest?: string };
     reset: () => void;
 }) {
+    // If this is a redirect or notFound, let Next.js handle it
+    if (
+        error.digest?.startsWith("NEXT_REDIRECT") ||
+        error.message?.includes("NEXT_NOT_FOUND")
+    ) {
+        throw error;
+    }
+
     useEffect(() => {
         // Log the error to an error reporting service
         console.error("[v0] Admin error boundary caught:", error);
