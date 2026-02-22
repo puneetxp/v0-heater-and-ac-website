@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { use, useMemo, useState } from "react";
 import { Header } from "@/components/header";
 import { ProductAnimatedBackground } from "@/components/product-animated-bg";
 
@@ -13,11 +13,11 @@ import { ArrowLeft, Check, Flame, Wind, Zap } from "lucide-react";
 import Link from "next/link";
 import { allProducts } from "@/lib/product-data";
 
-export default function ProductPage({
-  params,
-}: {
-  params: { category: string; slug: string };
+export default function ProductPage(props: {
+  params: Promise<{ category: string; slug: string }>;
 }) {
+  const params = use(props.params);
+
   // Find product from slug with category validation
   const productData = useMemo(() => {
     const categoryMap: Record<string, any[]> = {
