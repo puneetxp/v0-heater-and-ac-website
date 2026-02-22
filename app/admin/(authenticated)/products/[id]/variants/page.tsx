@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AdminVariantManager } from "@/components/admin-variant-manager";
-import { Header } from "@/components/header";
+import { ProductEditForm } from "@/components/admin/product-edit-form";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -94,51 +94,43 @@ export default async function AdminVariantsPage(
   ];
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-8 md:px-6 lg:px-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="mb-8">
-        <Button asChild variant="ghost" size="sm" className="mb-4">
+      <div>
+        <Button asChild variant="ghost" size="sm" className="mb-4 -ml-2">
           <Link href="/admin/products" className="flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" />
             Back to Products
           </Link>
         </Button>
 
-        <div>
-          <h1 className="text-3xl font-bold mb-2">
-            Manage Product Variants & Plans
-          </h1>
-          <p className="text-muted-foreground">
-            Configure product variants and service plans for:{" "}
-            <span className="font-semibold">{product.name}</span>
-          </p>
-        </div>
+        <h1 className="text-3xl font-bold mb-1">
+          Edit: {product.name}
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          Update product details, images, variants, and rental plans.
+        </p>
       </div>
 
-      {/* Admin Manager */}
-      <AdminVariantManager
-        productId={id}
-        variants={variants}
-        plans={plans}
-        onVariantAdd={(variant) => console.log("Add variant:", variant)}
-        onVariantEdit={(id, variant) =>
-          console.log("Edit variant:", id, variant)}
-        onVariantDelete={(id) => console.log("Delete variant:", id)}
-        onPlanAdd={(plan) => console.log("Add plan:", plan)}
-        onPlanEdit={(id, plan) => console.log("Edit plan:", id, plan)}
-        onPlanDelete={(id) => console.log("Delete plan:", id)}
-      />
+      {/* Two-column layout */}
+      <div className="grid lg:grid-cols-2 gap-6 items-start">
+        {/* Left: Product details + images */}
+        <ProductEditForm product={product} />
 
-      {/* Info Section */}
-      <div className="mt-12 p-6 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/30">
-        <h3 className="font-semibold text-blue-900 dark:text-blue-400 mb-2">
-          Database Integration Coming Soon
-        </h3>
-        <p className="text-sm text-blue-800 dark:text-blue-300">
-          The variant and plan management system is fully designed and ready for
-          backend integration. Once the database schema is set up, these changes
-          will be persisted automatically.
-        </p>
+        {/* Right: Variants & Plans */}
+        <AdminVariantManager
+          productId={id}
+          variants={variants}
+          plans={plans}
+          onVariantAdd={(variant) => console.log("Add variant:", variant)}
+          onVariantEdit={(variantId, variant) =>
+            console.log("Edit variant:", variantId, variant)}
+          onVariantDelete={(variantId) =>
+            console.log("Delete variant:", variantId)}
+          onPlanAdd={(plan) => console.log("Add plan:", plan)}
+          onPlanEdit={(planId, plan) => console.log("Edit plan:", planId, plan)}
+          onPlanDelete={(planId) => console.log("Delete plan:", planId)}
+        />
       </div>
     </div>
   );
