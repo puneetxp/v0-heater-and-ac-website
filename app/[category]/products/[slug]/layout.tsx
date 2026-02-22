@@ -52,17 +52,17 @@ export async function generateMetadata(
 
   if (!product) {
     return {
-      title: "Product Not Found | ComfortRent",
+      title: "Product Not Found",
       description: "The product you're looking for doesn't exist.",
       robots: { index: false },
     };
   }
 
-  const title = `${product.name} for Rent | ComfortRent`;
+  const title = `${product.name} (${product.capacity}) for Rent`;
   const description =
-    `Rent ${product.name} (${product.capacity}) at ₹${product.basePrice}/month. Professional installation included. 24/7 support available.`;
+    `Rent ${product.name} at just ₹${product.basePrice}/month. High-performance ${product.category} with professional installation, maintenance, and 24/7 support in major cities.`;
   const url =
-    `https://comfortrent.com/${params.category}/products/${params.slug}`;
+    `https://comfortrent-v0.puneetxp.com/${params.category}/products/${params.slug}`;
 
   return {
     title,
@@ -70,9 +70,9 @@ export async function generateMetadata(
     keywords: [
       product.name.toLowerCase(),
       product.category.toLowerCase(),
-      `${product.capacity.toLowerCase()} rental`,
-      "AC rental",
-      "heater rental",
+      `${product.capacity.toLowerCase()} rental India`,
+      "low cost AC rental",
+      "premium heater rental",
     ],
     alternates: {
       canonical: url,
@@ -82,11 +82,12 @@ export async function generateMetadata(
       title,
       description,
       siteName: "ComfortRent",
+      type: "website",
       images: [
         {
-          url: "https://comfortrent.com/product-og.png",
-          width: 1200,
-          height: 630,
+          url: `https://comfortrent-v0.puneetxp.com${product.image}`,
+          width: 800,
+          height: 600,
           alt: product.name,
         },
       ],
@@ -95,14 +96,67 @@ export async function generateMetadata(
       card: "summary_large_image",
       title,
       description,
+      images: [`https://comfortrent-v0.puneetxp.com${product.image}`],
     },
   };
 }
 
-export default function ProductLayout({
-  children,
-}: {
+export default async function ProductLayout(props: {
   children: React.ReactNode;
+  params: Promise<{ category: string; slug: string }>;
 }) {
-  return children;
+  const params = await props.params;
+  const categoryMap: Record<string, any[]> = {
+    cooling: [...allProducts.windowAC, ...allProducts.splitAC],
+    heating: [...allProducts.oilHeater],
+  };
+
+  const categoryProducts = categoryMap[params.category] || [];
+  let product = null;
+  for (const prod of categoryProducts) {
+    const productSlug = `${prod.category.toLowerCase().replace(/\s+/g, "-")}-${
+      prod.capacity
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+    }`;
+    if (productSlug === params.slug) {
+      product = prod;
+      break;
+    }
+  }
+
+  const schemaData = product
+    ? {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": product.name,
+      "image": `https://comfortrent-v0.puneetxp.com${product.image}`,
+      "description":
+        `Rent high-performance ${product.name} (${product.capacity}) with free installation and maintenance.`,
+      "brand": {
+        "@type": "Brand",
+        "name": "ComfortRent",
+      },
+      "offers": {
+        "@type": "Offer",
+        "url":
+          `https://comfortrent-v0.puneetxp.com/${params.category}/products/${params.slug}`,
+        "priceCurrency": "INR",
+        "price": product.basePrice,
+        "availability": "https://schema.org/InStock",
+      },
+    }
+    : null;
+
+  return (
+    <>
+      {schemaData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+        />
+      )}
+      {props.children}
+    </>
+  );
 }
