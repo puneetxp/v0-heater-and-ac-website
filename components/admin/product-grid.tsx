@@ -64,6 +64,11 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
                                 : getFallbackImages(product.category)[0]}
                             alt={product.name}
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src =
+                                    "/modern-air-conditioner-and-heater-in-luxury-home-i.jpg";
+                            }}
                         />
                         <Badge className="absolute top-3 right-3 capitalize">
                             {product.season}
@@ -75,7 +80,9 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
                                 {product.name}
                             </h3>
                             <p className="text-sm text-slate-500 capitalize">
-                                {product.category.replace("_", " ")}
+                                {typeof product.category === "string"
+                                    ? product.category.replace("_", " ")
+                                    : "Category"}
                             </p>
                         </div>
 
@@ -100,19 +107,13 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
                         </div>
 
                         <div className="flex gap-2">
-                            <Button
-                                asChild
-                                variant="outline"
-                                size="sm"
-                                className="flex-1 bg-transparent"
+                            <Link
+                                href={`/admin/products/${product.id}/variants`}
+                                className="flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-3"
                             >
-                                <Link
-                                    href={`/admin/products/${product.id}/variants`}
-                                >
-                                    <Edit className="h-4 w-4 mr-1" />
-                                    Edit
-                                </Link>
-                            </Button>
+                                <Edit className="h-4 w-4 mr-1" />
+                                Edit
+                            </Link>
                             <Button
                                 variant="outline"
                                 size="sm"
