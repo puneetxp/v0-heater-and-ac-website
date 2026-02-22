@@ -1,26 +1,3 @@
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: "Cooling Solutions | AC Rentals | ComfortRent",
-  description: "Rent window AC units and split AC systems starting at ₹899/month. Energy-efficient cooling with professional installation. Flexible monthly rental plans available.",
-  keywords: ["AC rental", "window AC rental", "split AC rental", "air conditioner rental", "cooling rental"],
-  canonical: "https://comfortrent.com/cooling",
-  openGraph: {
-    type: "website",
-    url: "https://comfortrent.com/cooling",
-    title: "Cooling Solutions | AC Rentals | ComfortRent",
-    description: "Affordable AC rentals with flexible plans. Window AC from ₹899/month, Split AC from ₹1,499/month.",
-    images: [
-      {
-        url: "https://comfortrent.com/cooling-og.png",
-        width: 1200,
-        height: 630,
-        alt: "Cooling Solutions",
-      },
-    ],
-  },
-}
-
 'use client'
 
 import { Header } from '@/components/header'

@@ -23,21 +23,63 @@ interface SeasonalPlan {
   end_month?: number
 }
 
+// Default fallback plans when Supabase is not available
+const DEFAULT_PLANS: SeasonalPlan[] = [
+  {
+    id: 1,
+    name: "Summer Comfort",
+    season: "summer",
+    description: "Perfect for hot summer months",
+    discount_percentage: 10,
+    duration_months: 3,
+    features: ["24/7 Customer Support", "Free Installation", "Emergency Service"],
+    valid_from: "2024-04-01",
+    valid_until: "2024-09-30",
+    base_price: 1499,
+  },
+  {
+    id: 2,
+    name: "Winter Warmth",
+    season: "winter",
+    description: "Essential heating for cold season",
+    discount_percentage: 15,
+    duration_months: 4,
+    features: ["24/7 Customer Support", "Free Installation", "Thermostat Control"],
+    valid_from: "2024-10-01",
+    valid_until: "2025-03-31",
+    base_price: 899,
+  },
+]
+
 export function SeasonalPlans() {
-  const [plans, setPlans] = useState<SeasonalPlan[]>([])
+  const [plans, setPlans] = useState<SeasonalPlan[]>(DEFAULT_PLANS)
   const [loading, setLoading] = useState(true)
   const supabase = useSupabaseClient()
 
   useEffect(() => {
     async function fetchPlans() {
-      const { data } = await supabase
-        .from("seasonal_plans")
-        .select("*")
-        .eq("is_active", true)
-        .order("duration_months", { ascending: true })
+      // If Supabase is not available, use default plans
+      if (!supabase) {
+        setPlans(DEFAULT_PLANS)
+        setLoading(false)
+        return
+      }
 
-      if (data) {
-        setPlans(data)
+      try {
+        const { data } = await supabase
+          .from("seasonal_plans")
+          .select("*")
+          .eq("is_active", true)
+          .order("duration_months", { ascending: true })
+
+        if (data) {
+          setPlans(data)
+        } else {
+          setPlans(DEFAULT_PLANS)
+        }
+      } catch (error) {
+        console.warn("[v0] Failed to fetch seasonal plans:", error)
+        setPlans(DEFAULT_PLANS)
       }
       setLoading(false)
     }

@@ -84,15 +84,22 @@ export function CategorySection({
 
       {/* Content */}
       <div className="container mx-auto max-w-7xl relative z-10 px-4 md:px-6 lg:px-8">
-        <div className="mb-10 md:mb-12">
-          <h3 className="text-2xl md:text-3xl font-bold mb-3 animate-fadeIn" style={{ animationFillMode: 'both' }}>
-            {title}
-          </h3>
-          <p className="text-base md:text-lg text-muted-foreground max-w-2xl animate-fadeIn" style={{ animationFillMode: 'both', animationDelay: '0.1s' }}>
+        <div className="mb-12 md:mb-16">
+          <div className="space-y-3 mb-6">
+            <p className="text-xs font-semibold text-primary uppercase tracking-widest animate-fadeIn" style={{ animationFillMode: 'both' }}>
+              {isCooling ? 'Cooling Solutions' : 'Heating Solutions'}
+            </p>
+            <h3 className="text-3xl md:text-4xl font-bold text-pretty animate-fadeIn" style={{ animationFillMode: 'both', animationDelay: '0.05s' }}>
+              {title}
+            </h3>
+          </div>
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed animate-fadeIn" style={{ animationFillMode: 'both', animationDelay: '0.1s' }}>
             {description}
           </p>
         </div>
-        {children}
+        <div className="animate-slideInUp" style={{ animationFillMode: 'both', animationDelay: '0.2s' }}>
+          {children}
+        </div>
       </div>
     </div>
   )

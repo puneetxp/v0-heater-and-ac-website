@@ -1,7 +1,9 @@
+'use client'
+
 import { ProductCard } from "@/components/product-card"
 import { CategorySection } from "@/components/category-section"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
+// Product data structure - Ready for database integration
 const acProducts = [
   {
     id: 1,
@@ -9,6 +11,7 @@ const acProducts = [
     category: "Window AC",
     capacity: "1 Ton",
     price: 899,
+    basePrice: 899,
     image: "/modern-white-window-air-conditioner-unit.jpg",
     features: ["Energy Efficient", "Quiet Operation", "Remote Control"],
   },
@@ -18,6 +21,7 @@ const acProducts = [
     category: "Window AC",
     capacity: "1.5 Ton",
     price: 1199,
+    basePrice: 1199,
     image: "/large-window-ac-air-conditioner-cooling.jpg",
     features: ["Powerful Cooling", "Timer Function", "Easy Installation"],
   },
@@ -27,6 +31,7 @@ const acProducts = [
     category: "Split AC",
     capacity: "1 Ton",
     price: 1499,
+    basePrice: 1499,
     image: "/modern-white-split-air-conditioner-indoor-unit.jpg",
     features: ["Inverter Technology", "Sleep Mode", "Auto Clean"],
   },
@@ -36,6 +41,7 @@ const acProducts = [
     category: "Split AC",
     capacity: "1.5 Ton",
     price: 1899,
+    basePrice: 1899,
     image: "/premium-split-ac-with-display-panel.jpg",
     features: ["5-Star Rating", "Smart Wi-Fi", "Turbo Cooling"],
   },
@@ -45,6 +51,7 @@ const acProducts = [
     category: "Split AC",
     capacity: "2 Ton",
     price: 2399,
+    basePrice: 2399,
     image: "/heavy-duty-split-air-conditioner-unit.jpg",
     features: ["Heavy Duty", "Dual Inverter", "Air Purifier"],
   },
@@ -57,6 +64,7 @@ const heaterProducts = [
     category: "Oil Heater",
     capacity: "5 Fins",
     price: 599,
+    basePrice: 599,
     image: "/5-fin-oil-filled-radiator-heater-portable.jpg",
     features: ["Portable", "Thermostat Control", "Safety Cut-off"],
   },
@@ -66,6 +74,7 @@ const heaterProducts = [
     category: "Oil Heater",
     capacity: "7 Fins",
     price: 799,
+    basePrice: 799,
     image: "/7-fin-oil-heater-radiator-with-wheels.jpg",
     features: ["Fast Heating", "3 Heat Settings", "Tip-Over Protection"],
   },
@@ -75,6 +84,7 @@ const heaterProducts = [
     category: "Oil Heater",
     capacity: "9 Fins",
     price: 999,
+    basePrice: 999,
     image: "/9-fin-oil-filled-heater-with-digital-display.jpg",
     features: ["Maximum Heat", "Digital Display", "Timer Function"],
   },
@@ -84,6 +94,7 @@ const heaterProducts = [
     category: "Oil Heater",
     capacity: "11 Fins",
     price: 1299,
+    basePrice: 1299,
     image: "/11-fin-large-oil-radiator-heater-remote-control.jpg",
     features: ["Large Room Coverage", "Eco Mode", "Remote Control"],
   },
@@ -92,18 +103,23 @@ const heaterProducts = [
 export function ProductGrid() {
   return (
     <section id="products" className="relative overflow-hidden">
-      {/* Header Section */}
-      <div className="py-12 md:py-16 lg:py-20 px-4 md:px-6 lg:px-8 bg-gradient-to-b from-background to-transparent">
+      {/* Header Section with improved spacing */}
+      <div className="py-16 md:py-24 lg:py-28 px-4 md:px-6 lg:px-8 bg-gradient-to-b from-background via-background/50 to-transparent">
         <div className="container mx-auto max-w-7xl">
-          <div className="text-center space-y-4 animate-slideInUp" style={{ animationFillMode: 'both' }}>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight animate-fadeIn" style={{ animationFillMode: 'both', animationDelay: '0.2s' }}>
-              Our{" "}
-              <span className="bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent">
-                Products
-              </span>
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-balance animate-fadeIn" style={{ animationFillMode: 'both', animationDelay: '0.3s' }}>
-              Discover our premium collection of air conditioners and heaters, each designed for optimal comfort and efficiency.
+          <div className="text-center space-y-6 animate-slideInUp" style={{ animationFillMode: 'both' }}>
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-primary uppercase tracking-widest animate-fadeIn" style={{ animationFillMode: 'both', animationDelay: '0.1s' }}>
+                Premium Selection
+              </p>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-pretty animate-fadeIn" style={{ animationFillMode: 'both', animationDelay: '0.2s' }}>
+                Our{" "}
+                <span className="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+                  Products
+                </span>
+              </h2>
+            </div>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-balance leading-relaxed animate-fadeIn" style={{ animationFillMode: 'both', animationDelay: '0.3s' }}>
+              Discover our premium collection of air conditioners and heaters, each designed for optimal comfort, efficiency, and reliability.
             </p>
           </div>
         </div>
