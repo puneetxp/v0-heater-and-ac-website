@@ -2,6 +2,16 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Enable scrolling on html and body */
+html {
+  scroll-behavior: smooth;
+  overflow-y: scroll;
+}
+
+body {
+  overflow-x: hidden;
+}
+
 /* Geist Font */
 @theme inline {
   --font-sans: GeistSans, "GeistSans Fallback", ui-sans-serif, system-ui, sans-serif,

@@ -15,7 +15,7 @@ export function AnimatedBackground() {
   }, [])
 
   return (
-    <div className="fixed inset-0 -z-50 overflow-hidden">
+    <div className="fixed inset-0 -z-50 overflow-hidden pointer-events-none">
       {/* Base Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-950 dark:via-blue-950 dark:to-cyan-950" />
 
