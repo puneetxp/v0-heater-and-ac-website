@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image"; // Added Image import
 import { getFallbackImages } from "@/lib/supabase/storage"; // Added getFallbackImages import
 
 export default async function SubscriptionsPage() {
@@ -61,13 +60,14 @@ export default async function SubscriptionsPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="relative w-full h-48 rounded-lg overflow-hidden">
-                    {/* Added wrapper div for Image fill */}
-                    <Image
-                      src={subscription.products.image_url ||
-                        getFallbackImages(subscription.products.category)[0]}
+                    {/* Added wrapper div for img */}
+                    <img
+                      src={subscription.products.image_url &&
+                          subscription.products.image_url.trim() !== ""
+                        ? subscription.products.image_url
+                        : getFallbackImages(subscription.products.category)[0]}
                       alt={subscription.products.name}
-                      fill
-                      className="object-cover"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">

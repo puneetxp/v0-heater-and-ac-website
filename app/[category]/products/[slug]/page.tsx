@@ -173,11 +173,10 @@ export default function ProductPage(props: {
               <div
                 className={`w-full rounded-2xl overflow-hidden bg-white/50 border-0 shadow-xl aspect-square relative flex items-center justify-center`}
               >
-                <Image
+                <img
                   src={product.image}
                   alt={product.name}
-                  fill
-                  className="object-cover"
+                  className="w-full h-full object-cover"
                 />
               </div>
             </div>

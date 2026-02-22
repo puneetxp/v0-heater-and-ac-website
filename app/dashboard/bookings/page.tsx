@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AlertCircle, Calendar, Clock, MapPin, Package } from "lucide-react";
 import { getFallbackImages } from "@/lib/supabase/storage";
-import Image from "next/image";
 
 export default async function BookingsPage() {
   const supabase = await createServerClient();
@@ -49,12 +48,13 @@ export default async function BookingsPage() {
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <div className="relative h-20 w-20 rounded-lg overflow-hidden">
-                        <Image
-                          src={booking.products.image_url ||
-                            getFallbackImages(booking.products.category)[0]}
+                        <img
+                          src={booking.products.image_url &&
+                              booking.products.image_url.trim() !== ""
+                            ? booking.products.image_url
+                            : getFallbackImages(booking.products.category)[0]}
                           alt={booking.products.name}
-                          fill
-                          className="object-cover"
+                          className="w-full h-full object-cover"
                         />
                       </div>
                       <div>

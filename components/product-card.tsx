@@ -58,7 +58,9 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardHeader className="p-0">
         <div className="relative h-64 overflow-hidden bg-muted/30">
           <img
-            src={product.image || getFallbackImages(product.category)[0]}
+            src={product.image && product.image.trim() !== ""
+              ? product.image
+              : getFallbackImages(product.category)[0]}
             alt={`${product.name} - ${product.capacity} Rental`}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           />

@@ -106,12 +106,10 @@ export function ProductImageUpload({
                         key={idx}
                         className="relative group aspect-square rounded-lg overflow-hidden border border-slate-200 bg-slate-50"
                     >
-                        <Image
+                        <img
                             src={src}
                             alt={`Product image ${idx + 1}`}
-                            fill
-                            className="object-cover"
-                            sizes="180px"
+                            className="w-full h-full object-cover"
                         />
                         {!disabled && (
                             <button
