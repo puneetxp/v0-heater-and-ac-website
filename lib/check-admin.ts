@@ -1,40 +1,45 @@
-import { createServerClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
-import { cookies } from "next/headers"
+import { createServerClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 export async function checkAdminAccess() {
-  const supabase = await createServerClient()
-  const cookieStore = await cookies()
+  const supabase = await createServerClient();
+  const cookieStore = await cookies();
 
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getUser();
 
   // Check if this is a Supabase authenticated user
   if (user) {
-    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+    try {
+      const { data: profile } = await supabase.from("profiles").select("role")
+        .eq("id", user.id).single();
 
-    if (profile?.role === "admin") {
-      return { user, profile }
+      if (profile?.role === "admin") {
+        return { user, profile };
+      }
+    } catch (err) {
+      console.error("[v0] profile check failed:", err);
     }
   }
 
   // Check for static admin session in cookies
-  const adminSessionCookie = cookieStore.get("admin_session")
+  const adminSessionCookie = cookieStore.get("admin_session");
   if (adminSessionCookie) {
     try {
-      const session = JSON.parse(adminSessionCookie.value)
+      const session = JSON.parse(adminSessionCookie.value);
       if (session.id === "static-admin" && session.role === "admin") {
         return {
           user: { id: "static-admin", email: session.email },
           profile: { role: "admin" },
-        }
+        };
       }
     } catch (e) {
-      console.error("[v0] Failed to parse admin session:", e)
+      console.error("[v0] Failed to parse admin session:", e);
     }
   }
 
   // Not authorized
-  redirect("/admin/login")
+  redirect("/admin/login");
 }
