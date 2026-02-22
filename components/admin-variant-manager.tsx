@@ -48,17 +48,50 @@ interface AdminVariantManagerProps {
 
 export function AdminVariantManager({
   productId,
-  variants = [],
-  plans = [],
-  onVariantAdd,
-  onVariantEdit,
-  onVariantDelete,
-  onPlanAdd,
-  onPlanEdit,
-  onPlanDelete,
+  variants: initialVariants = [],
+  plans: initialPlans = [],
+  onVariantAdd: externalOnVariantAdd,
+  onVariantEdit: externalOnVariantEdit,
+  onVariantDelete: externalOnVariantDelete,
+  onPlanAdd: externalOnPlanAdd,
+  onPlanEdit: externalOnPlanEdit,
+  onPlanDelete: externalOnPlanDelete,
 }: AdminVariantManagerProps) {
+  const [variants, setVariants] = useState<Variant[]>(initialVariants);
+  const [plans, setPlans] = useState<Plan[]>(initialPlans);
   const [editingVariant, setEditingVariant] = useState<string | null>(null);
   const [editingPlan, setEditingPlan] = useState<string | null>(null);
+
+  // Internal handlers to replace optional props
+  const onVariantAdd = externalOnVariantAdd || ((v: Variant) => {
+    setVariants([...variants, v]);
+    console.log("Added variant internally:", v);
+  });
+
+  const onVariantEdit = externalOnVariantEdit || ((id: string, v: Variant) => {
+    setVariants(variants.map((varitem) => varitem.id === id ? v : varitem));
+    console.log("Edited variant internally:", id, v);
+  });
+
+  const onVariantDelete = externalOnVariantDelete || ((id: string) => {
+    setVariants(variants.filter((varitem) => varitem.id !== id));
+    console.log("Deleted variant internally:", id);
+  });
+
+  const onPlanAdd = externalOnPlanAdd || ((p: Plan) => {
+    setPlans([...plans, p]);
+    console.log("Added plan internally:", p);
+  });
+
+  const onPlanEdit = externalOnPlanEdit || ((id: string, p: Plan) => {
+    setPlans(plans.map((planItem) => planItem.id === id ? p : planItem));
+    console.log("Edited plan internally:", id, p);
+  });
+
+  const onPlanDelete = externalOnPlanDelete || ((id: string) => {
+    setPlans(plans.filter((planItem) => planItem.id !== id));
+    console.log("Deleted plan internally:", id);
+  });
 
   return (
     <Tabs defaultValue="variants" className="w-full">
@@ -296,10 +329,9 @@ export function AdminVariantManager({
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() =>
-                            setEditingPlan(
-                              editingPlan === plan.id ? null : plan.id,
-                            )}
+                          onClick={() => setEditingPlan(
+                            editingPlan === plan.id ? null : plan.id,
+                          )}
                         >
                           <Edit2 className="w-4 h-4" />
                         </Button>
