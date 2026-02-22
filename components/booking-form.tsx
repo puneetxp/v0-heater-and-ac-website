@@ -71,7 +71,7 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
     return { subtotal, gstAmount, total, deposit, discount, discountAmount };
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);

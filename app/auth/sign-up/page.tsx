@@ -1,41 +1,53 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useSupabaseClient } from "@/lib/hooks/use-supabase"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
-import { Wind } from "lucide-react"
+import type React from "react";
+import { useSupabaseClient } from "@/lib/hooks/use-supabase";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Wind } from "lucide-react";
 
 export default function SignUpPage() {
-  const [fullName, setFullName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [repeatPassword, setRepeatPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
-  const supabase = useSupabaseClient()
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const supabase = useSupabaseClient();
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
+  const handleSignUp = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
 
     if (password !== repeatPassword) {
-      setError("Passwords do not match")
-      setIsLoading(false)
-      return
+      setError("Passwords do not match");
+      setIsLoading(false);
+      return;
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters long")
-      setIsLoading(false)
-      return
+      setError("Password must be at least 6 characters long");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!supabase) {
+      setError("Sign up service is currently unavailable.");
+      setIsLoading(false);
+      return;
     }
 
     try {
@@ -43,24 +55,31 @@ export default function SignUpPage() {
         email,
         password,
         options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`,
+          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ||
+            `${window.location.origin}/dashboard`,
           data: {
             full_name: fullName,
           },
         },
-      })
-      if (error) throw error
-      router.push("/auth/verify-email")
+      });
+      if (error) throw error;
+      router.push("/auth/verify-email");
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
+      setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleGoogleSignUp = async () => {
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
+
+    if (!supabase) {
+      setError("Google sign up service is currently unavailable.");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -68,19 +87,22 @@ export default function SignUpPage() {
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
-      })
-      if (error) throw error
+      });
+      if (error) throw error;
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
-      setIsLoading(false)
+      setError(error instanceof Error ? error.message : "An error occurred");
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-blue-50 via-white to-teal-50 p-6">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold text-blue-600">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-2xl font-bold text-blue-600"
+          >
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
               <Wind className="h-6 w-6 text-white" />
             </div>
@@ -89,8 +111,12 @@ export default function SignUpPage() {
         </div>
         <Card className="border-gray-200 shadow-xl">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-            <CardDescription>Enter your details to get started with ComfortRent</CardDescription>
+            <CardTitle className="text-2xl font-bold">
+              Create an account
+            </CardTitle>
+            <CardDescription>
+              Enter your details to get started with ComfortRent
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSignUp}>
@@ -128,7 +154,9 @@ export default function SignUpPage() {
                     <span className="w-full border-t border-gray-300" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-gray-500">Or continue with</span>
+                    <span className="bg-white px-2 text-gray-500">
+                      Or continue with
+                    </span>
                   </div>
                 </div>
 
@@ -178,14 +206,25 @@ export default function SignUpPage() {
                     className="h-11"
                   />
                 </div>
-                {error && <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</div>}
-                <Button type="submit" className="h-11 w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+                {error && (
+                  <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
+                    {error}
+                  </div>
+                )}
+                <Button
+                  type="submit"
+                  className="h-11 w-full bg-blue-600 hover:bg-blue-700"
+                  disabled={isLoading}
+                >
                   {isLoading ? "Creating account..." : "Sign up"}
                 </Button>
               </div>
               <div className="mt-6 text-center text-sm text-gray-600">
                 Already have an account?{" "}
-                <Link href="/auth/login" className="font-semibold text-blue-600 hover:underline">
+                <Link
+                  href="/auth/login"
+                  className="font-semibold text-blue-600 hover:underline"
+                >
                   Login
                 </Link>
               </div>
@@ -194,5 +233,5 @@ export default function SignUpPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
