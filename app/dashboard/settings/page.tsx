@@ -28,7 +28,7 @@ export default function SettingsPage() {
     confirm: "",
   });
 
-  const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleChangePassword = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);

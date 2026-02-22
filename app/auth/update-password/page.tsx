@@ -38,7 +38,7 @@ export default function UpdatePasswordPage() {
     passwordStrength.hasLowerCase &&
     passwordStrength.hasNumbers;
 
-  const handleUpdatePassword = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleUpdatePassword = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);

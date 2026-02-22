@@ -27,7 +27,7 @@ export function ProfileForm({ user, profile }: { user: any; profile: any }) {
     company_name: profile?.company_name || "",
   });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
