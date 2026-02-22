@@ -10,19 +10,20 @@ import { checkAdminAccess } from "@/lib/check-admin";
 export default async function AdminVariantsPage(
   { params }: { params: Promise<{ id: string }> },
 ) {
+  // 1. Check admin status FIRST
+  await checkAdminAccess();
+
   const { id } = await params;
   const supabase = await createClient();
 
-  // Get product
+  // 2. Get product with error handling
   const { data: product, error: productError } = await supabase.from("products")
-    .select("*").eq("id", id).single();
+    .select("*").eq("id", id).maybeSingle();
 
   if (productError || !product) {
+    console.error("[v0] Product not found or error:", productError);
     redirect("/admin/products");
   }
-
-  // Check admin status
-  await checkAdminAccess();
 
   // Mock variants data (will integrate with DB later)
   const variants = [
