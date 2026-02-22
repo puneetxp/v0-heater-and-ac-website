@@ -1,16 +1,23 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Analytics } from "@vercel/analytics/next"
-import { SupabaseProvider } from "./providers"
-import { AnimatedBackground } from "@/components/animated-background"
-import "./globals.css"
+import type React from "react";
+import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import { SupabaseProvider } from "./providers";
+import { AnimatedBackground } from "@/components/animated-background";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "ComfortRent - AC & Heater Rentals | Affordable Climate Control",
   description:
     "Premium AC and heater rental services with flexible monthly plans. Choose from window AC, split AC, and oil heaters. Professional installation included. Rent AC & heaters starting at ₹899/month.",
   generator: "Next.js",
-  keywords: ["AC rental", "heater rental", "window AC", "split AC", "oil heater", "climate control rental"],
+  keywords: [
+    "AC rental",
+    "heater rental",
+    "window AC",
+    "split AC",
+    "oil heater",
+    "climate control rental",
+  ],
   authors: [{ name: "ComfortRent" }],
   creator: "ComfortRent",
   publisher: "ComfortRent",
@@ -37,7 +44,8 @@ export const metadata: Metadata = {
     url: "https://comfortrent.com",
     siteName: "ComfortRent",
     title: "ComfortRent - Premium AC & Heater Rentals",
-    description: "Affordable climate control solutions with flexible rental plans. Professional installation & 24/7 support.",
+    description:
+      "Affordable climate control solutions with flexible rental plans. Professional installation & 24/7 support.",
     images: [
       {
         url: "https://comfortrent.com/og-image.png",
@@ -50,13 +58,14 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "ComfortRent - AC & Heater Rentals",
-    description: "Premium climate control rentals with professional installation.",
+    description:
+      "Premium climate control rentals with professional installation.",
     images: ["https://comfortrent.com/twitter-image.png"],
   },
   robots: {
-    index: true,
-    follow: true,
-    nocache: false,
+    index: false,
+    follow: false,
+    nocache: true,
     googleBot: {
       index: true,
       follow: true,
@@ -74,12 +83,12 @@ export const metadata: Metadata = {
     maximumScale: 5,
     userScalable: true,
   },
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   // JSON-LD Schema for organization
   const schemaData = {
@@ -89,7 +98,8 @@ export default function RootLayout({
     "name": "ComfortRent",
     "url": "https://comfortrent.com",
     "telephone": "+91-XXXXXXXXXX",
-    "description": "Premium AC and heater rental services with professional installation and 24/7 support.",
+    "description":
+      "Premium AC and heater rental services with professional installation and 24/7 support.",
     "image": "https://comfortrent.com/logo.png",
     "address": {
       "@type": "PostalAddress",
@@ -103,8 +113,13 @@ export default function RootLayout({
     ],
     "areaServed": "IN",
     "priceRange": "₹799 - ₹2399",
-    "knowsAbout": ["AC Rental", "Heater Rental", "Air Conditioning", "Climate Control"],
-  }
+    "knowsAbout": [
+      "AC Rental",
+      "Heater Rental",
+      "Air Conditioning",
+      "Climate Control",
+    ],
+  };
 
   return (
     <html lang="en">
@@ -122,5 +137,5 @@ export default function RootLayout({
         </SupabaseProvider>
       </body>
     </html>
-  )
+  );
 }

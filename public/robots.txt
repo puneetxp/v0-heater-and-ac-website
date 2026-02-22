@@ -1,16 +1,13 @@
-User-agent: *
+# Specific rules for Google
+User-agent: Googlebot
 Allow: /
 Disallow: /admin/
 Disallow: /.next/
 Disallow: /api/
 
-# Specific rules for Google
-User-agent: Googlebot
-Allow: /
-
-# Specific rules for Bing
-User-agent: Bingbot
-Allow: /
+# Block all other search engines
+User-agent: *
+Disallow: /
 
 # Sitemap
 Sitemap: https://comfortrent.com/sitemap.xml

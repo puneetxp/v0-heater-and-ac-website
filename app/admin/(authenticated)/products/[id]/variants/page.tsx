@@ -5,6 +5,7 @@ import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { checkAdminAccess } from "@/lib/check-admin";
 
 export default async function AdminVariantsPage(
   { params }: { params: Promise<{ id: string }> },
@@ -21,22 +22,7 @@ export default async function AdminVariantsPage(
   }
 
   // Check admin status
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/auth/login");
-  }
-
-  const { data: profile } = await supabase.from("profiles").select("role").eq(
-    "id",
-    user.id,
-  ).single();
-
-  if (profile?.role !== "admin") {
-    redirect("/");
-  }
+  await checkAdminAccess();
 
   // Mock variants data (will integrate with DB later)
   const variants = [
