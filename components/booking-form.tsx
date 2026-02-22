@@ -3,7 +3,6 @@
 import type React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image"; // Added Image import
 import { useSupabaseClient } from "@/lib/hooks/use-supabase";
 import { getFallbackImages } from "@/lib/supabase/storage"; // Added getFallbackImages import
 import { Button } from "@/components/ui/button";
@@ -135,12 +134,12 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="relative aspect-video rounded-lg overflow-hidden border">
-              <Image
-                src={product.image_url ||
-                  getFallbackImages(product.category)[0]}
+              <img
+                src={product.image_url && product.image_url.trim() !== ""
+                  ? product.image_url
+                  : getFallbackImages(product.category)[0]}
                 alt={product.name}
-                fill
-                className="object-cover"
+                className="w-full h-full object-cover"
               />
             </div>
             <div>

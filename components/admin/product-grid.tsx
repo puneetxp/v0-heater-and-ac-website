@@ -56,13 +56,14 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
                     key={product.id}
                     className="overflow-hidden hover:shadow-lg transition-shadow"
                 >
-                    <div className="relative h-48 bg-slate-100">
-                        <Image
-                            src={product.image_url ||
-                                getFallbackImages(product.category)[0]}
+                    <div className="relative h-48 bg-slate-100 overflow-hidden">
+                        <img
+                            src={product.image_url &&
+                                    product.image_url.trim() !== ""
+                                ? product.image_url
+                                : getFallbackImages(product.category)[0]}
                             alt={product.name}
-                            fill
-                            className="object-cover"
+                            className="w-full h-full object-cover"
                         />
                         <Badge className="absolute top-3 right-3 capitalize">
                             {product.season}
