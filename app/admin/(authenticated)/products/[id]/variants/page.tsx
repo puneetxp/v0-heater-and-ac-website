@@ -133,14 +133,6 @@ export default async function AdminVariantsPage(
           productId={id}
           variants={variants}
           plans={plans}
-          onVariantAdd={(variant) => console.log("Add variant:", variant)}
-          onVariantEdit={(variantId, variant) =>
-            console.log("Edit variant:", variantId, variant)}
-          onVariantDelete={(variantId) =>
-            console.log("Delete variant:", variantId)}
-          onPlanAdd={(plan) => console.log("Add plan:", plan)}
-          onPlanEdit={(planId, plan) => console.log("Edit plan:", planId, plan)}
-          onPlanDelete={(planId) => console.log("Delete plan:", planId)}
         />
       </div>
     </div>
