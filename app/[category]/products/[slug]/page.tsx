@@ -11,7 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Check, Flame, Wind, Zap } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { allProducts } from "@/lib/product-data";
+import { getFallbackImages } from "@/lib/supabase/storage";
 
 export default function ProductPage(props: {
   params: Promise<{ category: string; slug: string }>;
@@ -92,7 +94,7 @@ export default function ProductPage(props: {
     basePrice: productData.basePrice,
     description: productData.description ||
       "Premium rental product with professional service and support.",
-    image: "/placeholder.svg?height=500&width=600",
+    image: productData.image || getFallbackImages(productData.category)[0],
     warranty: "1 year manufacturer warranty",
     slug: params.slug,
   };
@@ -169,10 +171,13 @@ export default function ProductPage(props: {
           <div className="grid lg:grid-cols-2 gap-12 mb-16">
             <div className="flex items-center justify-center">
               <div
-                className={`w-full rounded-2xl overflow-hidden bg-gradient-to-br ${bgGradient} aspect-square flex items-center justify-center`}
+                className={`w-full rounded-2xl overflow-hidden bg-white/50 border-0 shadow-xl aspect-square relative flex items-center justify-center`}
               >
-                <IconComponent
-                  className={`w-32 h-32 ${textColor} opacity-20`}
+                <Image
+                  src={product.image}
+                  alt={product.name}
+                  fill
+                  className="object-cover"
                 />
               </div>
             </div>

@@ -3,132 +3,172 @@ export const allProducts = {
   windowAC: [
     {
       id: 1,
-      name: 'Window AC - 1 Ton',
-      category: 'Window AC',
-      capacity: '1 Ton',
+      name: "Window AC - 1 Ton",
+      category: "Window AC",
+      capacity: "1 Ton",
       price: 899,
-      description: 'Perfect for small rooms and apartments',
-      features: ['Energy Efficient', 'Quiet Operation', 'Remote Control'],
+      description: "Perfect for small rooms and apartments",
+      image: "/modern-white-window-air-conditioner-unit.jpg",
+      features: ["Energy Efficient", "Quiet Operation", "Remote Control"],
       basePrice: 899,
     },
     {
       id: 2,
-      name: 'Window AC - 1.5 Ton',
-      category: 'Window AC',
-      capacity: '1.5 Ton',
+      name: "Window AC - 1.5 Ton",
+      category: "Window AC",
+      capacity: "1.5 Ton",
       price: 1199,
-      description: 'Best for medium-sized rooms',
-      features: ['Powerful Cooling', 'Timer Function', 'Easy Installation'],
+      description: "Best for medium-sized rooms",
+      image: "/large-window-ac-air-conditioner-cooling.jpg",
+      features: ["Powerful Cooling", "Timer Function", "Easy Installation"],
       basePrice: 1199,
     },
   ],
   splitAC: [
     {
       id: 3,
-      name: 'Split AC - 1 Ton',
-      category: 'Split AC',
-      capacity: '1 Ton',
+      name: "Split AC - 1 Ton",
+      category: "Split AC",
+      capacity: "1 Ton",
       price: 1499,
-      description: 'Perfect for small rooms and apartments',
-      features: ['Inverter Technology', 'Sleep Mode', 'Auto Clean'],
+      description: "Perfect for small rooms and apartments",
+      image: "/modern-white-split-air-conditioner-indoor-unit.jpg",
+      features: ["Inverter Technology", "Sleep Mode", "Auto Clean"],
       basePrice: 1499,
     },
     {
       id: 4,
-      name: 'Split AC - 1.5 Ton',
-      category: 'Split AC',
-      capacity: '1.5 Ton',
+      name: "Split AC - 1.5 Ton",
+      category: "Split AC",
+      capacity: "1.5 Ton",
       price: 1899,
-      description: 'Best for medium-sized rooms',
-      features: ['5-Star Rating', 'Smart Wi-Fi', 'Turbo Cooling'],
+      description: "Best for medium-sized rooms",
+      image: "/premium-split-ac-with-display-panel.jpg",
+      features: ["5-Star Rating", "Smart Wi-Fi", "Turbo Cooling"],
       basePrice: 1899,
     },
     {
       id: 5,
-      name: 'Split AC - 2 Ton',
-      category: 'Split AC',
-      capacity: '2 Ton',
+      name: "Split AC - 2 Ton",
+      category: "Split AC",
+      capacity: "2 Ton",
       price: 2399,
-      description: 'Ideal for large rooms and offices',
-      features: ['Heavy Duty', 'Dual Inverter', 'Air Purifier'],
+      description: "Ideal for large rooms and offices",
+      image: "/heavy-duty-split-air-conditioner-unit.jpg",
+      features: ["Heavy Duty", "Dual Inverter", "Air Purifier"],
       basePrice: 2399,
     },
   ],
   oilHeater: [
     {
       id: 6,
-      name: 'Oil Heater - 7 Fin',
-      category: 'Oil Heater',
-      capacity: '7 Fins',
-      price: 799,
-      description: 'Compact portable heater perfect for small rooms',
-      features: ['Fast Heating', '3 Heat Settings', 'Tip-Over Protection'],
-      basePrice: 799,
+      name: "Oil Heater - 5 Fin",
+      category: "Oil Heater",
+      capacity: "5 Fins",
+      price: 599,
+      description: "Compact portable heater perfect for small rooms",
+      image: "/5-fin-oil-filled-radiator-heater-portable.jpg",
+      features: ["Portable", "Thermostat Control", "Safety Cut-off"],
+      basePrice: 599,
     },
     {
       id: 7,
-      name: 'Oil Heater - 9 Fin',
-      category: 'Oil Heater',
-      capacity: '9 Fins',
-      price: 999,
-      description: 'Ideal heating solution for medium-sized rooms',
-      features: ['Maximum Heat', 'Digital Display', 'Timer Function'],
-      basePrice: 999,
+      name: "Oil Heater - 7 Fin",
+      category: "Oil Heater",
+      capacity: "7 Fins",
+      price: 799,
+      description: "Standard oil heater for comfortable warmth",
+      image: "/7-fin-oil-heater-radiator-with-wheels.jpg",
+      features: ["Fast Heating", "3 Heat Settings", "Tip-Over Protection"],
+      basePrice: 799,
     },
     {
       id: 8,
-      name: 'Oil Heater - 11 Fin',
-      category: 'Oil Heater',
-      capacity: '11 Fins',
+      name: "Oil Heater - 9 Fin",
+      category: "Oil Heater",
+      capacity: "9 Fins",
+      price: 999,
+      description: "Ideal heating solution for medium-sized rooms",
+      image: "/9-fin-oil-filled-heater-with-digital-display.jpg",
+      features: ["Maximum Heat", "Digital Display", "Timer Function"],
+      basePrice: 999,
+    },
+    {
+      id: 9,
+      name: "Oil Heater - 11 Fin",
+      category: "Oil Heater",
+      capacity: "11 Fins",
       price: 1299,
-      description: 'Premium heater for large rooms and offices',
-      features: ['Large Room Coverage', 'Eco Mode', 'Remote Control'],
+      description: "Premium heater for large rooms and offices",
+      image: "/11-fin-large-oil-radiator-heater-remote-control.jpg",
+      features: ["Large Room Coverage", "Eco Mode", "Remote Control"],
       basePrice: 1299,
     },
   ],
-}
+};
 
 // Helper to find product by slug
-export function findProductBySlug(slug: string, category: 'window-ac' | 'split-ac' | 'oil-heater'): any {
+export function findProductBySlug(
+  slug: string,
+  category: "window-ac" | "split-ac" | "oil-heater",
+): any {
   const categoryMap = {
-    'window-ac': allProducts.windowAC,
-    'split-ac': allProducts.splitAC,
-    'oil-heater': allProducts.oilHeater,
-  }
+    "window-ac": allProducts.windowAC,
+    "split-ac": allProducts.splitAC,
+    "oil-heater": allProducts.oilHeater,
+  };
 
-  const products = categoryMap[category]
-  
+  const products = categoryMap[category];
+
   // Create slugs and find matching product
-  return products.find(product => {
-    const productSlug = `${product.category.toLowerCase().replace(/\s+/g, '-')}-${product.capacity
-      .toLowerCase()
-      .replace(/\s+/g, '-')}`
-    return productSlug === slug
-  })
+  return products.find((product) => {
+    const productSlug = `${
+      product.category.toLowerCase().replace(/\s+/g, "-")
+    }-${
+      product.capacity
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+    }`;
+    return productSlug === slug;
+  });
 }
 
 // Get all products for a category
-export function getProductsByCategory(category: 'window-ac' | 'split-ac' | 'oil-heater'): any[] {
+export function getProductsByCategory(
+  category: "window-ac" | "split-ac" | "oil-heater",
+): any[] {
   const categoryMap = {
-    'window-ac': allProducts.windowAC,
-    'split-ac': allProducts.splitAC,
-    'oil-heater': allProducts.oilHeater,
-  }
-  return categoryMap[category]
+    "window-ac": allProducts.windowAC,
+    "split-ac": allProducts.splitAC,
+    "oil-heater": allProducts.oilHeater,
+  };
+  return categoryMap[category];
 }
 
 // Generate URL slug for product
-export function generateProductSlug(category: string, capacity: string): string {
-  const categorySlug = category.toLowerCase().replace(/\s+/g, '-')
-  const capacitySlug = capacity.toLowerCase().replace(/\s+/g, '-')
-  return `${categorySlug}-${capacitySlug}`
+export function generateProductSlug(
+  category: string,
+  capacity: string,
+): string {
+  const categorySlug = category.toLowerCase().replace(/\s+/g, "-");
+  const capacitySlug = capacity.toLowerCase().replace(/\s+/g, "-");
+  return `${categorySlug}-${capacitySlug}`;
 }
 
 // Construct full URL for product
-export function getProductUrl(category: 'window-ac' | 'split-ac' | 'oil-heater', capacity: string): string {
+export function getProductUrl(
+  category: "window-ac" | "split-ac" | "oil-heater",
+  capacity: string,
+): string {
   const slug = generateProductSlug(
-    category.replace('-', ' ').toUpperCase(),
-    capacity
-  )
-  return `/${category === 'window-ac' ? 'cooling/window-ac' : category === 'split-ac' ? 'cooling/split-ac' : 'heating/oil-heater'}/${slug}`
+    category.replace("-", " ").toUpperCase(),
+    capacity,
+  );
+  return `/${
+    category === "window-ac"
+      ? "cooling/window-ac"
+      : category === "split-ac"
+      ? "cooling/split-ac"
+      : "heating/oil-heater"
+  }/${slug}`;
 }
