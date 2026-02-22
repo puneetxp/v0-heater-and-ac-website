@@ -1,48 +1,57 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useSupabase } from "@/app/providers"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
-import { Wind } from "lucide-react"
+import { useSupabase } from "@/app/providers";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Wind } from "lucide-react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
-  const supabase = useSupabase()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const supabase = useSupabase();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
 
     // Trim whitespace from inputs
-    const trimmedEmail = email.trim().toLowerCase()
-    const trimmedPassword = password.trim()
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedPassword = password.trim();
 
     // Static admin credentials
-    const STATIC_ADMIN_EMAIL = "admin@comfortrent.com"
-    const STATIC_ADMIN_PASSWORD = "admin123"
+    const STATIC_ADMIN_EMAIL = "admin@comfortrent.com";
+    const STATIC_ADMIN_PASSWORD = "admin123";
 
     // Check if using static admin credentials
-    if (trimmedEmail === STATIC_ADMIN_EMAIL && trimmedPassword === STATIC_ADMIN_PASSWORD) {
+    if (
+      trimmedEmail === STATIC_ADMIN_EMAIL &&
+      trimmedPassword === STATIC_ADMIN_PASSWORD
+    ) {
       // Store admin session in localStorage and sessionStorage
       const adminSession = {
         id: "static-admin",
         email: STATIC_ADMIN_EMAIL,
         role: "admin",
         loginTime: new Date().toISOString(),
-      }
-      
+      };
+
       try {
         // Try to set via API route for server-side cookie
         const response = await fetch("/api/auth/set-admin-session", {
@@ -51,50 +60,68 @@ export default function LoginPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(adminSession),
-        })
+        });
 
         // Store in localStorage as backup (works in preview)
-        localStorage.setItem("admin_session", JSON.stringify(adminSession))
-        sessionStorage.setItem("admin_authenticated", "true")
+        localStorage.setItem("admin_session", JSON.stringify(adminSession));
+        sessionStorage.setItem("admin_authenticated", "true");
 
-        setIsLoading(false)
-        router.push("/admin/dashboard")
-        return
+        setIsLoading(false);
+        router.push("/admin/dashboard");
+        return;
       } catch (err) {
-        console.error("[v0] Error with admin login:", err)
-        setError("Failed to login. Please try again.")
-        setIsLoading(false)
-        return
+        console.error("[v0] Error with admin login:", err);
+        setError("Failed to login. Please try again.");
+        setIsLoading(false);
+        return;
       }
     }
 
     // Not admin credentials, try Supabase auth
+    if (!supabase) {
+      setError("Authentication service is currently unavailable.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: trimmedEmail,
-        password: trimmedPassword,
-      })
+      const { data, error: authError } = await supabase.auth.signInWithPassword(
+        {
+          email: trimmedEmail,
+          password: trimmedPassword,
+        },
+      );
 
       if (authError) {
-        setError(authError.message || "Invalid email or password")
-        setIsLoading(false)
-        return
+        setError(authError.message || "Invalid email or password");
+        setIsLoading(false);
+        return;
       }
 
       if (data?.user) {
-        setIsLoading(false)
-        router.push("/dashboard")
-        return
+        setIsLoading(false);
+        router.push("/dashboard");
+        return;
       }
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred. Please try again.")
-      setIsLoading(false)
+      setError(
+        error instanceof Error
+          ? error.message
+          : "An error occurred. Please try again.",
+      );
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleGoogleLogin = async () => {
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
+
+    if (!supabase) {
+      setError("Google login is currently unavailable.");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -102,19 +129,22 @@ export default function LoginPage() {
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
-      })
-      if (error) throw error
+      });
+      if (error) throw error;
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
-      setIsLoading(false)
+      setError(error instanceof Error ? error.message : "An error occurred");
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-blue-50 via-white to-teal-50 p-6">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold text-blue-600">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-2xl font-bold text-blue-600"
+          >
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
               <Wind className="h-6 w-6 text-white" />
             </div>
@@ -124,7 +154,9 @@ export default function LoginPage() {
         <Card className="border-gray-200 shadow-xl">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-            <CardDescription>Enter your credentials to access your account</CardDescription>
+            <CardDescription>
+              Enter your credentials to access your account
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin}>
@@ -162,7 +194,9 @@ export default function LoginPage() {
                     <span className="w-full border-t border-gray-300" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-gray-500">Or continue with</span>
+                    <span className="bg-white px-2 text-gray-500">
+                      Or continue with
+                    </span>
                   </div>
                 </div>
 
@@ -181,7 +215,10 @@ export default function LoginPage() {
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password">Password</Label>
-                    <Link href="/auth/reset-password" className="text-sm text-blue-600 hover:underline">
+                    <Link
+                      href="/auth/reset-password"
+                      className="text-sm text-blue-600 hover:underline"
+                    >
                       Forgot password?
                     </Link>
                   </div>
@@ -194,14 +231,25 @@ export default function LoginPage() {
                     className="h-11"
                   />
                 </div>
-                {error && <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</div>}
-                <Button type="submit" className="h-11 w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+                {error && (
+                  <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
+                    {error}
+                  </div>
+                )}
+                <Button
+                  type="submit"
+                  className="h-11 w-full bg-blue-600 hover:bg-blue-700"
+                  disabled={isLoading}
+                >
                   {isLoading ? "Logging in..." : "Login"}
                 </Button>
               </div>
               <div className="mt-6 text-center text-sm text-gray-600">
                 Don't have an account?{" "}
-                <Link href="/auth/sign-up" className="font-semibold text-blue-600 hover:underline">
+                <Link
+                  href="/auth/sign-up"
+                  className="font-semibold text-blue-600 hover:underline"
+                >
                   Sign up
                 </Link>
               </div>
@@ -211,15 +259,23 @@ export default function LoginPage() {
 
         {/* Demo Credentials Box */}
         <div className="mt-6 rounded-lg bg-blue-50 border border-blue-200 p-4">
-          <p className="text-sm font-semibold text-blue-900 mb-2">Demo Admin Credentials:</p>
-          <p className="text-sm text-blue-800">
-            Email: <code className="bg-blue-100 px-2 py-1 rounded font-mono text-xs">admin@comfortrent.com</code>
+          <p className="text-sm font-semibold text-blue-900 mb-2">
+            Demo Admin Credentials:
           </p>
           <p className="text-sm text-blue-800">
-            Password: <code className="bg-blue-100 px-2 py-1 rounded font-mono text-xs">admin123</code>
+            Email:{" "}
+            <code className="bg-blue-100 px-2 py-1 rounded font-mono text-xs">
+              admin@comfortrent.com
+            </code>
+          </p>
+          <p className="text-sm text-blue-800">
+            Password:{" "}
+            <code className="bg-blue-100 px-2 py-1 rounded font-mono text-xs">
+              admin123
+            </code>
           </p>
         </div>
       </div>
     </div>
-  )
+  );
 }

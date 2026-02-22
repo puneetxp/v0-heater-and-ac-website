@@ -1,67 +1,78 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useSupabaseClient } from "@/lib/hooks/use-supabase"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
-import { Wind, Lock, Check } from "lucide-react"
-import Link from "next/link"
+import { useSupabaseClient } from "@/lib/hooks/use-supabase";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Check, Lock, Wind } from "lucide-react";
+import Link from "next/link";
 
 export default function UpdatePasswordPage() {
-  const supabase = useSupabaseClient()
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const supabase = useSupabaseClient();
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const passwordStrength = {
     length: password.length >= 8,
     hasUpperCase: /[A-Z]/.test(password),
     hasLowerCase: /[a-z]/.test(password),
     hasNumbers: /[0-9]/.test(password),
-  }
+  };
 
-  const isStrong =
-    passwordStrength.length &&
+  const isStrong = passwordStrength.length &&
     passwordStrength.hasUpperCase &&
     passwordStrength.hasLowerCase &&
-    passwordStrength.hasNumbers
+    passwordStrength.hasNumbers;
 
-  const handleUpdatePassword = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
+  const handleUpdatePassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match")
-      setIsLoading(false)
-      return
+      setError("Passwords do not match");
+      setIsLoading(false);
+      return;
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters long")
-      setIsLoading(false)
-      return
+      setError("Password must be at least 6 characters long");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!supabase) {
+      setError("Password service is currently unavailable.");
+      setIsLoading(false);
+      return;
     }
 
     try {
       const { error } = await supabase.auth.updateUser({
         password: password,
-      })
-      if (error) throw error
-      router.push("/auth/login")
+      });
+      if (error) throw error;
+      router.push("/auth/login");
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
+      setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-blue-50 via-slate-50 to-cyan-50 p-4">
@@ -74,11 +85,16 @@ export default function UpdatePasswordPage() {
       <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-2xl font-bold"
+          >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 shadow-lg">
               <Wind className="h-6 w-6 text-white" />
             </div>
-            <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">ComfortRent</span>
+            <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              ComfortRent
+            </span>
           </Link>
         </div>
 
@@ -89,7 +105,9 @@ export default function UpdatePasswordPage() {
                 <Lock className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <CardTitle className="text-3xl font-bold text-slate-900">Create new password</CardTitle>
+                <CardTitle className="text-3xl font-bold text-slate-900">
+                  Create new password
+                </CardTitle>
               </div>
             </div>
             <CardDescription className="text-slate-600">
@@ -99,7 +117,10 @@ export default function UpdatePasswordPage() {
           <CardContent>
             <form onSubmit={handleUpdatePassword} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-slate-700 font-medium">
+                <Label
+                  htmlFor="password"
+                  className="text-slate-700 font-medium"
+                >
                   New Password
                 </Label>
                 <Input
@@ -118,39 +139,57 @@ export default function UpdatePasswordPage() {
               {password && (
                 <div className="space-y-3">
                   <div className="space-y-2">
-                    <div className="text-xs font-medium text-slate-600">Password strength:</div>
+                    <div className="text-xs font-medium text-slate-600">
+                      Password strength:
+                    </div>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <div
                           className={`h-1 flex-1 rounded-full ${
-                            passwordStrength.length ? "bg-green-500" : "bg-slate-300"
+                            passwordStrength.length
+                              ? "bg-green-500"
+                              : "bg-slate-300"
                           }`}
                         />
-                        <span className="text-xs text-slate-600">At least 8 characters</span>
+                        <span className="text-xs text-slate-600">
+                          At least 8 characters
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div
                           className={`h-1 flex-1 rounded-full ${
-                            passwordStrength.hasUpperCase ? "bg-green-500" : "bg-slate-300"
+                            passwordStrength.hasUpperCase
+                              ? "bg-green-500"
+                              : "bg-slate-300"
                           }`}
                         />
-                        <span className="text-xs text-slate-600">One uppercase letter</span>
+                        <span className="text-xs text-slate-600">
+                          One uppercase letter
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div
                           className={`h-1 flex-1 rounded-full ${
-                            passwordStrength.hasLowerCase ? "bg-green-500" : "bg-slate-300"
+                            passwordStrength.hasLowerCase
+                              ? "bg-green-500"
+                              : "bg-slate-300"
                           }`}
                         />
-                        <span className="text-xs text-slate-600">One lowercase letter</span>
+                        <span className="text-xs text-slate-600">
+                          One lowercase letter
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div
                           className={`h-1 flex-1 rounded-full ${
-                            passwordStrength.hasNumbers ? "bg-green-500" : "bg-slate-300"
+                            passwordStrength.hasNumbers
+                              ? "bg-green-500"
+                              : "bg-slate-300"
                           }`}
                         />
-                        <span className="text-xs text-slate-600">One number</span>
+                        <span className="text-xs text-slate-600">
+                          One number
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -158,7 +197,10 @@ export default function UpdatePasswordPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="confirm-password" className="text-slate-700 font-medium">
+                <Label
+                  htmlFor="confirm-password"
+                  className="text-slate-700 font-medium"
+                >
                   Confirm Password
                 </Label>
                 <Input
@@ -171,12 +213,13 @@ export default function UpdatePasswordPage() {
                   className="h-11 border-slate-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
                   disabled={isLoading}
                 />
-                {password && confirmPassword && password === confirmPassword && (
-                  <div className="flex items-center gap-2 text-sm text-green-600">
-                    <Check className="h-4 w-4" />
-                    Passwords match
-                  </div>
-                )}
+                {password && confirmPassword && password === confirmPassword &&
+                  (
+                    <div className="flex items-center gap-2 text-sm text-green-600">
+                      <Check className="h-4 w-4" />
+                      Passwords match
+                    </div>
+                  )}
               </div>
 
               {error && (
@@ -188,7 +231,8 @@ export default function UpdatePasswordPage() {
               <Button
                 type="submit"
                 className="h-11 w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium shadow-md hover:shadow-lg transition-all disabled:opacity-50"
-                disabled={isLoading || !isStrong || password !== confirmPassword}
+                disabled={isLoading || !isStrong ||
+                  password !== confirmPassword}
               >
                 {isLoading ? "Updating password..." : "Update password"}
               </Button>
@@ -206,5 +250,5 @@ export default function UpdatePasswordPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
