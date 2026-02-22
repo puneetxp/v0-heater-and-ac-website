@@ -8,6 +8,7 @@ import { AlertCircle, Edit, Loader2, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getFallbackImages } from "@/lib/supabase/storage";
 
 interface Product {
     id: string;
@@ -57,7 +58,8 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
                 >
                     <div className="relative h-48 bg-slate-100">
                         <Image
-                            src={product.image_url || "/placeholder.svg"}
+                            src={product.image_url ||
+                                getFallbackImages(product.category)[0]}
                             alt={product.name}
                             fill
                             className="object-cover"
