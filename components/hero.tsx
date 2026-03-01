@@ -67,8 +67,8 @@ export function Hero() {
             </div>
 
             {/* Right Content - Image */}
-            <div className="relative">
-              <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border border-border/50 hover:shadow-3xl transition-all duration-500">
+            <div className="relative hidden lg:block">
+              <div className="sticky top-20 relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border border-border/50 hover:shadow-3xl transition-all duration-500">
                 <img
                   src="/modern-air-conditioner-and-heater-in-luxury-home-i.jpg"
                   alt="Premium AC and heater units"
