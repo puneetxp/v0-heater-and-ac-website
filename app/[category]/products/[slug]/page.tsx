@@ -169,7 +169,7 @@ export default function ProductPage(props: {
           </Link>
 
           <div className="grid lg:grid-cols-2 gap-12 mb-16">
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center lg:sticky lg:top-20 lg:h-fit">
               <div
                 className={`w-full rounded-2xl overflow-hidden bg-white/50 border-0 shadow-xl aspect-square relative flex items-center justify-center`}
               >
