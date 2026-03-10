@@ -40,7 +40,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           {/* Invoice Header */}
           <div className="flex items-start justify-between mb-12">
             <div>
-              <h1 className="text-3xl font-bold text-primary mb-2">ComfortRent</h1>
+              <h1 className="text-3xl font-bold text-primary mb-2">ACRentService</h1>
               <p className="text-muted-foreground">
                 123 Business District
                 <br />

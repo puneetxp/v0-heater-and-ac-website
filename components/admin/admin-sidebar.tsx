@@ -66,7 +66,7 @@ export function AdminSidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="font-bold text-white text-sm">Admin Portal</h1>
-            <p className="text-xs text-slate-400">ComfortRent</p>
+            <p className="text-xs text-slate-400">ACRentService</p>
           </div>
         </div>
       </div>

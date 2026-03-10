@@ -15,7 +15,7 @@ export function Footer() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-sm">
                   <Wind className="h-5 w-5 text-primary-foreground" />
                 </div>
-                <span className="text-xl font-bold text-primary">ComfortRent</span>
+                <span className="text-xl font-bold text-primary">ACRentService</span>
               </Link>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
                 Your trusted partner for AC and heater rentals. Comfort delivered to your doorstep.
@@ -93,13 +93,13 @@ export function Footer() {
                 </li>
                 <li>
                   <a
-                    href="mailto:hello@comfortrent.com"
+                    href="mailto:hello@acrentservice.com"
                     className="flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
                   >
                     <div className="h-9 w-9 rounded-lg bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/15 transition-colors flex-shrink-0">
                       <Mail className="h-4 w-4 text-secondary" />
                     </div>
-                    <span>hello@comfortrent.com</span>
+                    <span>hello@acrentservice.com</span>
                   </a>
                 </li>
                 <li>
@@ -128,7 +128,7 @@ export function Footer() {
 
           {/* Bottom */}
           <div className="border-t pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-            <p>&copy; 2025 ComfortRent. All rights reserved.</p>
+            <p>&copy; 2025 ACRentService. All rights reserved.</p>
             <div className="flex gap-6">
               <Link href="#" className="hover:text-foreground transition-colors">
                 Privacy Policy

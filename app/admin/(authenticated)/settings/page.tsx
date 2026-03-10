@@ -24,7 +24,7 @@ export default async function AdminSettingsPage() {
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="company-name">Company Name</Label>
-              <Input id="company-name" defaultValue="ComfortRent" />
+              <Input id="company-name" defaultValue="ACRentService" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="gst-number">GST Number</Label>
@@ -44,7 +44,7 @@ export default async function AdminSettingsPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="hello@comfortrent.com" />
+              <Input id="email" type="email" placeholder="hello@acrentservice.com" />
             </div>
           </div>
 

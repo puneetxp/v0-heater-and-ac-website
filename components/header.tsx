@@ -12,7 +12,7 @@ export function Header() {
             <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
               <Wind className="h-6 w-6 text-white" />
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">ComfortRent</span>
+            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">ACRentService</span>
           </Link>
 
           {/* Desktop Navigation */}

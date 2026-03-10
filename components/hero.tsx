@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Snowflake, Wind, Flame } from "lucide-react"
 
@@ -38,14 +39,17 @@ export function Hero() {
 
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Button
+                  asChild
                   size="lg"
                   className="bg-primary hover:bg-primary/95 text-white shadow-xl shadow-primary/20 text-base h-12 px-8 font-semibold transition-all duration-300 hover:shadow-primary/40 hover:scale-105"
                 >
-                  Browse Products
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <Link href="/#products">
+                    Browse Products
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
                 </Button>
-                <Button size="lg" variant="outline" className="text-base h-12 px-8 border border-primary/30 hover:border-primary/60 bg-transparent transition-all duration-300 font-semibold text-primary hover:bg-primary/5">
-                  View Plans
+                <Button asChild size="lg" variant="outline" className="text-base h-12 px-8 border border-primary/30 hover:border-primary/60 bg-transparent transition-all duration-300 font-semibold text-primary hover:bg-primary/5">
+                  <Link href="/#products">View Plans</Link>
                 </Button>
               </div>
 

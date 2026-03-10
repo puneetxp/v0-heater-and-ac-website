@@ -37,7 +37,7 @@ export function DashboardSidebar() {
             <Wind className="h-5 w-5 text-white" />
           </div>
           <div className="flex flex-col">
-            <span className="text-base font-bold text-slate-900">ComfortRent</span>
+            <span className="text-base font-bold text-slate-900">ACRentService</span>
             <span className="text-xs font-medium text-slate-500">User Dashboard</span>
           </div>
         </div>

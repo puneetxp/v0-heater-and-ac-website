@@ -46,7 +46,7 @@ export function DashboardHeader({ user }: { user: any }) {
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-sm">
                     <Wind className="h-5 w-5 text-primary-foreground" />
                   </div>
-                  <span className="text-xl font-bold text-primary">ComfortRent</span>
+                  <span className="text-xl font-bold text-primary">ACRentService</span>
                 </div>
                 <nav className="flex-1 space-y-1 p-4">
                   {menuItems.map((item) => {
