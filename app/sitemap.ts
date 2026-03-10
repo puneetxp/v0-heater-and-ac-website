@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { allProducts } from "@/lib/product-data";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = "https://comfortrent-v0.puneetxp.com";
+    const baseUrl = "https://acrentservice.com";
 
     // Static routes
     const routes = [

@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
 import Link from "next/link";
 import { getFallbackImages } from "@/lib/supabase/storage";
+import { getFallbackImageUrl, handleImageError } from "@/lib/image-utils";
+import { useState } from "react";
 
 interface Product {
   id: string | number; // Updated to support both string and number IDs
@@ -25,6 +27,8 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const [imageError, setImageError] = useState(false);
+
   // Determine if it's a cooling or heating product
   const isCooling = product.category.toLowerCase().includes("ac") ||
     product.category.toLowerCase().includes("window") ||
@@ -58,11 +62,18 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardHeader className="p-0">
         <div className="relative h-64 overflow-hidden bg-muted/30">
           <img
-            src={product.image && product.image.trim() !== ""
-              ? product.image
-              : getFallbackImages(product.category)[0]}
+            src={
+              imageError || !product.image || product.image.trim() === ""
+                ? getFallbackImageUrl(product.category)
+                : product.image
+            }
             alt={`${product.name} - ${product.capacity} Rental`}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            onError={() => {
+              setImageError(true);
+            }}
+            loading="lazy"
+            crossOrigin="anonymous"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <Badge

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
         "winter heating solutions",
     ],
     alternates: {
-        canonical: "https://comfortrent-v0.puneetxp.com/heating",
+        canonical: "https://acrentservice.com/heating",
     },
 };
 
@@ -28,13 +28,13 @@ export default function HeatingLayout({
                 "@type": "ListItem",
                 "position": 1,
                 "name": "Home",
-                "item": "https://comfortrent-v0.puneetxp.com",
+                "item": "https://acrentservice.com",
             },
             {
                 "@type": "ListItem",
                 "position": 2,
                 "name": "Heating",
-                "item": "https://comfortrent-v0.puneetxp.com/heating",
+                "item": "https://acrentservice.com/heating",
             },
         ],
     };

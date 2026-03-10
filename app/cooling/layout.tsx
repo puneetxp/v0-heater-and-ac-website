@@ -12,7 +12,7 @@ export const metadata: Metadata = {
         "summer cooling solutions",
     ],
     alternates: {
-        canonical: "https://comfortrent-v0.puneetxp.com/cooling",
+        canonical: "https://acrentservice.com/cooling",
     },
 };
 
@@ -29,13 +29,13 @@ export default function CoolingLayout({
                 "@type": "ListItem",
                 "position": 1,
                 "name": "Home",
-                "item": "https://comfortrent-v0.puneetxp.com",
+                "item": "https://acrentservice.com",
             },
             {
                 "@type": "ListItem",
                 "position": 2,
                 "name": "Cooling",
-                "item": "https://comfortrent-v0.puneetxp.com/cooling",
+                "item": "https://acrentservice.com/cooling",
             },
         ],
     };

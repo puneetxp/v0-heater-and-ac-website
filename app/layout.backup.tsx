@@ -6,14 +6,14 @@ import { AnimatedBackground } from "@/components/animated-background"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "ComfortRent - AC & Heater Rentals | Affordable Climate Control",
+  title: "ACRentService - AC & Heater Rentals | Affordable Climate Control",
   description:
     "Premium AC and heater rental services with flexible monthly plans. Choose from window AC, split AC, and oil heaters. Professional installation included. Rent AC & heaters starting at ₹899/month.",
   generator: "Next.js",
   keywords: ["AC rental", "heater rental", "window AC", "split AC", "oil heater", "climate control rental"],
-  authors: [{ name: "ComfortRent" }],
-  creator: "ComfortRent",
-  publisher: "ComfortRent",
+  authors: [{ name: "ACRentService" }],
+  creator: "ACRentService",
+  publisher: "ACRentService",
   icons: {
     icon: [
       {
@@ -34,16 +34,16 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: "https://comfortrent.com",
-    siteName: "ComfortRent",
-    title: "ComfortRent - Premium AC & Heater Rentals",
+    url: "https://acrentservice.com",
+    siteName: "ACRentService",
+    title: "ACRentService - Premium AC & Heater Rentals",
     description: "Affordable climate control solutions with flexible rental plans. Professional installation & 24/7 support.",
     images: [
       {
-        url: "https://comfortrent.com/og-image.png",
+        url: "https://acrentservice.com/og-image.png",
         width: 1200,
         height: 630,
-        alt: "ComfortRent - AC & Heater Rentals",
+        alt: "ACRentService - AC & Heater Rentals",
       },
     ],
   },

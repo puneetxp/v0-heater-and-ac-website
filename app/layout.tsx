@@ -7,8 +7,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "ComfortRent - AC & Heater Rentals | Premium Climate Control",
-    template: "%s | ComfortRent",
+    default: "ACRentService - AC & Heater Rentals | Premium Climate Control",
+    template: "%s | ACRentService",
   },
   description:
     "Low-cost AC and heater rental services in Delhi, Mumbai, Bangalore, and across India. Flexible monthly plans for window AC, split AC, and oil heaters. Professional installation & maintenance included.",
@@ -22,11 +22,11 @@ export const metadata: Metadata = {
     "Window AC rental",
     "monthly AC rental plans",
     "appliance rentals India",
-    "ComfortRent",
+    "ACRentService",
   ],
-  authors: [{ name: "ComfortRent Team" }],
-  creator: "ComfortRent",
-  publisher: "ComfortRent",
+  authors: [{ name: "ACRentService Team" }],
+  creator: "ACRentService",
+  publisher: "ACRentService",
   icons: {
     icon: [
       {
@@ -47,26 +47,26 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: "https://comfortrent-v0.puneetxp.com",
-    siteName: "ComfortRent",
-    title: "ComfortRent - High-Quality AC & Heater Rentals",
+    url: "https://acrentservice.com",
+    siteName: "ACRentService",
+    title: "ACRentService - High-Quality AC & Heater Rentals",
     description:
       "Affordable monthly rental plans for premium ACs and heaters. Free installation & prompt service included.",
     images: [
       {
-        url: "https://comfortrent-v0.puneetxp.com/og-image.jpg",
+        url: "https://acrentservice.com/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "ComfortRent Climate Control Rentals",
+        alt: "ACRentService Climate Control Rentals",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rent AC & Heaters at Best Prices - ComfortRent",
+    title: "Rent AC & Heaters at Best Prices - ACRentService",
     description:
       "Premium appliance rentals with flexible plans and professional installation. Perfect for seasonal needs.",
-    images: ["https://comfortrent-v0.puneetxp.com/twitter-image.jpg"],
+    images: ["https://acrentservice.com/twitter-image.jpg"],
   },
   robots: {
     index: false,
@@ -81,7 +81,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://comfortrent-v0.puneetxp.com",
+    canonical: "https://acrentservice.com",
   },
   category: "Home Appliances",
 };
@@ -95,11 +95,11 @@ export default function RootLayout({
   const schemaData = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    "@id": "https://comfortrent-v0.puneetxp.com",
-    "name": "ComfortRent",
-    "url": "https://comfortrent-v0.puneetxp.com",
-    "logo": "https://comfortrent-v0.puneetxp.com/logo.png",
-    "image": "https://comfortrent-v0.puneetxp.com/og-image.jpg",
+    "@id": "https://acrentservice.com",
+    "name": "ACRentService",
+    "url": "https://acrentservice.com",
+    "logo": "https://acrentservice.com/logo.png",
+    "image": "https://acrentservice.com/og-image.jpg",
     "telephone": "+91-888-888-8888",
     "description":
       "Professional AC and heater rental services across major Indian cities. We provide window AC, split AC, and premium oil heaters with free installation and maintenance.",
@@ -129,9 +129,9 @@ export default function RootLayout({
       "closes": "20:00",
     },
     "sameAs": [
-      "https://www.facebook.com/comfortrent",
-      "https://twitter.com/comfortrent",
-      "https://www.instagram.com/comfortrent",
+      "https://www.facebook.com/acrentservice",
+      "https://twitter.com/acrentservice",
+      "https://www.instagram.com/acrentservice",
     ],
     "areaServed": ["Delhi", "Mumbai", "Bangalore", "Hyderabad", "Pune"],
     "priceRange": "₹799 - ₹2399",

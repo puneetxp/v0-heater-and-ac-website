@@ -40,7 +40,7 @@ export function Features() {
         <div className="text-center space-y-4 mb-12 md:mb-16 lg:mb-20">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
             Why Choose{" "}
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">ComfortRent</span>
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">ACRentService</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-balance">
             We make renting climate control equipment simple, affordable, and hassle-free.

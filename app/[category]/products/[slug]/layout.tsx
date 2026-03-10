@@ -62,7 +62,7 @@ export async function generateMetadata(
   const description =
     `Rent ${product.name} at just ₹${product.basePrice}/month. High-performance ${product.category} with professional installation, maintenance, and 24/7 support in major cities.`;
   const url =
-    `https://comfortrent-v0.puneetxp.com/${params.category}/products/${params.slug}`;
+    `https://acrentservice.com/${params.category}/products/${params.slug}`;
 
   return {
     title,
@@ -81,11 +81,11 @@ export async function generateMetadata(
       url,
       title,
       description,
-      siteName: "ComfortRent",
+      siteName: "ACRentService",
       type: "website",
       images: [
         {
-          url: `https://comfortrent-v0.puneetxp.com${product.image}`,
+          url: `https://acrentservice.com${product.image}`,
           width: 800,
           height: 600,
           alt: product.name,
@@ -96,7 +96,7 @@ export async function generateMetadata(
       card: "summary_large_image",
       title,
       description,
-      images: [`https://comfortrent-v0.puneetxp.com${product.image}`],
+      images: [`https://acrentservice.com${product.image}`],
     },
   };
 }
