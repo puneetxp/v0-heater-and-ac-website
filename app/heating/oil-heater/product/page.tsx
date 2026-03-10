@@ -7,8 +7,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ArrowLeft, Check, Flame, Zap } from 'lucide-react'
+import { ArrowLeft, Check, Flame, Zap, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
+
+// Fallback image for oil heater
+const FALLBACK_IMAGE = '/api/placeholder?type=oil-heater'
 
 export default function OilHeaterProductPage() {
   const [selectedCapacity, setSelectedCapacity] = useState('9')
@@ -55,8 +59,19 @@ export default function OilHeaterProductPage() {
           <div className="grid lg:grid-cols-2 gap-12 mb-16">
             {/* Product Image */}
             <div className="flex items-center justify-center">
-              <div className="w-full rounded-2xl overflow-hidden bg-gradient-to-br from-orange-100 to-yellow-100 aspect-square flex items-center justify-center">
-                <div className="text-6xl"><Flame className="w-32 h-32 text-orange-600 opacity-20" /></div>
+              <div className="w-full rounded-2xl overflow-hidden bg-gradient-to-br from-orange-100 to-yellow-100 aspect-square flex items-center justify-center relative">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Flame className="w-32 h-32 text-orange-600 opacity-20" />
+                </div>
+                <img 
+                  src={FALLBACK_IMAGE} 
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // If image fails to load, keep fallback icon visible
+                    e.currentTarget.style.display = 'none'
+                  }}
+                />
               </div>
             </div>
 
