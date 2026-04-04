@@ -85,8 +85,9 @@ export default function AdminLoginPage() {
 
     // Safety check for supabase client
     if (!supabase) {
+      console.error("[v0] Supabase client is null - check environment variables");
       setError(
-        "Login system is currently unavailable (Missing configuration).",
+        "Supabase authentication service is not properly configured. Please contact support.",
       );
       setLoading(false);
       return;
