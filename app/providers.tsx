@@ -9,9 +9,16 @@ const SupabaseContext = createContext<ReturnType<typeof createBrowserClient> | n
 export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   const supabase = useMemo(() => {
     try {
-      return createBrowserClient()
+      const client = createBrowserClient()
+      if (client) {
+        console.log("[v0] SupabaseProvider: Client available")
+      } else {
+        console.warn("[v0] SupabaseProvider: createBrowserClient returned null")
+        console.warn("[v0] Check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in environment")
+      }
+      return client
     } catch (error) {
-      console.warn("[v0] Supabase provider initialization failed:", error)
+      console.error("[v0] SupabaseProvider initialization failed:", error)
       return null
     }
   }, [])

@@ -54,13 +54,20 @@ export default function AdminLoginPage() {
 
       try {
         // Try to set via API route for server-side cookie
-        await fetch("/api/auth/set-admin-session", {
+        const sessionResponse = await fetch("/api/auth/set-admin-session", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(adminSession),
         });
+
+        if (!sessionResponse.ok) {
+          const errorData = await sessionResponse.json();
+          setError(errorData.error || "Failed to set session. Please try again.");
+          setLoading(false);
+          return;
+        }
 
         // Store in localStorage as backup
         localStorage.setItem("admin_session", JSON.stringify(adminSession));
@@ -78,8 +85,9 @@ export default function AdminLoginPage() {
 
     // Safety check for supabase client
     if (!supabase) {
+      console.error("[v0] Supabase client is null - check environment variables");
       setError(
-        "Login system is currently unavailable (Missing configuration).",
+        "Supabase authentication service is not properly configured. Please contact support.",
       );
       setLoading(false);
       return;

@@ -79,7 +79,9 @@ export default function LoginPage() {
 
     // Not admin credentials, try Supabase auth
     if (!supabase) {
-      setError("Authentication service is currently unavailable.");
+      console.error("[v0] Supabase client not available in auth/login");
+      console.error("[v0] Check if NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set");
+      setError("Authentication service is not available. Please contact support or use admin credentials.");
       setIsLoading(false);
       return;
     }
@@ -118,7 +120,8 @@ export default function LoginPage() {
     setError(null);
 
     if (!supabase) {
-      setError("Google login is currently unavailable.");
+      console.error("[v0] Supabase not available for Google login");
+      setError("Google authentication is not available. Please try email login or contact support.");
       setIsLoading(false);
       return;
     }
