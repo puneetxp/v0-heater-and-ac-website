@@ -148,7 +148,7 @@ export default function LoginPage() {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
               <Wind className="h-6 w-6 text-white" />
             </div>
-            ComfortRent
+            ACRentService
           </Link>
         </div>
         <Card className="border-gray-200 shadow-xl">
@@ -265,7 +265,7 @@ export default function LoginPage() {
           <p className="text-sm text-blue-800">
             Email:{" "}
             <code className="bg-blue-100 px-2 py-1 rounded font-mono text-xs">
-              admin@comfortrent.com
+              admin@acrentservice.com
             </code>
           </p>
           <p className="text-sm text-blue-800">
