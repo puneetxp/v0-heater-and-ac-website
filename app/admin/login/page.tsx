@@ -37,17 +37,17 @@ export default function AdminLoginPage() {
     const trimmedPassword = password.trim();
 
     // Static admin credentials
-    const STATIC_ADMIN_EMAIL = "admin@acrentservice.com";
+    const STATIC_ADMIN_EMAILS = ["admin@comfortrent.com", "admin@acrentservice.com"];
     const STATIC_ADMIN_PASSWORD = "admin123";
 
     // Check if using static admin credentials
     if (
-      trimmedEmail === STATIC_ADMIN_EMAIL &&
+      STATIC_ADMIN_EMAILS.includes(trimmedEmail) &&
       trimmedPassword === STATIC_ADMIN_PASSWORD
     ) {
       const adminSession = {
         id: "static-admin",
-        email: STATIC_ADMIN_EMAIL,
+        email: trimmedEmail,
         role: "admin",
         loginTime: new Date().toISOString(),
       };

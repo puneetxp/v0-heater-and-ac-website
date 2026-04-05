@@ -114,13 +114,22 @@ export function ProductEditForm({ product, onSaved }: ProductEditFormProps) {
             <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                     <CardTitle className="text-base">Product Details</CardTitle>
-                    <Badge
-                        variant={isAvailable ? "default" : "secondary"}
-                        onClick={() => setIsAvailable(!isAvailable)}
-                        className="cursor-pointer select-none"
-                    >
-                        {isAvailable ? "Available" : "Unavailable"}
-                    </Badge>
+                    <div className="flex items-center gap-3">
+                        <Label
+                            htmlFor="availability-toggle"
+                            className="text-sm text-muted-foreground cursor-pointer"
+                        >
+                            Status:
+                        </Label>
+                        <Badge
+                            id="availability-toggle"
+                            variant={isAvailable ? "default" : "secondary"}
+                            onClick={() => setIsAvailable(!isAvailable)}
+                            className="cursor-pointer select-none px-3 py-1 text-xs"
+                        >
+                            {isAvailable ? "Available" : "Unavailable"}
+                        </Badge>
+                    </div>
                 </div>
             </CardHeader>
 

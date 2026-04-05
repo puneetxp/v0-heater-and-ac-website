@@ -1,5 +1,3 @@
-"use client";
-
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
@@ -7,38 +5,21 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Check, Leaf, Wind, Zap } from "lucide-react";
+import { createServerClient } from "@/lib/supabase/server";
 
-const splitACProducts = [
-  {
-    id: 3,
-    name: "Split AC - 1 Ton",
-    category: "Split AC",
-    capacity: "1 Ton",
-    price: 1499,
-    description: "Perfect for small rooms and apartments",
-    features: ["Inverter Technology", "Sleep Mode", "Auto Clean"],
-  },
-  {
-    id: 4,
-    name: "Split AC - 1.5 Ton",
-    category: "Split AC",
-    capacity: "1.5 Ton",
-    price: 1899,
-    description: "Best for medium-sized rooms",
-    features: ["5-Star Rating", "Smart Wi-Fi", "Turbo Cooling"],
-  },
-  {
-    id: 5,
-    name: "Split AC - 2 Ton",
-    category: "Split AC",
-    capacity: "2 Ton",
-    price: 2399,
-    description: "Ideal for large rooms and offices",
-    features: ["Heavy Duty", "Dual Inverter", "Air Purifier"],
-  },
-];
+export const dynamic = "force-dynamic";
 
-export default function SplitACPage() {
+export default async function SplitACPage() {
+  const supabase = await createServerClient();
+  
+  const { data: dbProducts } = await supabase
+    .from("products")
+    .select("*")
+    .eq("category", "split_ac")
+    .eq("is_available", true);
+
+  const displayProducts = dbProducts || [];
+
   return (
     <main className="min-h-screen flex flex-col bg-white">
       <Header />
@@ -114,69 +95,74 @@ export default function SplitACPage() {
           </h2>
 
           {/* Products Grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {splitACProducts.map((product) => (
-              <Card
-                key={product.id}
-                className="overflow-hidden hover:shadow-2xl transition-all duration-300 border-0 bg-white rounded-2xl shadow-lg"
-              >
-                <div className="h-48 bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Wind className="h-24 w-24 text-blue-300 opacity-20" />
-                  </div>
-                  <Badge className="absolute top-4 right-4 bg-blue-600 text-white">
-                    {product.capacity}
-                  </Badge>
-                </div>
-
-                <CardContent className="p-6 space-y-4">
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {product.name}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {product.description}
-                    </p>
+          {displayProducts.length > 0 ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {displayProducts.map((product) => (
+                <Card
+                  key={product.id}
+                  className="overflow-hidden hover:shadow-2xl transition-all duration-300 border-0 bg-white rounded-2xl shadow-lg"
+                >
+                  <div className="h-48 bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center relative overflow-hidden">
+                    <img 
+                        src={product.image_url || "/premium-split-ac-with-display-panel.jpg"} 
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                    />
+                    <Badge className="absolute top-4 right-4 bg-blue-600 text-white uppercase">
+                      RECENT
+                    </Badge>
                   </div>
 
-                  {/* Features */}
-                  <ul className="space-y-2">
-                    {product.features.map((feature, idx) => (
-                      <li
-                        key={idx}
-                        className="flex items-center gap-2 text-sm text-gray-700"
-                      >
-                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* Price & Button */}
-                  <div className="border-t pt-4 space-y-3">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-bold text-blue-600">
-                        ₹{product.price}
-                      </span>
-                      <span className="text-sm text-gray-600">/month</span>
+                  <CardContent className="p-6 space-y-4">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">
+                        {product.name}
+                      </h3>
+                      <p className="text-sm text-gray-600 line-clamp-2">
+                        {product.description || "Premium inverter split air conditioner."}
+                      </p>
                     </div>
-                    <Button
-                      asChild
-                      className="w-full bg-blue-600 hover:bg-blue-700 h-10"
-                    >
-                      <Link
-                        href={`/product/split-ac-${
-                          product.capacity.replace(/\s+/g, "-").toLowerCase()
-                        }`}
+
+                    {/* Features */}
+                    <ul className="space-y-2">
+                         <li className="flex items-center gap-2 text-sm text-gray-700">
+                          <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                          Inverter Technology
+                        </li>
+                        <li className="flex items-center gap-2 text-sm text-gray-700">
+                          <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                          Smart Wi-Fi Control
+                        </li>
+                    </ul>
+
+                    {/* Price & Button */}
+                    <div className="border-t pt-4 space-y-3">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-bold text-blue-600">
+                          ₹{product.price_per_month}
+                        </span>
+                        <span className="text-sm text-gray-600">/month</span>
+                      </div>
+                      <Button
+                        asChild
+                        className="w-full bg-blue-600 hover:bg-blue-700 h-10"
                       >
-                        View Details
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                        <Link
+                          href={`/cooling/products/${product.name.toLowerCase().replace(/\s+/g, "-")}`}
+                        >
+                          View Details
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed">
+                <p className="text-gray-500">No split AC units are currently available for booking. Please check back soon!</p>
+            </div>
+          )}
         </div>
       </div>
 

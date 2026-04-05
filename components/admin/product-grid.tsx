@@ -29,6 +29,44 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
     const [products, setProducts] = useState(initialProducts);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
+    async function handleToggleAvailability(id: string, currentStatus: boolean) {
+        const newStatus = !currentStatus;
+        try {
+            // Optimistic update
+            setProducts(
+                products.map((p) =>
+                    p.id === id ? { ...p, is_available: newStatus } : p
+                ),
+            );
+
+            // Find current product to get all required fields for the PATCH API
+            const product = products.find((p) => p.id === id);
+            if (!product) return;
+
+            const res = await fetch(`/api/admin/products/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: product.name,
+                    price_per_month: product.price_per_month,
+                    is_available: newStatus,
+                }),
+            });
+
+            if (!res.ok) throw new Error("Failed to update status");
+            router.refresh();
+        } catch (err) {
+            alert("Failed to update availability. Please try again.");
+            console.error(err);
+            // Rollback on error
+            setProducts(
+                products.map((p) =>
+                    p.id === id ? { ...p, is_available: currentStatus } : p
+                ),
+            );
+        }
+    }
+
     async function handleDelete(id: string) {
         if (!confirm("Are you sure you want to delete this product?")) return;
 
@@ -99,6 +137,12 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
                                 variant={product.is_available
                                     ? "default"
                                     : "secondary"}
+                                className="cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() =>
+                                    handleToggleAvailability(
+                                        product.id,
+                                        product.is_available,
+                                    )}
                             >
                                 {product.is_available
                                     ? "Available"

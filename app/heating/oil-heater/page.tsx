@@ -1,5 +1,3 @@
-'use client'
-
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { Button } from '@/components/ui/button'
@@ -7,38 +5,22 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { Flame, Zap, Leaf, Check } from 'lucide-react'
+import { createServerClient } from "@/lib/supabase/server"
 
-const oilHeaterProducts = [
-  {
-    id: 6,
-    name: 'Oil Heater - 7 Fin',
-    category: 'Oil Heater',
-    capacity: '7 Fins',
-    price: 799,
-    description: 'Compact portable heater perfect for small rooms',
-    features: ['Fast Heating', '3 Heat Settings', 'Tip-Over Protection'],
-  },
-  {
-    id: 7,
-    name: 'Oil Heater - 9 Fin',
-    category: 'Oil Heater',
-    capacity: '9 Fins',
-    price: 999,
-    description: 'Ideal heating solution for medium-sized rooms',
-    features: ['Maximum Heat', 'Digital Display', 'Timer Function'],
-  },
-  {
-    id: 8,
-    name: 'Oil Heater - 11 Fin',
-    category: 'Oil Heater',
-    capacity: '11 Fins',
-    price: 1299,
-    description: 'Premium heater for large rooms and offices',
-    features: ['Large Room Coverage', 'Eco Mode', 'Remote Control'],
-  },
-]
+export const dynamic = "force-dynamic";
 
-export default function OilHeaterPage() {
+export default async function OilHeaterPage() {
+  const supabase = await createServerClient();
+  
+  // Fetch live products for this category
+  const { data: dbProducts } = await supabase
+    .from("products")
+    .select("*")
+    .eq("category", "oil_heater")
+    .eq("is_available", true);
+
+  const displayProducts = dbProducts || [];
+
   return (
     <main className="min-h-screen flex flex-col bg-white">
       <Header />
@@ -101,48 +83,58 @@ export default function OilHeaterPage() {
           <h2 className="text-3xl font-bold mb-12 text-gray-900">Choose Your Capacity</h2>
 
           {/* Products Grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {oilHeaterProducts.map((product) => (
-              <Card key={product.id} className="overflow-hidden hover:shadow-2xl transition-all duration-300 border-0 bg-white rounded-2xl shadow-lg">
-                <div className="h-48 bg-gradient-to-br from-orange-100 to-yellow-100 flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Flame className="h-24 w-24 text-orange-300 opacity-20" />
+          {displayProducts.length > 0 ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {displayProducts.map((product) => (
+                <Card key={product.id} className="overflow-hidden hover:shadow-2xl transition-all duration-300 border-0 bg-white rounded-2xl shadow-lg">
+                  <div className="h-48 bg-gradient-to-br from-orange-100 to-yellow-100 flex items-center justify-center relative overflow-hidden">
+                    <img 
+                        src={product.image_url || "/7-fin-oil-heater-radiator-with-wheels.jpg"} 
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                    />
+                    <Badge className="absolute top-4 right-4 bg-orange-600 text-white">New</Badge>
                   </div>
-                  <Badge className="absolute top-4 right-4 bg-orange-600 text-white">{product.capacity}</Badge>
-                </div>
-                
-                <CardContent className="p-6 space-y-4">
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{product.name}</h3>
-                    <p className="text-sm text-gray-600">{product.description}</p>
-                  </div>
-
-                  {/* Features */}
-                  <ul className="space-y-2">
-                    {product.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center gap-2 text-sm text-gray-700">
-                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* Price & Button */}
-                  <div className="border-t pt-4 space-y-3">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-bold text-orange-600">₹{product.price}</span>
-                      <span className="text-sm text-gray-600">/month</span>
+                  
+                  <CardContent className="p-6 space-y-4">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">{product.name}</h3>
+                      <p className="text-sm text-gray-600 line-clamp-2">{product.description || "Premium oil-filled radiator heater."}</p>
                     </div>
-                    <Button asChild className="w-full bg-orange-600 hover:bg-orange-700 h-10">
-                      <Link href={`/product/oil-heater-${product.capacity.replace(/\s+/g, '-').toLowerCase()}`}>
-                        View Details
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+
+                    {/* Features */}
+                    <ul className="space-y-2">
+                       <li className="flex items-center gap-2 text-sm text-gray-700">
+                          <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                          Silent Operation
+                        </li>
+                        <li className="flex items-center gap-2 text-sm text-gray-700">
+                          <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+                          Safety Tip-over Switch
+                        </li>
+                    </ul>
+
+                    {/* Price & Button */}
+                    <div className="border-t pt-4 space-y-3">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-bold text-orange-600">₹{product.price_per_month}</span>
+                        <span className="text-sm text-gray-600">/month</span>
+                      </div>
+                      <Button asChild className="w-full bg-orange-600 hover:bg-orange-700 h-10">
+                        <Link href={`/heating/products/${product.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                          View Details
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed">
+                <p className="text-gray-500">No heaters are currently available for booking. Please check back soon!</p>
+            </div>
+          )}
         </div>
       </div>
 
