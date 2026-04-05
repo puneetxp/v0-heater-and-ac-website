@@ -36,7 +36,7 @@ export default function LoginPage() {
     const trimmedPassword = password.trim();
 
     // Static admin credentials
-    const STATIC_ADMIN_EMAIL = "admin@acrentservice.com";
+    const STATIC_ADMIN_EMAIL = "admin@comfortrent.com";
     const STATIC_ADMIN_PASSWORD = "admin123";
 
     // Check if using static admin credentials

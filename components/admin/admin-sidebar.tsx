@@ -52,8 +52,30 @@ export function AdminSidebar() {
   const router = useRouter()
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push("/admin/login")
+    try {
+      // 1. Clear server-side session cookie via API
+      await fetch("/api/auth/logout", {
+        method: "POST",
+      })
+
+      // 2. Clear local storage markers (works in preview)
+      localStorage.removeItem("admin_session")
+      sessionStorage.removeItem("admin_authenticated")
+
+      // 3. Sign out of Supabase if active
+      if (supabase) {
+        await supabase.auth.signOut()
+      }
+
+      // 4. Redirect to admin login
+      router.push("/admin/login")
+      router.refresh()
+    } catch (err) {
+      console.error("[v0] Error during logout:", err)
+      // Fallback redirect even if API fails
+      localStorage.removeItem("admin_session")
+      router.push("/admin/login")
+    }
   }
 
   return (
