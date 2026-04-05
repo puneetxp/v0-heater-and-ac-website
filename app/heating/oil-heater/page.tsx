@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { Flame, Zap, Leaf, Check } from 'lucide-react'
 import { createServerClient } from "@/lib/supabase/server"
+import { generateProductSlug } from "@/lib/utils"
 
 export const dynamic = "force-dynamic";
 
@@ -121,7 +122,7 @@ export default async function OilHeaterPage() {
                         <span className="text-sm text-gray-600">/month</span>
                       </div>
                       <Button asChild className="w-full bg-orange-600 hover:bg-orange-700 h-10">
-                        <Link href={`/heating/products/${product.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                        <Link href={`/heating/products/${generateProductSlug(product.name)}`}>
                           View Details
                         </Link>
                       </Button>

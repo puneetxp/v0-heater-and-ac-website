@@ -2,6 +2,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { ProductDetailView } from "@/components/product-detail-view";
 import { allProducts } from "@/lib/product-data";
 import { notFound } from "next/navigation";
+import { generateProductSlug } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -29,17 +30,12 @@ export default async function ProductPage(props: {
         .in("category", targetCategories);
 
       if (products) {
-        // Find by generated slug
+        console.log(`[v0] Fetched ${products.length} products for categories:`, targetCategories);
+        // Find by generated slug OR by ID if slug is numeric
         dbProduct = products.find((p) => {
-          // Fallback slug generation logic matching lib/product-data.ts if possible
-          // But DB products might have different naming.
-          const nameSlug = p.name.toLowerCase().replace(/\s+/g, "-");
-          
-          // Recreate the slug logic used in the app
-          const categoryName = p.category.replace("_", " ");
-          const appSlug = `${categoryName.toLowerCase().replace(/\s+/g, "-")}-${p.name.toLowerCase().split("-").pop()?.trim().toLowerCase().replace(/\s+/g, "-")}`;
-          
-          return nameSlug === params.slug || appSlug === params.slug;
+          const nameSlug = generateProductSlug(p.name);
+          console.log(`[v0] Comparing DB: '${nameSlug}' === '${params.slug}' (ID: ${p.id})`);
+          return nameSlug === params.slug || String(p.id) === params.slug;
         });
       }
     }
@@ -57,8 +53,8 @@ export default async function ProductPage(props: {
     const categoryProducts = categoryMap[params.category] || [];
 
     for (const p of categoryProducts) {
-      const productSlug = `${p.category.toLowerCase().replace(/\s+/g, "-")}-${p.capacity.toLowerCase().replace(/\s+/g, "-")}`;
-      if (productSlug === params.slug) {
+      const productSlug = generateProductSlug(p.name);
+      if (productSlug === params.slug || String(p.id) === params.slug) {
         // Convert static product to DB-like format for the component
         dbProduct = {
           id: String(p.id),

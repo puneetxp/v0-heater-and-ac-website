@@ -8,16 +8,23 @@
  */
 export function getFallbackImageUrl(category: string): string {
   const fallbackImages: Record<string, string> = {
-    cooling: '/fallback/cooling-unit.jpg',
-    'window-ac': '/fallback/window-ac.jpg',
-    'split-ac': '/fallback/split-ac.jpg',
-    heating: '/fallback/heating-unit.jpg',
-    'oil-heater': '/fallback/oil-heater.jpg',
-    portable: '/fallback/portable-unit.jpg',
-    default: '/fallback/product-default.jpg'
+    cooling: '/modern-white-window-air-conditioner-unit.jpg',
+    'window-ac': '/modern-white-window-air-conditioner-unit.jpg',
+    'window ac': '/modern-white-window-air-conditioner-unit.jpg',
+    'window_ac': '/modern-white-window-air-conditioner-unit.jpg',
+    'split-ac': '/modern-white-split-air-conditioner-indoor-unit.jpg',
+    'split ac': '/modern-white-split-air-conditioner-indoor-unit.jpg',
+    'split_ac': '/modern-white-split-air-conditioner-indoor-unit.jpg',
+    heating: '/7-fin-oil-heater-radiator-with-wheels.jpg',
+    'oil-heater': '/7-fin-oil-heater-radiator-with-wheels.jpg',
+    'oil heater': '/7-fin-oil-heater-radiator-with-wheels.jpg',
+    'oil_heater': '/7-fin-oil-heater-radiator-with-wheels.jpg',
+    default: '/modern-air-conditioner-and-heater-in-luxury-home-i.jpg'
   }
 
-  return fallbackImages[category.toLowerCase()] || fallbackImages.default
+  // Handle case-insensitive and dash/underscore variations
+  const key = category.toLowerCase().trim();
+  return fallbackImages[key] || fallbackImages.default
 }
 
 /**

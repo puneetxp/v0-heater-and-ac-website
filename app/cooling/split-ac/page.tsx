@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Check, Leaf, Wind, Zap } from "lucide-react";
 import { createServerClient } from "@/lib/supabase/server";
+import { generateProductSlug } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -148,7 +149,7 @@ export default async function SplitACPage() {
                         className="w-full bg-blue-600 hover:bg-blue-700 h-10"
                       >
                         <Link
-                          href={`/cooling/products/${product.name.toLowerCase().replace(/\s+/g, "-")}`}
+                          href={`/cooling/products/${generateProductSlug(product.name)}`}
                         >
                           View Details
                         </Link>
