@@ -27,6 +27,14 @@ export async function PATCH(
         );
     }
 
+    // Reject blob URLs - they're temporary and cannot be persisted
+    if (image_url && typeof image_url === "string" && image_url.startsWith("blob:")) {
+        return NextResponse.json(
+            { error: "Cannot save with temporary blob URL. Please upload an image first." },
+            { status: 400 },
+        );
+    }
+
     const supabase = await createClient();
 
     const { data, error } = await supabase
