@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
+import { createClient } from "@supabase/supabase-js";
 import { checkAdminAccess } from "@/lib/check-admin";
+
+const BUCKET = "product-images";
 
 export async function POST(req: NextRequest) {
     // Check admin access
@@ -22,19 +23,21 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const uploadedUrls: string[] = [];
-        const uploadDir = join(process.cwd(), "public", "uploads", "products");
+        // Initialize Supabase client with service role key (for server-side operations)
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+            process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+        );
 
-        // Ensure upload directory exists
-        try {
-            await mkdir(uploadDir, { recursive: true });
-        } catch (err) {
-            console.error("[upload] Failed to create upload directory:", err);
+        if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+            console.error("[upload] Missing Supabase credentials");
             return NextResponse.json(
-                { error: "Failed to prepare upload directory" },
+                { error: "Storage service not available" },
                 { status: 500 },
             );
         }
+
+        const uploadedUrls: string[] = [];
 
         // Process each file
         for (let i = 0; i < Math.min(files.length, 3); i++) {
@@ -48,15 +51,31 @@ export async function POST(req: NextRequest) {
 
             const buffer = await file.arrayBuffer();
             const ext = file.name.split(".").pop() || "jpg";
-            const filename = `${Date.now()}-${i}.${ext}`;
-            const filepath = join(uploadDir, filename);
+            const path = `products/${Date.now()}-${i}.${ext}`;
 
             try {
-                await writeFile(filepath, Buffer.from(buffer));
-                uploadedUrls.push(`/uploads/products/${filename}`);
+                const { error } = await supabase.storage.from(BUCKET).upload(
+                    path,
+                    new Blob([buffer], { type: file.type }),
+                    {
+                        upsert: false,
+                        contentType: file.type,
+                    },
+                );
+
+                if (error) {
+                    console.error(`[upload] Supabase upload failed for file ${i}:`, error);
+                    continue;
+                }
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from(BUCKET)
+                    .getPublicUrl(path);
+
+                uploadedUrls.push(publicUrl);
                 console.log(`[upload] Successfully uploaded file ${i}`);
             } catch (err) {
-                console.error(`[upload] Failed to write file ${i}:`, err);
+                console.error(`[upload] Failed to upload file ${i}:`, err);
                 continue;
             }
         }
