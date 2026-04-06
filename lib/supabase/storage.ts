@@ -32,43 +32,72 @@ export function getFallbackImages(category?: string): string[] {
 export async function uploadProductImages(
     productId: string,
     files: File[],
-): Promise<string[]> {
+): Promise<{ urls: string[]; error?: string }> {
     const supabase = createBrowserClient();
-    if (!supabase) {
-        console.warn("[storage] Supabase not available, cannot upload images");
-        return [];
-    }
+    
+    // If Supabase is available, try to use it
+    if (supabase) {
+        const uploadedUrls: string[] = [];
 
-    const uploadedUrls: string[] = [];
+        for (let i = 0; i < Math.min(files.length, 3); i++) {
+            const file = files[i];
+            const ext = file.name.split(".").pop() || "jpg";
+            const path = `${productId}/${Date.now()}-${i}.${ext}`;
 
-    for (let i = 0; i < Math.min(files.length, 3); i++) {
-        const file = files[i];
-        const ext = file.name.split(".").pop() || "jpg";
-        const path = `${productId}/${Date.now()}-${i}.${ext}`;
-
-        const { error } = await supabase.storage.from(BUCKET).upload(
-            path,
-            file,
-            {
-                upsert: false,
-                contentType: file.type,
-            },
-        );
-
-        if (error) {
-            console.error(
-                `[storage] Failed to upload image ${i}:`,
-                error.message,
+            const { error } = await supabase.storage.from(BUCKET).upload(
+                path,
+                file,
+                {
+                    upsert: false,
+                    contentType: file.type,
+                },
             );
-            continue;
+
+            if (error) {
+                console.error(
+                    `[storage] Failed to upload image ${i}:`,
+                    error.message,
+                );
+                continue;
+            }
+
+            const { data: { publicUrl } } = supabase.storage.from(BUCKET)
+                .getPublicUrl(path);
+            uploadedUrls.push(publicUrl);
         }
 
-        const { data: { publicUrl } } = supabase.storage.from(BUCKET)
-            .getPublicUrl(path);
-        uploadedUrls.push(publicUrl);
+        if (uploadedUrls.length > 0) {
+            return { urls: uploadedUrls };
+        }
     }
 
-    return uploadedUrls;
+    // Fallback to local storage API
+    console.warn("[storage] Supabase failed or unavailable, using local storage fallback");
+    
+    try {
+        const formData = new FormData();
+        for (const file of files) {
+            formData.append("files", file);
+        }
+
+        const res = await fetch("/api/admin/upload", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            const errorMsg = data.error || `Upload failed with status ${res.status}`;
+            return { urls: [], error: errorMsg };
+        }
+
+        const data = await res.json();
+        return { urls: data.urls || [] };
+    } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : "Unknown error during upload";
+        console.error("[storage] Fallback upload failed:", errorMsg);
+        return { urls: [], error: errorMsg };
+    }
 }
 
 export async function deleteProductImage(path: string): Promise<void> {
