@@ -16,6 +16,8 @@ export async function POST(req: NextRequest) {
         const formData = await req.formData();
         const files = formData.getAll("files") as File[];
 
+        console.log(`[upload] Received ${files.length} files`);
+
         if (!files.length) {
             return NextResponse.json(
                 { error: "No files provided" },
@@ -38,33 +40,44 @@ export async function POST(req: NextRequest) {
         }
 
         const uploadedUrls: string[] = [];
+        const errors: string[] = [];
 
         // Process each file
         for (let i = 0; i < Math.min(files.length, 3); i++) {
             const file = files[i];
 
-            // Validate file
-            if (!file.type.startsWith("image/")) {
-                console.warn(`[upload] File ${i} is not an image, skipping`);
+            console.log(`[upload] Processing file ${i}: name=${file.name}, type=${file.type}, size=${file.size}`);
+
+            // Be more lenient with file type checking - accept any file that looks like it could be an image
+            const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+            const isLikelyImage = 
+                file.type.startsWith("image/") || 
+                ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext);
+
+            if (!isLikelyImage) {
+                const msg = `[upload] File ${i} does not appear to be an image (type: ${file.type}, ext: ${ext}), skipping`;
+                console.warn(msg);
+                errors.push(msg);
                 continue;
             }
 
             const buffer = await file.arrayBuffer();
-            const ext = file.name.split(".").pop() || "jpg";
             const path = `products/${Date.now()}-${i}.${ext}`;
 
             try {
                 const { error } = await supabase.storage.from(BUCKET).upload(
                     path,
-                    new Blob([buffer], { type: file.type }),
+                    new Blob([buffer], { type: file.type || "application/octet-stream" }),
                     {
                         upsert: false,
-                        contentType: file.type,
+                        contentType: file.type || "application/octet-stream",
                     },
                 );
 
                 if (error) {
-                    console.error(`[upload] Supabase upload failed for file ${i}:`, error);
+                    const msg = `[upload] Supabase upload failed for file ${i}: ${error.message}`;
+                    console.error(msg);
+                    errors.push(msg);
                     continue;
                 }
 
@@ -73,16 +86,22 @@ export async function POST(req: NextRequest) {
                     .getPublicUrl(path);
 
                 uploadedUrls.push(publicUrl);
-                console.log(`[upload] Successfully uploaded file ${i}`);
+                console.log(`[upload] Successfully uploaded file ${i}: ${publicUrl}`);
             } catch (err) {
-                console.error(`[upload] Failed to upload file ${i}:`, err);
+                const msg = `[upload] Failed to upload file ${i}: ${err instanceof Error ? err.message : String(err)}`;
+                console.error(msg);
+                errors.push(msg);
                 continue;
             }
         }
 
+        console.log(`[upload] Upload complete: ${uploadedUrls.length} successful, ${errors.length} errors`);
+
         if (!uploadedUrls.length) {
+            const errorDetails = errors.join("; ");
+            console.error(`[upload] All files failed: ${errorDetails}`);
             return NextResponse.json(
-                { error: "Failed to upload any files" },
+                { error: `Failed to upload any files: ${errorDetails}` },
                 { status: 500 },
             );
         }
@@ -91,7 +110,7 @@ export async function POST(req: NextRequest) {
     } catch (err) {
         console.error("[upload] Unexpected error:", err);
         return NextResponse.json(
-            { error: "Internal server error" },
+            { error: `Internal server error: ${err instanceof Error ? err.message : String(err)}` },
             { status: 500 },
         );
     }
