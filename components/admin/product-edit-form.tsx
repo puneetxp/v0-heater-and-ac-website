@@ -56,19 +56,31 @@ export function ProductEditForm({ product, onSaved }: ProductEditFormProps) {
 
             // Upload new files if any were picked
             if (newFiles.length > 0) {
-                const uploaded = await uploadProductImages(
+                const result = await uploadProductImages(
                     product.id,
                     newFiles,
                 );
-                if (uploaded.length > 0) {
+                
+                if (result.error) {
+                    throw new Error(`Image upload failed: ${result.error}`);
+                }
+
+                if (result.urls.length > 0) {
                     // Merge: uploaded images replace the local blob previews from the end
                     const existing = imageUrls.filter((u) =>
                         !u.startsWith("blob:")
                     );
-                    const combined = [...existing, ...uploaded].slice(0, 3);
+                    const combined = [...existing, ...result.urls].slice(0, 3);
                     setImageUrls(combined);
                     finalImageUrl = combined[0];
+                } else {
+                    throw new Error("No files were successfully uploaded");
                 }
+            }
+
+            // Validate that we don't save blob URLs
+            if (finalImageUrl && finalImageUrl.startsWith("blob:")) {
+                throw new Error("Cannot save with temporary blob URL. Please upload an image first.");
             }
 
             // Persist to DB via API route
