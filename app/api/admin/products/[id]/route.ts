@@ -35,7 +35,10 @@ export async function PATCH(
         );
     }
 
-    const supabase = await createClient();
+    // Get a privileged client for admin actions
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const adminClient = createAdminClient();
+    const supabase = adminClient || (await createClient());
 
     const { data, error } = await supabase
         .from("products")
@@ -49,7 +52,14 @@ export async function PATCH(
         })
         .eq("id", id)
         .select()
-        .single();
+        .maybeSingle(); // Better: returning null instead of throwing on not found
+
+    if (!data && !error) {
+        return NextResponse.json(
+            { error: `Product with ID ${id} not found` },
+            { status: 404 },
+        );
+    }
 
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
