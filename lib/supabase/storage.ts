@@ -33,14 +33,19 @@ export async function uploadProductImages(
     productId: string,
     files: File[],
 ): Promise<{ urls: string[]; error?: string }> {
+    console.log(`[storage] uploadProductImages called with ${files.length} files for product ${productId}`);
+    
     const supabase = createBrowserClient();
     
     // If Supabase is available, try to use it
     if (supabase) {
+        console.log("[storage] Supabase client available, attempting upload");
         const uploadedUrls: string[] = [];
 
         for (let i = 0; i < Math.min(files.length, 3); i++) {
             const file = files[i];
+            console.log(`[storage] Processing file ${i}: name=${file.name}, type=${file.type}, size=${file.size}`);
+            
             const ext = file.name.split(".").pop() || "jpg";
             const path = `${productId}/${Date.now()}-${i}.${ext}`;
 
@@ -63,35 +68,44 @@ export async function uploadProductImages(
 
             const { data: { publicUrl } } = supabase.storage.from(BUCKET)
                 .getPublicUrl(path);
+            console.log(`[storage] Supabase upload successful: ${publicUrl}`);
             uploadedUrls.push(publicUrl);
         }
 
         if (uploadedUrls.length > 0) {
+            console.log(`[storage] Supabase upload complete with ${uploadedUrls.length} URLs`);
             return { urls: uploadedUrls };
         }
     }
 
     // Fallback to local storage API
-    console.warn("[storage] Supabase failed or unavailable, using local storage fallback");
+    console.warn("[storage] Supabase failed or unavailable, using fallback upload API");
     
     try {
         const formData = new FormData();
+        console.log(`[storage] Creating FormData with ${files.length} files`);
         for (const file of files) {
+            console.log(`[storage] Adding file to FormData: ${file.name} (${file.type})`);
             formData.append("files", file);
         }
 
+        console.log("[storage] Sending POST request to /api/admin/upload");
         const res = await fetch("/api/admin/upload", {
             method: "POST",
             body: formData,
         });
 
+        console.log(`[storage] Upload API response: ${res.status} ${res.statusText}`);
+
         if (!res.ok) {
             const data = await res.json().catch(() => ({}));
             const errorMsg = data.error || `Upload failed with status ${res.status}`;
+            console.error(`[storage] Upload API error: ${errorMsg}`);
             return { urls: [], error: errorMsg };
         }
 
         const data = await res.json();
+        console.log(`[storage] Upload API success: ${data.urls?.length || 0} URLs returned`);
         return { urls: data.urls || [] };
     } catch (err) {
         const errorMsg = err instanceof Error ? err.message : "Unknown error during upload";
