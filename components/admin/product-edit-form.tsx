@@ -109,9 +109,14 @@ export function ProductEditForm({ product, onSaved }: ProductEditFormProps) {
             setTimeout(() => setStatus("idle"), 2000);
         } catch (err: unknown) {
             setStatus("error");
-            setErrorMessage(
-                err instanceof Error ? err.message : "Unknown error",
-            );
+            let msg = err instanceof Error ? err.message : "Unknown error";
+            
+            // Helpful tip for Supabase configuration
+            if (msg.includes("Supabase configuration is missing")) {
+                msg = "Configuration Error: Supabase credentials are missing in your deployment. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your Vercel project settings.";
+            }
+            
+            setErrorMessage(msg);
         }
     }
 

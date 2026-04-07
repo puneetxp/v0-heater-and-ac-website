@@ -33,85 +33,77 @@ export async function uploadProductImages(
     productId: string,
     files: File[],
 ): Promise<{ urls: string[]; error?: string }> {
-    console.log(`[storage] uploadProductImages called with ${files.length} files for product ${productId}`);
-    
+    const isProduction = process.env.NODE_ENV === "production" || !!process.env.NEXT_PUBLIC_VERCEL_ENV;
     const supabase = createBrowserClient();
     
-    // If Supabase is available, try to use it
+    // 1. Try Supabase if available
     if (supabase) {
-        console.log("[storage] Supabase client available, attempting upload");
         const uploadedUrls: string[] = [];
+        let firstError: string | null = null;
 
         for (let i = 0; i < Math.min(files.length, 3); i++) {
             const file = files[i];
-            console.log(`[storage] Processing file ${i}: name=${file.name}, type=${file.type}, size=${file.size}`);
-            
             const ext = file.name.split(".").pop() || "jpg";
             const path = `${productId}/${Date.now()}-${i}.${ext}`;
 
-            const { error } = await supabase.storage.from(BUCKET).upload(
-                path,
-                file,
-                {
-                    upsert: false,
-                    contentType: file.type,
-                },
-            );
-
-            if (error) {
-                console.error(
-                    `[storage] Failed to upload image ${i}:`,
-                    error.message,
+            try {
+                const { error } = await supabase.storage.from(BUCKET).upload(
+                    path,
+                    file,
+                    {
+                        upsert: false,
+                        contentType: file.type,
+                    },
                 );
-                continue;
-            }
 
-            const { data: { publicUrl } } = supabase.storage.from(BUCKET)
-                .getPublicUrl(path);
-            console.log(`[storage] Supabase upload successful: ${publicUrl}`);
-            uploadedUrls.push(publicUrl);
+                if (error) {
+                    console.error(`[storage] Supabase upload failed:`, error.message);
+                    firstError = error.message;
+                    continue;
+                }
+
+                const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path);
+                uploadedUrls.push(publicUrl);
+            } catch (err: any) {
+                firstError = err.message;
+            }
         }
 
         if (uploadedUrls.length > 0) {
-            console.log(`[storage] Supabase upload complete with ${uploadedUrls.length} URLs`);
             return { urls: uploadedUrls };
         }
+    } else {
+        console.warn("[storage] Supabase environment variables are missing.");
     }
 
-    // Fallback to local storage API
-    console.warn("[storage] Supabase failed or unavailable, using fallback upload API");
-    
+    // 2. Prevent local fallback on read-only filesystems (like Vercel)
+    if (isProduction && !supabase) {
+        return { 
+            urls: [], 
+            error: "Supabase configuration is missing. Local file uploads are not supported in production (Vercel). Please check your Environment Variables in the Vercel dashboard." 
+        };
+    }
+
+    // 3. Fallback to local storage API (only for local dev)
     try {
         const formData = new FormData();
-        console.log(`[storage] Creating FormData with ${files.length} files`);
-        for (const file of files) {
-            console.log(`[storage] Adding file to FormData: ${file.name} (${file.type})`);
-            formData.append("files", file);
-        }
+        files.forEach((file) => formData.append("files", file));
         formData.append("productId", productId);
 
-        console.log("[storage] Sending POST request to /api/admin/upload");
         const res = await fetch("/api/admin/upload", {
             method: "POST",
             body: formData,
         });
 
-        console.log(`[storage] Upload API response: ${res.status} ${res.statusText}`);
-
         if (!res.ok) {
             const data = await res.json().catch(() => ({}));
-            const errorMsg = data.error || `Upload failed with status ${res.status}`;
-            console.error(`[storage] Upload API error: ${errorMsg}`);
-            return { urls: [], error: errorMsg };
+            return { urls: [], error: data.error || `Upload failed (HTTP ${res.status})` };
         }
 
         const data = await res.json();
-        console.log(`[storage] Upload API success: ${data.urls?.length || 0} URLs returned`);
-        return { urls: data.urls || [] };
-    } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : "Unknown error during upload";
-        console.error("[storage] Fallback upload failed:", errorMsg);
-        return { urls: [], error: errorMsg };
+        return { urls: data.urls };
+    } catch (err: any) {
+        return { urls: [], error: "All upload methods failed: " + err.message };
     }
 }
 

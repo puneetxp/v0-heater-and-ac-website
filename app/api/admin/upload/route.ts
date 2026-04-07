@@ -11,6 +11,14 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // 2. Prevent local uploads on Vercel (read-only filesystem)
+    if (!!process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.NODE_ENV === "production") {
+        return NextResponse.json(
+            { error: "Local file storage is not supported in production (Vercel). Please configure Supabase Storage in your project settings." },
+            { status: 400 },
+        );
+    }
+
     // 2. Process FormData
     try {
         const formData = await req.formData();
