@@ -14,11 +14,12 @@ export async function POST(req: NextRequest) {
 
     try {
         const formData = await req.formData();
-        const files = formData.getAll("files") as File[];
+        const files = Array.from(formData.getAll("files")) as File[];
 
         console.log(`[upload] Received ${files.length} files`);
 
-        if (!files.length) {
+        if (!files || files.length === 0) {
+            console.error("[upload] No files found in FormData. Available keys:", Array.from(formData.keys()));
             return NextResponse.json(
                 { error: "No files provided" },
                 { status: 400 },
