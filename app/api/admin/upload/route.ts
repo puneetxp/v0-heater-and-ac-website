@@ -115,13 +115,3 @@ export async function POST(req: NextRequest) {
         );
     }
 }
-
-        return NextResponse.json({ urls });
-    } catch (err: any) {
-        console.error("[upload-api] Local upload failed:", err);
-        return NextResponse.json(
-            { error: "Local upload failed: " + err.message },
-            { status: 500 },
-        );
-    }
-}
