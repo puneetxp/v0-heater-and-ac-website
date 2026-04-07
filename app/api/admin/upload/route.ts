@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import { checkAdminAccess } from "@/lib/check-admin";
+
+const BUCKET = "product-images";
 
 export async function POST(req: NextRequest) {
     // 1. Authenticate admin
@@ -12,66 +15,102 @@ export async function POST(req: NextRequest) {
     // 2. Process FormData
     try {
         const formData = await req.formData();
-        const files = formData.getAll("files") as File[];
-        const productId = formData.get("productId") as string;
+        const files = Array.from(formData.getAll("files")) as File[];
 
-        if (!files || files.length === 0 || !productId) {
+        console.log(`[upload] Received ${files.length} files`);
+
+        if (!files || files.length === 0) {
             return NextResponse.json(
-                { error: "files and productId are required" },
+                { error: "No files provided" },
                 { status: 400 },
             );
         }
 
-        const urls: string[] = [];
-        let supabaseError: string | null = null;
+        // Initialize Supabase client with service role key (for server-side operations)
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-        // 3. Try Supabase Storage first (via admin client to bypass RLS)
-        const { createAdminClient } = await import("@/lib/supabase/admin");
-        const adminClient = createAdminClient();
+        if (!supabaseUrl || !supabaseKey) {
+            console.error("[upload] Missing Supabase credentials");
+            return NextResponse.json(
+                { error: "Configuration Error: Supabase credentials are missing in your deployment. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your Vercel project settings." },
+                { status: 500 },
+            );
+        }
 
-        if (adminClient) {
-            const BUCKET = "product-images";
-            for (let i = 0; i < Math.min(files.length, 3); i++) {
-                const file = files[i];
-                const bytes = await file.arrayBuffer();
-                const buffer = Buffer.from(bytes);
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        const uploadedUrls: string[] = [];
+        const errors: string[] = [];
 
-                const ext = file.name.split(".").pop() || "jpg";
-                const path = `${productId}/${Date.now()}-${i}.${ext}`;
+        // Process each file
+        for (let i = 0; i < Math.min(files.length, 3); i++) {
+            const file = files[i];
 
-                const { data, error } = await adminClient.storage
-                    .from(BUCKET)
-                    .upload(path, buffer, {
-                        contentType: file.type,
-                        upsert: true,
-                    });
+            console.log(`[upload] Processing file ${i}: name=${file.name}, type=${file.type}, size=${file.size}`);
 
-                if (error) {
-                    console.error("[upload-api] Supabase storage upload failed:", error);
-                    supabaseError = error.message;
-                    break;
-                }
+            // Be more lenient with file type checking
+            const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+            const isLikelyImage =
+                file.type.startsWith("image/") ||
+                ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext);
 
-                const { data: { publicUrl } } = adminClient.storage
-                    .from(BUCKET)
-                    .getPublicUrl(path);
-                urls.push(publicUrl);
+            if (!isLikelyImage) {
+                const msg = `File ${i} does not appear to be an image (type: ${file.type}, ext: ${ext}), skipping`;
+                console.warn(`[upload] ${msg}`);
+                errors.push(msg);
+                continue;
             }
 
-            if (urls.length > 0 && !supabaseError) {
-                return NextResponse.json({ urls });
+            const buffer = await file.arrayBuffer();
+            const path = `products/${Date.now()}-${i}.${ext}`;
+
+            try {
+                const { error } = await supabase.storage.from(BUCKET).upload(
+                    path,
+                    new Blob([buffer], { type: file.type || "application/octet-stream" }),
+                    {
+                        upsert: false,
+                        contentType: file.type || "application/octet-stream",
+                    },
+                );
+
+                if (error) {
+                    const msg = `Supabase upload failed for file ${i}: ${error.message}`;
+                    console.error(`[upload] ${msg}`);
+                    errors.push(msg);
+                    continue;
+                }
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from(BUCKET)
+                    .getPublicUrl(path);
+
+                uploadedUrls.push(publicUrl);
+                console.log(`[upload] Successfully uploaded file ${i}: ${publicUrl}`);
+            } catch (err) {
+                const msg = `Failed to upload file ${i}: ${err instanceof Error ? err.message : String(err)}`;
+                console.error(`[upload] ${msg}`);
+                errors.push(msg);
+                continue;
             }
         }
 
-        // 4. Return error if Supabase failed or is not configured
-        return NextResponse.json(
-            { error: supabaseError || "Supabase Storage is not configured. Cloud storage is required to save images." },
-            { status: 500 },
-        );
+        console.log(`[upload] Upload complete: ${uploadedUrls.length} successful, ${errors.length} errors`);
+
+        if (!uploadedUrls.length) {
+            const errorDetails = errors.join("; ");
+            console.error(`[upload] All files failed: ${errorDetails}`);
+            return NextResponse.json(
+                { error: `Failed to upload any files: ${errorDetails}` },
+                { status: 500 },
+            );
+        }
+
+        return NextResponse.json({ urls: uploadedUrls });
     } catch (err: any) {
-        console.error("[upload-api] Upload process failed:", err);
+        console.error("[upload] Unexpected error:", err);
         return NextResponse.json(
-            { error: "Upload process failed: " + err.message },
+            { error: `Internal server error: ${err.message}` },
             { status: 500 },
         );
     }
