@@ -18,6 +18,12 @@ export function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1">
             <Link
+              href="/#products"
+              className="text-sm font-semibold text-foreground/70 hover:text-primary px-3 py-2 rounded-md transition-all duration-300 hover:bg-primary/5"
+            >
+              Products
+            </Link>
+            <Link
               href="/cooling"
               className="text-sm font-semibold text-foreground/70 hover:text-primary px-3 py-2 rounded-md transition-all duration-300 hover:bg-primary/5"
             >

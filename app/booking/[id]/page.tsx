@@ -10,9 +10,39 @@ export default async function BookingPage({ params }: { params: Promise<{ id: st
   const supabase = await createClient()
 
   // Get product details
-  const { data: product, error: productError } = await supabase.from("products").select("*").eq("id", id).single()
+  let product = null;
+  const { data: dbProduct, error: productError } = await supabase
+    .from("products")
+    .select("*")
+    .eq("id", id)
+    .single();
+    
+  if (dbProduct) {
+    product = dbProduct;
+  } else {
+    // Fallback to static allProducts data
+    const { allProducts } = await import("@/lib/product-data");
+    const staticProducts = [
+      ...allProducts.windowAC,
+      ...allProducts.splitAC,
+      ...allProducts.oilHeater,
+    ];
+    const staticMatch = staticProducts.find((p) => String(p.id) === id);
+    
+    if (staticMatch) {
+      product = {
+        id: String(staticMatch.id),
+        name: staticMatch.name,
+        category: staticMatch.category.toLowerCase().replace(/\s+/g, "_"),
+        price_per_month: staticMatch.price,
+        description: staticMatch.description,
+        image_url: staticMatch.image,
+        is_available: true,
+      };
+    }
+  }
 
-  if (productError || !product) {
+  if (!product) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50">
         <Header />
@@ -32,7 +62,7 @@ export default async function BookingPage({ params }: { params: Promise<{ id: st
           </div>
         </main>
       </div>
-    )
+    );
   }
 
   // Check if user is logged in

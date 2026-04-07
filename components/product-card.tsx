@@ -10,9 +10,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
 import Link from "next/link";
-import { getFallbackImages } from "@/lib/supabase/storage";
 import { getFallbackImageUrl, handleImageError } from "@/lib/image-utils";
 import { useState } from "react";
+import { generateProductSlug } from "@/lib/utils";
 
 interface Product {
   id: string | number; // Updated to support both string and number IDs
@@ -38,19 +38,10 @@ export function ProductCard({ product }: ProductCardProps) {
   const isHeating = product.category.toLowerCase().includes("heater") ||
     product.category.toLowerCase().includes("oil");
 
-  // Generate hierarchical SEO-friendly URL with category
-  const generateCleanUrl = () => {
-    // Determine parent category from product type
-    const parentCategory = product.category.includes("Oil")
-      ? "heating"
-      : "cooling";
-    const slug = `${product.category.toLowerCase().replace(/\s+/g, "-")}-${
-      product.capacity.toLowerCase().replace(/\s+/g, "-")
-    }`;
-    return `/${parentCategory}/products/${slug}`;
-  };
-
-  const detailsUrl = generateCleanUrl();
+  // Generate hierarchical SEO-friendly URL using centralized utility
+  const slug = generateProductSlug(product.name);
+  const parentCategory = isHeating ? "heating" : "cooling";
+  const detailsUrl = `/${parentCategory}/products/${slug}`;
 
   // Select badge color based on category
   const badgeColor = isCooling
