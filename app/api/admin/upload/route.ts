@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
 import { checkAdminAccess } from "@/lib/check-admin";
 
 export async function POST(req: NextRequest) {
@@ -9,14 +7,6 @@ export async function POST(req: NextRequest) {
         await checkAdminAccess();
     } catch {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // 2. Prevent local uploads on Vercel (read-only filesystem)
-    if (!!process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.NODE_ENV === "production") {
-        return NextResponse.json(
-            { error: "Local file storage is not supported in production (Vercel). Please configure Supabase Storage in your project settings." },
-            { status: 400 },
-        );
     }
 
     // 2. Process FormData
@@ -32,33 +22,56 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const uploadDir = join(process.cwd(), "public", "uploads", "products", productId);
-        
-        // Ensure directory exists
-        await mkdir(uploadDir, { recursive: true });
-
         const urls: string[] = [];
+        let supabaseError: string | null = null;
 
-        for (let i = 0; i < Math.min(files.length, 3); i++) {
-            const file = files[i];
-            const bytes = await file.arrayBuffer();
-            const buffer = Buffer.from(bytes);
+        // 3. Try Supabase Storage first (via admin client to bypass RLS)
+        const { createAdminClient } = await import("@/lib/supabase/admin");
+        const adminClient = createAdminClient();
 
-            const ext = file.name.split(".").pop() || "jpg";
-            const fileName = `${Date.now()}-${i}.${ext}`;
-            const path = join(uploadDir, fileName);
+        if (adminClient) {
+            const BUCKET = "product-images";
+            for (let i = 0; i < Math.min(files.length, 3); i++) {
+                const file = files[i];
+                const bytes = await file.arrayBuffer();
+                const buffer = Buffer.from(bytes);
 
-            await writeFile(path, buffer);
-            
-            // Public URL
-            urls.push(`/uploads/products/${productId}/${fileName}`);
+                const ext = file.name.split(".").pop() || "jpg";
+                const path = `${productId}/${Date.now()}-${i}.${ext}`;
+
+                const { data, error } = await adminClient.storage
+                    .from(BUCKET)
+                    .upload(path, buffer, {
+                        contentType: file.type,
+                        upsert: true,
+                    });
+
+                if (error) {
+                    console.error("[upload-api] Supabase storage upload failed:", error);
+                    supabaseError = error.message;
+                    break;
+                }
+
+                const { data: { publicUrl } } = adminClient.storage
+                    .from(BUCKET)
+                    .getPublicUrl(path);
+                urls.push(publicUrl);
+            }
+
+            if (urls.length > 0 && !supabaseError) {
+                return NextResponse.json({ urls });
+            }
         }
 
-        return NextResponse.json({ urls });
-    } catch (err: any) {
-        console.error("[upload-api] Local upload failed:", err);
+        // 4. Return error if Supabase failed or is not configured
         return NextResponse.json(
-            { error: "Local upload failed: " + err.message },
+            { error: supabaseError || "Supabase Storage is not configured. Cloud storage is required to save images." },
+            { status: 500 },
+        );
+    } catch (err: any) {
+        console.error("[upload-api] Upload process failed:", err);
+        return NextResponse.json(
+            { error: "Upload process failed: " + err.message },
             { status: 500 },
         );
     }

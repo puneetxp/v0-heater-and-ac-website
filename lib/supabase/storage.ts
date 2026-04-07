@@ -76,15 +76,7 @@ export async function uploadProductImages(
         console.warn("[storage] Supabase environment variables are missing.");
     }
 
-    // 2. Prevent local fallback on read-only filesystems (like Vercel)
-    if (isProduction && !supabase) {
-        return { 
-            urls: [], 
-            error: "Supabase configuration is missing. Local file uploads are not supported in production (Vercel). Please check your Environment Variables in the Vercel dashboard." 
-        };
-    }
-
-    // 3. Fallback to local storage API (only for local dev)
+    // 2. Try Server-side Upload API (more reliable as it uses the Service Role)
     try {
         const formData = new FormData();
         files.forEach((file) => formData.append("files", file));
@@ -95,13 +87,13 @@ export async function uploadProductImages(
             body: formData,
         });
 
+        const data = await res.json().catch(() => ({}));
+
         if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            return { urls: [], error: data.error || `Upload failed (HTTP ${res.status})` };
+            return { urls: [], error: data.error || `Cloud upload failed (HTTP ${res.status})` };
         }
 
-        const data = await res.json();
-        return { urls: data.urls };
+        return { urls: data.urls || [] };
     } catch (err: any) {
         return { urls: [], error: "All upload methods failed: " + err.message };
     }
