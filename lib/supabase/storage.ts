@@ -88,6 +88,7 @@ export async function uploadProductImages(
             console.log(`[storage] Adding file to FormData: ${file.name} (${file.type})`);
             formData.append("files", file);
         }
+        formData.append("productId", productId);
 
         console.log("[storage] Sending POST request to /api/admin/upload");
         const res = await fetch("/api/admin/upload", {
