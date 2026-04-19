@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, Package, Calendar, Receipt, Users, Settings, LogOut, Shield, Tags } from "lucide-react"
+import { LayoutDashboard, Package, Calendar, Receipt, Users, Settings, LogOut, Shield, Tags, Database } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useSupabaseClient } from "@/lib/hooks/use-supabase"
 import { useRouter } from "next/navigation"
@@ -38,6 +38,11 @@ const navItems = [
     title: "Users",
     href: "/admin/users",
     icon: Users,
+  },
+  {
+    title: "Intax Integration",
+    href: "/admin/intax",
+    icon: Database,
   },
   {
     title: "Settings",
