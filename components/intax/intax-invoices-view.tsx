@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { OptionalFieldsToggle } from "./optional-fields-toggle";
 import { Loader2, AlertCircle } from "lucide-react";
-import type { Invoice } from "@/lib/intax/types";
+import type { ApiInvoice } from "@/lib/intax/types";
 
 export function IntaxInvoicesView() {
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [invoices, setInvoices] = useState<ApiInvoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [visibleFields, setVisibleFields] = useState<string[]>([

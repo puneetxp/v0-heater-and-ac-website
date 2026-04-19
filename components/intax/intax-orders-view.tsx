@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { OptionalFieldsToggle } from "./optional-fields-toggle";
 import { Loader2, AlertCircle } from "lucide-react";
-import type { Order } from "@/lib/intax/types";
+import type { ApiOrder } from "@/lib/intax/types";
 
 export function IntaxOrdersView() {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<ApiOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [visibleFields, setVisibleFields] = useState<string[]>([
