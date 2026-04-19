@@ -41,6 +41,21 @@ Each section (Products, Invoices, Orders) has an "Show Optional Fields" toggle t
 
 ### Available Sections
 
+#### Leads (CRM)
+- Manage all your sales leads and prospects
+- Create new leads with name, phone, email, and status
+- Track lead status: new, contacted, qualified, closed
+- Add notes to track lead interactions
+- Toggle optional fields: phone, email, notes, status, book_id
+- Direct dialing and email links for quick contact
+
+#### Chat Sessions
+- View all WhatsApp and chat integrations
+- Track chat session status (open/closed)
+- Link chat sessions to specific leads for CRM tracking
+- Monitor which agent is handling which conversation
+- Toggle optional fields: channel, channel_id, user_id, book_id
+
 #### Products
 - View all products from your Intax system
 - Display product details, categories, pricing, and inventory

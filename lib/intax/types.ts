@@ -112,6 +112,44 @@ export interface ApiUnit extends APIBaseModel {
 }
 
 // ============================================
+// CRM & Lead Management
+// ============================================
+
+export interface ApiLead extends APIBaseModel {
+  name: string | null;
+  phone: string | null;
+  email: string | null;
+  status: string; // default: 'new'
+  notes: string | null;
+  book_id: number | null;
+}
+
+export interface ApiChatSession extends APIBaseModel {
+  status: string; // default: 'open'
+  channel: string; // default: 'whatsapp'
+  channel_id: string | null; // Remote ID e.g., external WhatsApp phone mapping
+  user_id: number | null; // Agent resolving it
+  lead_id: number | null; // Bound CRM trace
+  book_id: number | null;
+}
+
+export interface ApiChatMessage extends APIBaseModel {
+  message: string;
+  sender_type: string; // 'agent', 'lead', 'bot'
+  remote_message_id: string | null;
+  chat_session_id: number | null;
+}
+
+export interface ApiKey extends APIBaseModel {
+  name: string;
+  key_value: string | null;
+  provider: string; // 'whatsapp', 'custom', 'stripe', etc.
+  metadata: string | null; // Extended JSON schema payload bridging API ids
+  last_used_at: string | null;
+  book_id: number | null;
+}
+
+// ============================================
 // Purchasing, Sales, and Invoicing
 // ============================================
 
