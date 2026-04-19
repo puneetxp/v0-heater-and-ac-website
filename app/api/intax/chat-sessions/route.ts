@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { intaxClient } from "@/lib/intax/client";
+import { intaxGetAll, intaxCreate } from "@/lib/intax/client";
 import type { ApiChatSession } from "@/lib/intax/types";
 import { checkAdminAccess } from "@/lib/check-admin";
 
@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     }
 
     try {
-        const sessions = await intaxClient.getAll<ApiChatSession>("chat_session");
+        const sessions = await intaxGetAll<ApiChatSession>("chat_session");
         return NextResponse.json(sessions);
     } catch (error: any) {
         console.error("[intax-chat] Error fetching chat sessions:", error);
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const session = await intaxClient.create<ApiChatSession>("chat_session", body);
+        const session = await intaxCreate<ApiChatSession>("chat_session", body);
         return NextResponse.json(session, { status: 201 });
     } catch (error: any) {
         console.error("[intax-chat] Error creating chat session:", error);

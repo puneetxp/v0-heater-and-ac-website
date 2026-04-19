@@ -1,19 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkAdminAccess } from "@/lib/check-admin";
-import { intaxClient } from "@/lib/intax/client";
+import { intaxGetAll, intaxCreate } from "@/lib/intax/client";
+import type { ApiProduct } from "@/lib/intax/types";
 
 export async function GET(req: NextRequest) {
   try {
     await checkAdminAccess();
 
-    const { searchParams } = new URL(req.url);
-    const limit = searchParams.get("limit") || "100";
-    const offset = searchParams.get("offset") || "0";
-
-    const products = await intaxClient.read("products", {
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-    });
+    const products = await intaxGetAll<ApiProduct>("products");
 
     return NextResponse.json({ success: true, data: products });
   } catch (error) {
@@ -30,7 +24,7 @@ export async function POST(req: NextRequest) {
     await checkAdminAccess();
 
     const body = await req.json();
-    const product = await intaxClient.create("products", body);
+    const product = await intaxCreate<ApiProduct>("products", body);
 
     return NextResponse.json({ success: true, data: product });
   } catch (error) {
