@@ -5,10 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { OptionalFieldsToggle } from "./optional-fields-toggle";
 import { Loader2, AlertCircle } from "lucide-react";
-import type { Product } from "@/lib/intax/types";
+import type { ApiProduct } from "@/lib/intax/types";
 
 export function IntaxProductsView() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [visibleFields, setVisibleFields] = useState<string[]>([

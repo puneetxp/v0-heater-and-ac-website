@@ -6,7 +6,7 @@ import type { ApiLead } from "@/lib/intax/types";
 import { OptionalFieldsToggle } from "./optional-fields-toggle";
 import { AlertCircle, Loader2, Plus, Phone, Mail, Trash2 } from "lucide-react";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+const fetcher = (url: string) => fetch(url).then((r) => r.json()).then((data) => Array.isArray(data) ? data : data.data || []);
 
 interface LeadFieldsState {
   phone: boolean;
