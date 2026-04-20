@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { OptionalFieldsToggle } from "./optional-fields-toggle";
 import { Loader2, AlertCircle } from "lucide-react";
 import type { ApiInvoice } from "@/lib/intax/types";
 
@@ -96,12 +95,7 @@ export function IntaxInvoicesView() {
         </Button>
       </div>
 
-      <OptionalFieldsToggle
-        allFields={allFields}
-        visibleFields={visibleFields}
-        onToggle={handleToggle}
-        title="Show Optional Fields"
-      />
+
 
       {invoices.length === 0 ? (
         <p className="text-center text-slate-500 py-8">No invoices found</p>
@@ -129,7 +123,7 @@ export function IntaxInvoicesView() {
                       className="px-4 py-3 text-sm text-slate-700"
                     >
                       {renderFieldValue(
-                        invoice[field as keyof Invoice],
+                        invoice[field as keyof ApiInvoice],
                       )}
                     </td>
                   ))}

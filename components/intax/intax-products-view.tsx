@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { OptionalFieldsToggle } from "./optional-fields-toggle";
 import { Loader2, AlertCircle } from "lucide-react";
 import type { ApiProduct } from "@/lib/intax/types";
 
@@ -96,12 +95,7 @@ export function IntaxProductsView() {
         </Button>
       </div>
 
-      <OptionalFieldsToggle
-        allFields={allFields}
-        visibleFields={visibleFields}
-        onToggle={handleToggle}
-        title="Show Optional Fields"
-      />
+
 
       {products.length === 0 ? (
         <p className="text-center text-slate-500 py-8">No products found</p>
