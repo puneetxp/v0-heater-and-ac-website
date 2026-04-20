@@ -45,7 +45,7 @@ export async function intaxRequest<T extends APIBaseModel>(
     const requestHeaders: Record<string, string> = {
       'Content-Type': 'text/plain;charset=UTF-8',
       'Accept': 'application/json',
-      'X-API-Key': INTAX_API_KEY,
+      'Authorization': `Bearer ${INTAX_API_KEY}`,
       ...headers,
     };
 
