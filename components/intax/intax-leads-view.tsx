@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import useSWR from "swr";
 import type { ApiLead } from "@/lib/intax/types";
-import { OptionalFieldsToggle } from "./optional-fields-toggle";
 import { AlertCircle, Loader2, Plus, Phone, Mail, Trash2 } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json()).then((data) => Array.isArray(data) ? data : data.data || []);
@@ -146,13 +145,7 @@ export function IntaxLeadsView() {
         </button>
       </div>
 
-      {/* Optional Fields Toggle */}
-      <OptionalFieldsToggle
-        fields={showFields}
-        onToggle={(field) =>
-          setShowFields((prev) => ({ ...prev, [field]: !prev[field] }))
-        }
-      />
+
 
       {/* Leads Table */}
       <div className="rounded-lg border overflow-hidden">
