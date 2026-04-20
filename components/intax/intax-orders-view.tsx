@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { OptionalFieldsToggle } from "./optional-fields-toggle";
 import { Loader2, AlertCircle } from "lucide-react";
 import type { ApiOrder } from "@/lib/intax/types";
 
@@ -96,12 +95,7 @@ export function IntaxOrdersView() {
         </Button>
       </div>
 
-      <OptionalFieldsToggle
-        allFields={allFields}
-        visibleFields={visibleFields}
-        onToggle={handleToggle}
-        title="Show Optional Fields"
-      />
+
 
       {orders.length === 0 ? (
         <p className="text-center text-slate-500 py-8">No orders found</p>
