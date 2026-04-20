@@ -1,12 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import useSWR from "swr";
+import { useState, useEffect } from "react";
 import type { ApiChatSession } from "@/lib/intax/types";
-import { OptionalFieldsToggle } from "./optional-fields-toggle";
+import { intaxGetAll } from "@/lib/intax/client";
 import { AlertCircle, Loader2, MessageSquare } from "lucide-react";
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json()).then((data) => Array.isArray(data) ? data : data.data || []);
 
 interface ChatFieldsState {
   channel: boolean;
@@ -17,11 +14,9 @@ interface ChatFieldsState {
 }
 
 export function IntaxChatSessionsView() {
-  const { data: sessions, error, isLoading } = useSWR<ApiChatSession[]>(
-    "/api/intax/chat-sessions",
-    fetcher,
-    { revalidateOnFocus: false, dedupingInterval: 60000 }
-  );
+  const [sessions, setSessions] = useState<ApiChatSession[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   const [showFields, setShowFields] = useState<ChatFieldsState>({
     channel: true,
@@ -30,6 +25,22 @@ export function IntaxChatSessionsView() {
     lead_id: true,
     book_id: false,
   });
+
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        setIsLoading(true);
+        const data = await intaxGetAll<ApiChatSession>("chat_session");
+        setSessions(data || []);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error("Failed to fetch chat sessions"));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSessions();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -66,14 +77,6 @@ export function IntaxChatSessionsView() {
 
   return (
     <div className="space-y-6">
-      {/* Optional Fields Toggle */}
-      <OptionalFieldsToggle
-        fields={showFields}
-        onToggle={(field) =>
-          setShowFields((prev) => ({ ...prev, [field]: !prev[field] }))
-        }
-      />
-
       {/* Chat Sessions Table */}
       <div className="rounded-lg border overflow-hidden">
         <div className="overflow-x-auto">
