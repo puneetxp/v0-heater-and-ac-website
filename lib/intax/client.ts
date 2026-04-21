@@ -5,7 +5,8 @@
 
 import type { APIBaseModel, ModelNames } from './types';
 
-const INTAX_BASE_URL = 'https://intax.in/api';
+// INTAX_API should contain the full base URL (e.g., https://intax.in/api)
+const INTAX_BASE_URL = process.env.INTAX_API || 'https://intax.in/api';
 const INTAX_API_KEY = process.env.INTAX_API || '';
 
 export interface IntaxRequestOptions {
@@ -78,12 +79,15 @@ export async function intaxRequest<T extends APIBaseModel>(
 }
 
 /**
- * Generic GET all records
+ * Generic GET all records for a book
  */
 export async function intaxGetAll<T extends APIBaseModel>(
   model: ModelNames,
+  bookId?: number,
 ): Promise<T[]> {
-  const endpoint = `/islogin/${model}`;
+  const endpoint = bookId 
+    ? `/islogin/book/${bookId}/${model}` 
+    : `/islogin/${model}`;
   const result = await intaxRequest<T>(endpoint, { method: 'GET' });
   return Array.isArray(result) ? result : [];
 }
@@ -94,8 +98,11 @@ export async function intaxGetAll<T extends APIBaseModel>(
 export async function intaxGetById<T extends APIBaseModel>(
   model: ModelNames,
   id: number,
+  bookId?: number,
 ): Promise<T | null> {
-  const endpoint = `/islogin/${model}/${id}`;
+  const endpoint = bookId 
+    ? `/islogin/book/${bookId}/${model}/${id}` 
+    : `/islogin/${model}/${id}`;
   const result = await intaxRequest<T>(endpoint, { method: 'GET' });
   return Array.isArray(result) ? null : result || null;
 }
@@ -106,8 +113,11 @@ export async function intaxGetById<T extends APIBaseModel>(
 export async function intaxCreate<T extends APIBaseModel>(
   model: ModelNames,
   data: Omit<T, keyof APIBaseModel>,
+  bookId?: number,
 ): Promise<T | null> {
-  const endpoint = `/islogin/${model}`;
+  const endpoint = bookId 
+    ? `/islogin/book/${bookId}/${model}` 
+    : `/islogin/${model}`;
   const result = await intaxRequest<T>(endpoint, {
     method: 'POST',
     body: data,
@@ -122,8 +132,11 @@ export async function intaxUpdate<T extends APIBaseModel>(
   model: ModelNames,
   id: number,
   data: Partial<Omit<T, keyof APIBaseModel>>,
+  bookId?: number,
 ): Promise<T | null> {
-  const endpoint = `/islogin/${model}/${id}`;
+  const endpoint = bookId 
+    ? `/islogin/book/${bookId}/${model}/${id}` 
+    : `/islogin/${model}/${id}`;
   const result = await intaxRequest<T>(endpoint, {
     method: 'PATCH',
     body: data,
@@ -137,8 +150,11 @@ export async function intaxUpdate<T extends APIBaseModel>(
 export async function intaxDelete<T extends APIBaseModel>(
   model: ModelNames,
   id: number,
+  bookId?: number,
 ): Promise<T | null> {
-  const endpoint = `/islogin/${model}/${id}`;
+  const endpoint = bookId 
+    ? `/islogin/book/${bookId}/${model}/${id}` 
+    : `/islogin/${model}/${id}`;
   const result = await intaxRequest<T>(endpoint, { method: 'DELETE' });
   return Array.isArray(result) ? null : result || null;
 }
@@ -149,8 +165,11 @@ export async function intaxDelete<T extends APIBaseModel>(
 export async function intaxWhere<T extends APIBaseModel>(
   model: ModelNames,
   filters: Record<string, any>,
+  bookId?: number,
 ): Promise<T[]> {
-  const endpoint = `/islogin/${model}/where`;
+  const endpoint = bookId 
+    ? `/islogin/book/${bookId}/${model}/where` 
+    : `/islogin/${model}/where`;
   const result = await intaxRequest<T>(endpoint, {
     method: 'POST',
     body: filters,
