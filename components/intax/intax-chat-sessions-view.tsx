@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import type { ApiChatSession } from "@/lib/intax/types";
 import { intaxGetAll } from "@/lib/intax/client";
-import { AlertCircle, Loader2, MessageSquare } from "lucide-react";
+import { AlertCircle, Loader2, MessageSquare, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ChatFieldsState {
   channel: boolean;
@@ -14,33 +16,19 @@ interface ChatFieldsState {
 }
 
 export function IntaxChatSessionsView() {
-  const [sessions, setSessions] = useState<ApiChatSession[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { data: sessions, error, isLoading, mutate } = useSWR<ApiChatSession[]>(
+    "intax_chat_sessions",
+    () => intaxGetAll<ApiChatSession>("chat_session"),
+    { revalidateOnFocus: false, dedupingInterval: 60000 }
+  );
 
-  const [showFields, setShowFields] = useState<ChatFieldsState>({
+  const [showFields] = useState<ChatFieldsState>({
     channel: true,
     channel_id: false,
     user_id: false,
     lead_id: true,
     book_id: false,
   });
-
-  useEffect(() => {
-    const fetchSessions = async () => {
-      try {
-        setIsLoading(true);
-        const data = await intaxGetAll<ApiChatSession>("chat_session");
-        setSessions(data || []);
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error("Failed to fetch chat sessions"));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSessions();
-  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -69,6 +57,10 @@ export function IntaxChatSessionsView() {
           <div>
             <h3 className="font-semibold text-destructive">Error Loading Chat Sessions</h3>
             <p className="text-sm text-destructive/80 mt-1">{error.message}</p>
+            <Button size="sm" variant="outline" onClick={() => mutate()} className="mt-2">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
           </div>
         </div>
       </div>
@@ -77,6 +69,14 @@ export function IntaxChatSessionsView() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Chat Sessions</h2>
+        <Button onClick={() => mutate()} variant="outline" size="sm">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Refresh
+        </Button>
+      </div>
+
       {/* Chat Sessions Table */}
       <div className="rounded-lg border overflow-hidden">
         <div className="overflow-x-auto">
@@ -106,8 +106,8 @@ export function IntaxChatSessionsView() {
             <tbody className="divide-y">
               {sessions && sessions.length > 0 ? (
                 sessions.map((session) => (
-                  <tr key={session.id} className="hover:bg-muted/50">
-                    <td className="px-4 py-3 text-xs text-muted-foreground">
+                  <tr key={session.id} className="hover:bg-muted/50 transition-colors">
+                    <td className="px-4 py-3 text-xs text-muted-foreground font-mono">
                       #{session.id}
                     </td>
                     <td className="px-4 py-3">
@@ -162,7 +162,7 @@ export function IntaxChatSessionsView() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                  <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
                     No chat sessions yet
                   </td>
                 </tr>
@@ -174,3 +174,4 @@ export function IntaxChatSessionsView() {
     </div>
   );
 }
+

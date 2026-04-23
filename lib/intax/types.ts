@@ -121,6 +121,11 @@ export interface ApiLead extends APIBaseModel {
   email: string | null;
   status: string; // default: 'new'
   notes: string | null;
+  company: string | null;
+  priority: string | null;
+  source: string | null;
+  last_contacted_at: string | null;
+  assigned_to: number | null;
   book_id: number | null;
 }
 
@@ -130,6 +135,7 @@ export interface ApiChatSession extends APIBaseModel {
   channel_id: string | null; // Remote ID e.g., external WhatsApp phone mapping
   user_id: number | null; // Agent resolving it
   lead_id: number | null; // Bound CRM trace
+  party_id: number | null;
   book_id: number | null;
 }
 
@@ -140,7 +146,13 @@ export interface ApiChatMessage extends APIBaseModel {
   chat_session_id: number | null;
 }
 
-export interface ApiKey extends APIBaseModel {
+export interface ApiValueAsset extends APIBaseModel {
+  name: string;
+  category_asset_id: number;
+  product_id: number;
+}
+
+export interface ApiApiKey extends APIBaseModel {
   name: string;
   key_value: string | null;
   provider: string; // 'whatsapp', 'custom', 'stripe', etc.
@@ -448,9 +460,14 @@ export interface ApiPhoto extends APIBaseModel {
 export interface ApiUser extends APIBaseModel {
   name: string;
   email: string;
-  password_hash: string;
+  phone: string | null;
+  google_id: string | null;
+  facebook_id: string | null;
+  password: string | null;
+  password_reset_token: string | null;
+  password_reset_expires_at: string | null;
+  telegram_id: string | null;
   status: string;
-  book_id: number;
 }
 
 export interface ApiRole extends APIBaseModel {
@@ -461,13 +478,6 @@ export interface ApiRole extends APIBaseModel {
 export interface ApiActiveRole extends APIBaseModel {
   user_id: number;
   role_id: number;
-}
-
-export interface ApiApiKey extends APIBaseModel {
-  key: string;
-  user_id: number;
-  status: string;
-  last_used_at: string | null;
 }
 
 export interface ApiPasskey extends APIBaseModel {
@@ -513,7 +523,10 @@ export type AllAPIModels =
   | ApiPhoto
   | ApiUser
   | ApiRole
-  | ApiApiKey;
+  | ApiApiKey
+  | ApiChatSession
+  | ApiChatMessage
+  | ApiValueAsset;
 
 export type ModelNames =
   | 'account'
@@ -521,6 +534,8 @@ export type ModelNames =
   | 'account_type_company'
   | 'account_attribute'
   | 'account_attribute_value'
+  | 'chat_session'
+  | 'chat_message'
   | 'bill'
   | 'invoice'
   | 'invoice_item'
@@ -539,6 +554,7 @@ export type ModelNames =
   | 'product_version'
   | 'product_compatible'
   | 'value_product'
+  | 'value_asset'
   | 'category'
   | 'category_product'
   | 'category_asset'
@@ -571,4 +587,5 @@ export type ModelNames =
   | 'role'
   | 'active_role'
   | 'api_key'
+  | 'lead'
   | 'passkey';

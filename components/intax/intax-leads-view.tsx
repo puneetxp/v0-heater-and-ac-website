@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import useSWR from "swr";
 import type { ApiLead } from "@/lib/intax/types";
+import { intaxGetAll, intaxCreate, intaxUpdate, intaxDelete } from "@/lib/intax/client";
 import { AlertCircle, Loader2, Plus, Phone, Mail, Trash2 } from "lucide-react";
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json()).then((data) => Array.isArray(data) ? data : data.data || []);
 
 interface LeadFieldsState {
   phone: boolean;
@@ -17,8 +16,8 @@ interface LeadFieldsState {
 
 export function IntaxLeadsView() {
   const { data: leads, error, isLoading, mutate } = useSWR<ApiLead[]>(
-    "/api/intax/leads",
-    fetcher,
+    "intax_leads",
+    () => intaxGetAll<ApiLead>("lead"),
     { revalidateOnFocus: false, dedupingInterval: 60000 }
   );
 
@@ -48,15 +47,10 @@ export function IntaxLeadsView() {
 
     setIsCreating(true);
     try {
-      const res = await fetch("/api/intax/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newLead),
-      });
+      const res = await intaxCreate<ApiLead>("lead", newLead);
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to create lead");
+      if (!res) {
+        throw new Error("Failed to create lead");
       }
 
       setNewLead({ name: "", phone: "", email: "", status: "new", notes: "" });
@@ -65,6 +59,27 @@ export function IntaxLeadsView() {
       alert(`Error: ${error.message}`);
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const handleUpdateStatus = async (id: number, newStatus: string) => {
+    try {
+      const res = await intaxUpdate<ApiLead>("lead", id, { status: newStatus });
+      if (!res) throw new Error("Failed to update status");
+      mutate();
+    } catch (error: any) {
+      alert(`Error updating status: ${error.message}`);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this lead?")) return;
+    try {
+      const res = await intaxDelete<ApiLead>("lead", id);
+      if (!res) throw new Error("Failed to delete lead");
+      mutate();
+    } catch (error: any) {
+      alert(`Error deleting lead: ${error.message}`);
     }
   };
 
@@ -168,6 +183,7 @@ export function IntaxLeadsView() {
                   <th className="px-4 py-3 text-left font-semibold">Notes</th>
                 )}
                 <th className="px-4 py-3 text-left font-semibold">Created</th>
+                <th className="px-4 py-3 text-right font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -210,9 +226,16 @@ export function IntaxLeadsView() {
                     )}
                     {showFields.status && (
                       <td className="px-4 py-3">
-                        <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700">
-                          {lead.status}
-                        </span>
+                        <select
+                          value={lead.status}
+                          onChange={(e) => handleUpdateStatus(lead.id, e.target.value)}
+                          className="px-2 py-1 text-xs font-medium rounded-md border-0 bg-blue-50 text-blue-700 cursor-pointer hover:bg-blue-100 outline-none ring-1 ring-blue-200"
+                        >
+                          <option value="new">New</option>
+                          <option value="contacted">Contacted</option>
+                          <option value="qualified">Qualified</option>
+                          <option value="closed">Closed</option>
+                        </select>
                       </td>
                     )}
                     {showFields.notes && (
@@ -223,11 +246,20 @@ export function IntaxLeadsView() {
                     <td className="px-4 py-3 text-xs text-muted-foreground">
                       {new Date(lead.created_at).toLocaleDateString()}
                     </td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        onClick={() => handleDelete(lead.id)}
+                        className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                        title="Delete Lead"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                  <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
                     No leads yet
                   </td>
                 </tr>
