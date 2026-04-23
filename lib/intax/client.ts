@@ -13,6 +13,8 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // INTAX_API should contain the full base URL (e.g., https://intax.in/api)
 const INTAX_BASE_URL = process.env.INTAX_API || 'https://intax.in/api';
+const INTAX_API_KEY = process.env.NEXT_PUBLIC_INTAX_API_KEY || process.env.INTAX_API_KEY;
+const INTAX_BOOK_ID = process.env.NEXT_PUBLIC_INTAX_BOOK_ID || process.env.INTAX_BOOK_ID;
 
 export interface IntaxRequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
@@ -30,6 +32,16 @@ interface IntaxErrorResponse {
  * Get active Intax API config from database
  */
 async function getIntaxConfig(): Promise<ApiConfig | null> {
+  // Check if environment variables are set (priority)
+  if (INTAX_API_KEY) {
+    return {
+      api_key: INTAX_API_KEY,
+      book_id: INTAX_BOOK_ID ? parseInt(INTAX_BOOK_ID) : undefined,
+      provider: 'intax',
+      enabled: true,
+    } as ApiConfig;
+  }
+
   // Check cache first
   if (cachedApiConfig && Date.now() - cacheTime < CACHE_DURATION) {
     return cachedApiConfig;
@@ -259,6 +271,8 @@ export async function intaxWhere<T extends APIBaseModel>(
 /**
  * Check if API is configured
  */
-export function isIntaxConfigured(): boolean {
-  return !!INTAX_API_KEY;
+export async function isIntaxConfigured(): Promise<boolean> {
+  if (INTAX_API_KEY) return true;
+  const config = await getIntaxConfig();
+  return !!(config && config.api_key);
 }

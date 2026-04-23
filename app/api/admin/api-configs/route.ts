@@ -10,16 +10,28 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  try {
+    const { searchParams } = new URL(req.url);
+    const provider = searchParams.get("provider");
+    const enabled = searchParams.get("enabled");
+
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL || "",
       process.env.SUPABASE_SERVICE_ROLE_KEY || "",
     );
 
-    const { data, error } = await supabase
-      .from("api_configs")
-      .select("*")
-      .order("created_at", { ascending: false });
+    let query = supabase.from("api_configs").select("*");
+
+    if (provider) {
+      query = query.eq("provider", provider);
+    }
+
+    if (enabled === "true") {
+      query = query.eq("enabled", true);
+    } else if (enabled === "false") {
+      query = query.eq("enabled", false);
+    }
+
+    const { data, error } = await query.order("created_at", { ascending: false });
 
     if (error) {
       console.error("[api-configs] Query error:", error);
