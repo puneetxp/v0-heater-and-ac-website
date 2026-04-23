@@ -1,11 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import useSWR from "swr";
 import type { ApiLead } from "@/lib/intax/types";
+import { intaxGetAll, intaxCreate } from "@/lib/intax/client";
 import { AlertCircle, Loader2, Plus, Phone, Mail, Trash2 } from "lucide-react";
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json()).then((data) => Array.isArray(data) ? data : data.data || []);
 
 interface LeadFieldsState {
   phone: boolean;
@@ -16,11 +14,9 @@ interface LeadFieldsState {
 }
 
 export function IntaxLeadsView() {
-  const { data: leads, error, isLoading, mutate } = useSWR<ApiLead[]>(
-    "/api/intax/leads",
-    fetcher,
-    { revalidateOnFocus: false, dedupingInterval: 60000 }
-  );
+  const [leads, setLeads] = useState<ApiLead[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [showFields, setShowFields] = useState<LeadFieldsState>({
     phone: true,
@@ -39,6 +35,23 @@ export function IntaxLeadsView() {
   });
 
   const [isCreating, setIsCreating] = useState(false);
+
+  useEffect(() => {
+    fetchLeads();
+  }, []);
+
+  const fetchLeads = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await intaxGetAll<ApiLead>("lead");
+      setLeads(data || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch leads");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCreate = async () => {
     if (!newLead.name) {

@@ -1,0 +1,1 @@
+export const intax = "https://intax.in";
