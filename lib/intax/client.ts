@@ -4,10 +4,15 @@
  */
 
 import type { APIBaseModel, ModelNames } from './types';
+import type { ApiConfig } from '@/lib/types/api-config';
+
+// Cache for API config to avoid repeated database queries
+let cachedApiConfig: ApiConfig | null = null;
+let cacheTime = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // INTAX_API should contain the full base URL (e.g., https://intax.in/api)
 const INTAX_BASE_URL = process.env.INTAX_API || 'https://intax.in/api';
-const INTAX_API_KEY = process.env.INTAX_API || '';
 
 export interface IntaxRequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
@@ -19,6 +24,39 @@ interface IntaxErrorResponse {
   error?: string;
   message?: string;
   status?: number;
+}
+
+/**
+ * Get active Intax API config from database
+ */
+async function getIntaxConfig(): Promise<ApiConfig | null> {
+  // Check cache first
+  if (cachedApiConfig && Date.now() - cacheTime < CACHE_DURATION) {
+    return cachedApiConfig;
+  }
+
+  try {
+    // Fetch from local API endpoint that retrieves from database
+    const response = await fetch('/api/admin/api-configs?provider=intax&enabled=true');
+    
+    if (!response.ok) {
+      console.error('[intax] Failed to fetch API config:', response.status);
+      return null;
+    }
+
+    const configs = await response.json() as ApiConfig[];
+    
+    if (configs && configs.length > 0) {
+      cachedApiConfig = configs[0];
+      cacheTime = Date.now();
+      return cachedApiConfig;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('[intax] Error fetching API config:', error);
+    return null;
+  }
 }
 
 /**
@@ -34,11 +72,15 @@ export async function intaxRequest<T extends APIBaseModel>(
     headers = {},
   } = options;
 
-  // Validate API key
-  if (!INTAX_API_KEY) {
-    console.error('[intax] INTAX_API environment variable is not set');
+  // Get API config from database (includes API key and book_id)
+  const config = await getIntaxConfig();
+  
+  if (!config || !config.api_key) {
+    console.error('[intax] No active Intax API config found. Please configure in API Settings.');
     return null;
   }
+
+  const apiKey = config.api_key;
 
   const url = `${INTAX_BASE_URL}${endpoint}`;
 
@@ -46,7 +88,7 @@ export async function intaxRequest<T extends APIBaseModel>(
     const requestHeaders: Record<string, string> = {
       'Content-Type': 'text/plain;charset=UTF-8',
       'Accept': 'application/json',
-      'Authorization': `Bearer ${INTAX_API_KEY}`,
+      'Authorization': `Bearer ${apiKey}`,
       ...headers,
     };
 
@@ -85,8 +127,15 @@ export async function intaxGetAll<T extends APIBaseModel>(
   model: ModelNames,
   bookId?: number,
 ): Promise<T[]> {
-  const endpoint = bookId 
-    ? `/islogin/book/${bookId}/${model}` 
+  // Use provided bookId or fetch from config
+  let finalBookId = bookId;
+  if (!finalBookId) {
+    const config = await getIntaxConfig();
+    finalBookId = config?.book_id;
+  }
+
+  const endpoint = finalBookId 
+    ? `/islogin/book/${finalBookId}/${model}` 
     : `/islogin/${model}`;
   const result = await intaxRequest<T>(endpoint, { method: 'GET' });
   return Array.isArray(result) ? result : [];
@@ -100,8 +149,14 @@ export async function intaxGetById<T extends APIBaseModel>(
   id: number,
   bookId?: number,
 ): Promise<T | null> {
-  const endpoint = bookId 
-    ? `/islogin/book/${bookId}/${model}/${id}` 
+  let finalBookId = bookId;
+  if (!finalBookId) {
+    const config = await getIntaxConfig();
+    finalBookId = config?.book_id;
+  }
+
+  const endpoint = finalBookId 
+    ? `/islogin/book/${finalBookId}/${model}/${id}` 
     : `/islogin/${model}/${id}`;
   const result = await intaxRequest<T>(endpoint, { method: 'GET' });
   return Array.isArray(result) ? null : result || null;
@@ -115,8 +170,14 @@ export async function intaxCreate<T extends APIBaseModel>(
   data: Omit<T, keyof APIBaseModel>,
   bookId?: number,
 ): Promise<T | null> {
-  const endpoint = bookId 
-    ? `/islogin/book/${bookId}/${model}` 
+  let finalBookId = bookId;
+  if (!finalBookId) {
+    const config = await getIntaxConfig();
+    finalBookId = config?.book_id;
+  }
+
+  const endpoint = finalBookId 
+    ? `/islogin/book/${finalBookId}/${model}` 
     : `/islogin/${model}`;
   const result = await intaxRequest<T>(endpoint, {
     method: 'POST',
@@ -134,8 +195,14 @@ export async function intaxUpdate<T extends APIBaseModel>(
   data: Partial<Omit<T, keyof APIBaseModel>>,
   bookId?: number,
 ): Promise<T | null> {
-  const endpoint = bookId 
-    ? `/islogin/book/${bookId}/${model}/${id}` 
+  let finalBookId = bookId;
+  if (!finalBookId) {
+    const config = await getIntaxConfig();
+    finalBookId = config?.book_id;
+  }
+
+  const endpoint = finalBookId 
+    ? `/islogin/book/${finalBookId}/${model}/${id}` 
     : `/islogin/${model}/${id}`;
   const result = await intaxRequest<T>(endpoint, {
     method: 'PATCH',
@@ -152,8 +219,14 @@ export async function intaxDelete<T extends APIBaseModel>(
   id: number,
   bookId?: number,
 ): Promise<T | null> {
-  const endpoint = bookId 
-    ? `/islogin/book/${bookId}/${model}/${id}` 
+  let finalBookId = bookId;
+  if (!finalBookId) {
+    const config = await getIntaxConfig();
+    finalBookId = config?.book_id;
+  }
+
+  const endpoint = finalBookId 
+    ? `/islogin/book/${finalBookId}/${model}/${id}` 
     : `/islogin/${model}/${id}`;
   const result = await intaxRequest<T>(endpoint, { method: 'DELETE' });
   return Array.isArray(result) ? null : result || null;
@@ -167,8 +240,14 @@ export async function intaxWhere<T extends APIBaseModel>(
   filters: Record<string, any>,
   bookId?: number,
 ): Promise<T[]> {
-  const endpoint = bookId 
-    ? `/islogin/book/${bookId}/${model}/where` 
+  let finalBookId = bookId;
+  if (!finalBookId) {
+    const config = await getIntaxConfig();
+    finalBookId = config?.book_id;
+  }
+
+  const endpoint = finalBookId 
+    ? `/islogin/book/${finalBookId}/${model}/where` 
     : `/islogin/${model}/where`;
   const result = await intaxRequest<T>(endpoint, {
     method: 'POST',
