@@ -22,6 +22,19 @@ export async function GET(req: NextRequest) {
       .order("created_at", { ascending: false });
 
     if (error) {
+      console.error("[api-configs] Query error:", error);
+      
+      // If table doesn't exist, return helpful message
+      if (error.code === 'PGRST116' || error.message?.includes('relation')) {
+        return NextResponse.json(
+          { 
+            error: "API configurations table not initialized. Please contact administrator to run database migrations.",
+            code: 'TABLE_NOT_FOUND'
+          },
+          { status: 503 },
+        );
+      }
+      
       return NextResponse.json(
         { error: error.message },
         { status: 500 },
@@ -59,6 +72,18 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (error) {
+      console.error("[api-configs] Insert error:", error);
+      
+      if (error.code === 'PGRST116' || error.message?.includes('relation')) {
+        return NextResponse.json(
+          { 
+            error: "API configurations table not initialized. Please contact administrator to run database migrations.",
+            code: 'TABLE_NOT_FOUND'
+          },
+          { status: 503 },
+        );
+      }
+      
       return NextResponse.json(
         { error: error.message },
         { status: 500 },
