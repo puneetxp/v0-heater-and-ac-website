@@ -63,6 +63,28 @@ export function IntaxServicesView() {
     }
   };
 
+  const [syncingId, setSyncingId] = useState<number | null>(null);
+
+  const handleSync = async (service: ApiService, plan: ApiServicePlan, price: ApiServicePlanPrice) => {
+    setSyncingId(price.id);
+    try {
+      const res = await fetch("/api/admin/intax/sync/service", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ service, plan, price }),
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Sync failed");
+      
+      alert(`Successfully ${data.action} product: ${data.product.name}`);
+    } catch (error: any) {
+      alert(`Sync error: ${error.message}`);
+    } finally {
+      setSyncingId(null);
+    }
+  };
+
   const isLoading = servicesLoading || plansLoading || pricesLoading || attributesLoading || attributeValuesLoading;
   const error = servicesError || plansError || pricesError || attributesError || attributeValuesError;
 
@@ -183,10 +205,24 @@ export function IntaxServicesView() {
                                   <p className="text-[10px] text-slate-400 italic px-2">No pricing configured</p>
                                 ) : (
                                   planPrices.map(price => (
-                                    <div key={price.id} className="flex flex-col p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
+                                    <div key={price.id} className="group/price relative flex flex-col p-3 bg-white rounded-xl border border-slate-100 shadow-sm hover:border-blue-200 transition-all">
                                       <div className="flex justify-between items-center mb-1">
                                         <span className="font-bold text-slate-700 text-xs">{price.name || "Default Tier"}</span>
-                                        <span className="font-black text-blue-600 text-sm">₹{price.amount.toLocaleString()}</span>
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-black text-blue-600 text-sm">₹{price.amount.toLocaleString()}</span>
+                                          <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-6 w-6 opacity-0 group-hover/price:opacity-100 transition-opacity text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleSync(service, plan, price);
+                                            }}
+                                            disabled={syncingId === price.id}
+                                          >
+                                            {syncingId === price.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                                          </Button>
+                                        </div>
                                       </div>
                                       <div className="flex items-center justify-between text-[10px] text-slate-500">
                                         <div className="flex gap-2">
