@@ -45,49 +45,97 @@ export async function POST(req: NextRequest) {
       updated_at: new Date().toISOString(),
     };
 
-    // Upsert by name and category (or if you have a specific column for intax_id, use that)
-    // For now, we'll try to find by name first
-    const { data: existing } = await supabase
+    // 1. Sync to Products table
+    const { data: existingProduct, error: fetchError } = await supabase
       .from("products")
       .select("id")
       .eq("name", plan.name)
       .eq("category", category)
-      .single();
+      .maybeSingle();
 
-    let result;
-    if (existing) {
-      result = await supabase
+    if (fetchError) {
+      console.error("[intax-sync] Product fetch error:", fetchError);
+      throw new Error(`Failed to check existing product: ${fetchError.message}`);
+    }
+
+    if (existingProduct) {
+      const { error: updateError } = await supabase
         .from("products")
         .update(productData)
-        .eq("id", existing.id)
-        .select()
-        .single();
+        .eq("id", existingProduct.id);
+      
+      if (updateError) {
+        console.error("[intax-sync] Product update error:", updateError);
+        throw new Error(`Failed to update product: ${updateError.message}`);
+      }
     } else {
-      result = await supabase
+      const { error: insertError } = await supabase
         .from("products")
         .insert({
           ...productData,
-          id: `intax_${plan.id}`, // Custom string ID or let UUID handle it? 
-          // If the table uses UUID, this will fail. Let's see the schema.
           created_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
+        });
+
+      if (insertError) {
+        console.error("[intax-sync] Product insert error:", insertError);
+        throw new Error(`Failed to create product: ${insertError.message}`);
+      }
     }
 
-    if (result.error) {
-      console.error("[intax-sync] DB Error:", result.error);
-      return NextResponse.json({ error: result.error.message }, { status: 500 });
+    // 2. Sync to Seasonal Plans table
+    let season = "year_round";
+    if (category === "oil_heater") season = "winter";
+    else if (category === "split_ac" || category === "window_ac") season = "summer";
+
+    const planData = {
+      name: `${plan.name} - ${price.name || "Default"}`,
+      season: season,
+      description: `${service.name}: ${plan.name} (${price.name || "Standard"})`,
+      base_price: Number(price.amount), // Ensure it's a number
+      pricing_per_unit: Number(price.amount),
+      duration_months: Number(price.month) || 1,
+      discount_percentage: 0,
+      is_active: plan.enable === 1,
+      start_month: season === "winter" ? 10 : 4,
+      end_month: season === "winter" ? 3 : 9,
+    };
+
+    const { data: existingPlan, error: planFetchError } = await supabase
+      .from("seasonal_plans")
+      .select("id")
+      .eq("name", planData.name)
+      .maybeSingle();
+
+    if (planFetchError) {
+      console.error("[intax-sync] Plan fetch error:", planFetchError);
+    }
+
+    if (existingPlan) {
+      const { error: planUpdateError } = await supabase
+        .from("seasonal_plans")
+        .update(planData)
+        .eq("id", existingPlan.id);
+      
+      if (planUpdateError) console.error("[intax-sync] Plan update error:", planUpdateError);
+    } else {
+      const { error: planInsertError } = await supabase
+        .from("seasonal_plans")
+        .insert(planData);
+      
+      if (planInsertError) console.error("[intax-sync] Plan insert error:", planInsertError);
     }
 
     return NextResponse.json({ 
       success: true, 
-      product: result.data,
-      action: existing ? "updated" : "created"
+      action: "synced",
+      target: "Products & Seasonal Plans"
     });
 
   } catch (error: any) {
     console.error("[intax-sync] Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ 
+      error: error.message || "Internal server error",
+      details: error.details || null
+    }, { status: 500 });
   }
 }

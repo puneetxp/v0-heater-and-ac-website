@@ -80,6 +80,7 @@ export function IntaxServicesView() {
   };
 
   const [syncingId, setSyncingId] = useState<number | null>(null);
+  const [syncingServiceId, setSyncingServiceId] = useState<number | null>(null);
 
   const handleSync = async (service: ApiService, plan: ApiServicePlan, price: ApiServicePlanPrice) => {
     setSyncingId(price.id);
@@ -93,12 +94,38 @@ export function IntaxServicesView() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Sync failed");
       
-      alert(`Successfully ${data.action} product: ${data.product.name}`);
+      alert(`Successfully synced: ${plan.name}`);
     } catch (error: any) {
       alert(`Sync error: ${error.message}`);
     } finally {
       setSyncingId(null);
     }
+  };
+
+  const handleSyncService = async (service: ApiService, servicePlans: ApiServicePlan[]) => {
+    setSyncingServiceId(service.id);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const plan of servicePlans) {
+      const planPrices = prices?.filter(pr => pr.service_plan_id === plan.id && pr.enable === 1) || [];
+      for (const price of planPrices) {
+        try {
+          const res = await fetch("/api/admin/intax/sync/service", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ service, plan, price }),
+          });
+          if (res.ok) successCount++;
+          else failCount++;
+        } catch {
+          failCount++;
+        }
+      }
+    }
+
+    alert(`Sync completed for ${service.name}.\nSuccess: ${successCount}\nFailed: ${failCount}`);
+    setSyncingServiceId(null);
   };
 
   const isLoading = servicesLoading || plansLoading || pricesLoading || attributesLoading || attributeValuesLoading;
@@ -175,9 +202,22 @@ export function IntaxServicesView() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8 gap-2 text-blue-600 border-blue-100 hover:bg-blue-50"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSyncService(service, servicePlans);
+                        }}
+                        disabled={syncingServiceId === service.id}
+                      >
+                        {syncingServiceId === service.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                        <span className="hidden sm:inline">Sync All to Site</span>
+                      </Button>
+                      <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="text-slate-400 hover:text-red-600 h-8 w-8"
+                        className="h-8 w-8 text-slate-400 hover:text-red-600"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDeleteService(service.id);
