@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { checkAdminAccess } from "@/lib/check-admin";
 
 export async function POST(req: NextRequest) {
@@ -16,7 +15,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required data" }, { status: 400 });
     }
 
-    const supabase = await createClient();
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const supabase = createAdminClient();
+
+    if (!supabase) {
+      return NextResponse.json({ error: "Admin client not available" }, { status: 500 });
+    }
 
     // Map Intax data to website product schema
     // We use a combination of service name and plan name as a unique identifier if possible,
