@@ -197,20 +197,33 @@ export function IntaxServicesView() {
                       <p className="text-center text-sm text-slate-500 py-4 italic">No plans defined for this service</p>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {servicePlans.map(plan => {
+                        {/* Group plans by name to handle duplicates from backend */}
+                        {Object.values(servicePlans.reduce((acc, plan) => {
+                          if (!acc[plan.name]) {
+                            acc[plan.name] = { ...plan, mergedPrices: [], mergedAttrValues: [] };
+                          }
+                          // Fetch prices for this specific plan record
                           const planPrices = prices?.filter(pr => pr.service_plan_id === plan.id && pr.enable === 1) || [];
+                          acc[plan.name].mergedPrices.push(...planPrices);
+                          
                           const planAttrValues = attributeValues?.filter(v => v.service_plan_id === plan.id && v.enable === 1) || [];
+                          acc[plan.name].mergedAttrValues.push(...planAttrValues);
+                          
+                          return acc;
+                        }, {} as Record<string, any>)).map((groupedPlan: any) => {
+                          // Deduplicate prices by amount and month to be even cleaner
+                          const uniquePrices = Array.from(new Map(groupedPlan.mergedPrices.map((p: any) => [`${p.amount}-${p.month}`, p])).values());
                           
                           return (
-                            <div key={plan.id} className="flex flex-col border rounded-2xl p-5 bg-slate-50/30 hover:bg-slate-50/60 transition-all border-slate-100 shadow-sm">
+                            <div key={groupedPlan.name} className="flex flex-col border rounded-2xl p-5 bg-slate-50/30 hover:bg-slate-50/60 transition-all border-slate-100 shadow-sm">
                               <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-2">
                                   <div className="p-1.5 bg-white rounded-md border border-slate-200">
                                     <ListTree className="h-4 w-4 text-blue-600" />
                                   </div>
                                   <div>
-                                    <h4 className="font-bold text-slate-900">{plan.name}</h4>
-                                    <p className="text-[10px] text-slate-400 font-mono leading-none">ID: #{plan.id}</p>
+                                    <h4 className="font-bold text-slate-900">{groupedPlan.name}</h4>
+                                    <p className="text-[10px] text-slate-400 font-mono leading-none">Synced from Intax</p>
                                   </div>
                                 </div>
                               </div>
@@ -220,10 +233,10 @@ export function IntaxServicesView() {
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                                   <DollarSign className="h-3 w-3" /> Pricing
                                 </p>
-                                {planPrices.length === 0 ? (
+                                {uniquePrices.length === 0 ? (
                                   <p className="text-[10px] text-slate-400 italic px-2">No pricing configured</p>
                                 ) : (
-                                  planPrices.map(price => (
+                                  uniquePrices.map((price: any) => (
                                     <div key={price.id} className="group/price relative flex flex-col p-3 bg-white rounded-xl border border-slate-100 shadow-sm hover:border-blue-200 transition-all">
                                       <div className="flex justify-between items-center mb-1">
                                         <div>
@@ -238,7 +251,7 @@ export function IntaxServicesView() {
                                             className="h-6 w-6 opacity-0 group-hover/price:opacity-100 transition-opacity text-blue-500 hover:text-blue-700 hover:bg-blue-50"
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              handleSync(service, plan, price);
+                                              handleSync(service, groupedPlan, price);
                                             }}
                                             disabled={syncingId === price.id}
                                           >
@@ -270,7 +283,7 @@ export function IntaxServicesView() {
                                 ) : (
                                   <ul className="space-y-2">
                                     {serviceAttrs.map(attr => {
-                                      const val = planAttrValues.find(v => v.service_attribute_id === attr.id);
+                                      const val = groupedPlan.mergedAttrValues.find((v: any) => v.service_attribute_id === attr.id);
                                       return (
                                         <li key={attr.id} className="flex items-start justify-between text-[11px]">
                                           <span className="text-slate-500">{attr.name}</span>
