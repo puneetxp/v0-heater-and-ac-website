@@ -12,31 +12,47 @@ export function IntaxServicesView() {
 
   const { data: services, error: servicesError, isLoading: servicesLoading, mutate: mutateServices } = useSWR<ApiService[]>(
     "intax_services",
-    () => intaxGetAll<ApiService>("service"),
+    async () => {
+      const data = await intaxGetAll<ApiService>("service");
+      // Deduplicate by ID
+      return Array.from(new Map(data.map(item => [item.id, item])).values());
+    },
     { revalidateOnFocus: false, dedupingInterval: 60000 }
   );
 
   const { data: plans, error: plansError, isLoading: plansLoading, mutate: mutatePlans } = useSWR<ApiServicePlan[]>(
     "intax_service_plans",
-    () => intaxGetAll<ApiServicePlan>("service_plan"),
+    async () => {
+      const data = await intaxGetAll<ApiServicePlan>("service_plan");
+      return Array.from(new Map(data.map(item => [item.id, item])).values());
+    },
     { revalidateOnFocus: false, dedupingInterval: 60000 }
   );
 
   const { data: prices, error: pricesError, isLoading: pricesLoading, mutate: mutatePrices } = useSWR<ApiServicePlanPrice[]>(
     "intax_service_prices",
-    () => intaxGetAll<ApiServicePlanPrice>("service_plan_price"),
+    async () => {
+      const data = await intaxGetAll<ApiServicePlanPrice>("service_plan_price");
+      return Array.from(new Map(data.map(item => [item.id, item])).values());
+    },
     { revalidateOnFocus: false, dedupingInterval: 60000 }
   );
 
   const { data: attributes, error: attributesError, isLoading: attributesLoading, mutate: mutateAttributes } = useSWR<ApiServiceAttribute[]>(
     "intax_service_attributes",
-    () => intaxGetAll<ApiServiceAttribute>("service_attribute"),
+    async () => {
+      const data = await intaxGetAll<ApiServiceAttribute>("service_attribute");
+      return Array.from(new Map(data.map(item => [item.id, item])).values());
+    },
     { revalidateOnFocus: false, dedupingInterval: 60000 }
   );
 
   const { data: attributeValues, error: attributeValuesError, isLoading: attributeValuesLoading, mutate: mutateAttributeValues } = useSWR<ApiServiceAttributeValue[]>(
     "intax_service_attribute_values",
-    () => intaxGetAll<ApiServiceAttributeValue>("service_attribute_value"),
+    async () => {
+      const data = await intaxGetAll<ApiServiceAttributeValue>("service_attribute_value");
+      return Array.from(new Map(data.map(item => [item.id, item])).values());
+    },
     { revalidateOnFocus: false, dedupingInterval: 60000 }
   );
 
