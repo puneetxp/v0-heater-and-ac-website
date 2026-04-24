@@ -131,9 +131,9 @@ export function IntaxServicesView() {
         </div>
       ) : (
         <div className="space-y-4">
-          {services.map((service) => {
-            const servicePlans = plans?.filter(p => p.service_id === service.id) || [];
-            const serviceAttrs = attributes?.filter(a => a.service_id === service.id) || [];
+          {services.filter(s => s.enable === 1).map((service) => {
+            const servicePlans = (plans?.filter(p => p.service_id === service.id && p.enable === 1) || []);
+            const serviceAttrs = attributes?.filter(a => a.service_id === service.id && a.enable === 1) || [];
             const isExpanded = expandedServices[service.id];
 
             return (
@@ -182,8 +182,8 @@ export function IntaxServicesView() {
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {servicePlans.map(plan => {
-                          const planPrices = prices?.filter(pr => pr.service_plan_id === plan.id) || [];
-                          const planAttrValues = attributeValues?.filter(v => v.service_plan_id === plan.id) || [];
+                          const planPrices = prices?.filter(pr => pr.service_plan_id === plan.id && pr.enable === 1) || [];
+                          const planAttrValues = attributeValues?.filter(v => v.service_plan_id === plan.id && v.enable === 1) || [];
                           
                           return (
                             <div key={plan.id} className="flex flex-col border rounded-2xl p-5 bg-slate-50/30 hover:bg-slate-50/60 transition-all border-slate-100 shadow-sm">
@@ -192,7 +192,10 @@ export function IntaxServicesView() {
                                   <div className="p-1.5 bg-white rounded-md border border-slate-200">
                                     <ListTree className="h-4 w-4 text-blue-600" />
                                   </div>
-                                  <h4 className="font-bold text-slate-900">{plan.name}</h4>
+                                  <div>
+                                    <h4 className="font-bold text-slate-900">{plan.name}</h4>
+                                    <p className="text-[10px] text-slate-400 font-mono leading-none">ID: #{plan.id}</p>
+                                  </div>
                                 </div>
                               </div>
                               
@@ -207,7 +210,10 @@ export function IntaxServicesView() {
                                   planPrices.map(price => (
                                     <div key={price.id} className="group/price relative flex flex-col p-3 bg-white rounded-xl border border-slate-100 shadow-sm hover:border-blue-200 transition-all">
                                       <div className="flex justify-between items-center mb-1">
-                                        <span className="font-bold text-slate-700 text-xs">{price.name || "Default Tier"}</span>
+                                        <div>
+                                          <span className="font-bold text-slate-700 text-xs">{price.name || "Default Tier"}</span>
+                                          <p className="text-[8px] text-slate-300 font-mono leading-none">ID: #{price.id}</p>
+                                        </div>
                                         <div className="flex items-center gap-2">
                                           <span className="font-black text-blue-600 text-sm">₹{price.amount.toLocaleString()}</span>
                                           <Button 
