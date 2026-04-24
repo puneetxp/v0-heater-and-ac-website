@@ -10,6 +10,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  try {
     const { searchParams } = new URL(req.url);
     const provider = searchParams.get("provider");
     const enabled = searchParams.get("enabled");
