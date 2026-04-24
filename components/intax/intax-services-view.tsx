@@ -3,8 +3,8 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { Button } from "@/components/ui/button";
-import { Loader2, AlertCircle, Trash2, RefreshCw, ChevronDown, ChevronRight, Tags, ListTree, DollarSign } from "lucide-react";
-import type { ApiService, ApiServicePlan, ApiServicePlanPrice } from "@/lib/intax/types";
+import { Loader2, AlertCircle, Trash2, RefreshCw, ChevronDown, ChevronRight, Tags, ListTree, DollarSign, CheckCircle2 } from "lucide-react";
+import type { ApiService, ApiServicePlan, ApiServicePlanPrice, ApiServiceAttribute, ApiServiceAttributeValue } from "@/lib/intax/types";
 import { intaxGetAll, intaxDelete } from "@/lib/intax/client";
 
 export function IntaxServicesView() {
@@ -28,6 +28,18 @@ export function IntaxServicesView() {
     { revalidateOnFocus: false, dedupingInterval: 60000 }
   );
 
+  const { data: attributes, error: attributesError, isLoading: attributesLoading, mutate: mutateAttributes } = useSWR<ApiServiceAttribute[]>(
+    "intax_service_attributes",
+    () => intaxGetAll<ApiServiceAttribute>("service_attribute"),
+    { revalidateOnFocus: false, dedupingInterval: 60000 }
+  );
+
+  const { data: attributeValues, error: attributeValuesError, isLoading: attributeValuesLoading, mutate: mutateAttributeValues } = useSWR<ApiServiceAttributeValue[]>(
+    "intax_service_attribute_values",
+    () => intaxGetAll<ApiServiceAttributeValue>("service_attribute_value"),
+    { revalidateOnFocus: false, dedupingInterval: 60000 }
+  );
+
   const toggleService = (id: number) => {
     setExpandedServices(prev => ({ ...prev, [id]: !prev[id] }));
   };
@@ -36,6 +48,8 @@ export function IntaxServicesView() {
     mutateServices();
     mutatePlans();
     mutatePrices();
+    mutateAttributes();
+    mutateAttributeValues();
   };
 
   const handleDeleteService = async (id: number) => {
@@ -49,8 +63,8 @@ export function IntaxServicesView() {
     }
   };
 
-  const isLoading = servicesLoading || plansLoading || pricesLoading;
-  const error = servicesError || plansError || pricesError;
+  const isLoading = servicesLoading || plansLoading || pricesLoading || attributesLoading || attributeValuesLoading;
+  const error = servicesError || plansError || pricesError || attributesError || attributeValuesError;
 
   if (isLoading) {
     return (
@@ -97,6 +111,7 @@ export function IntaxServicesView() {
         <div className="space-y-4">
           {services.map((service) => {
             const servicePlans = plans?.filter(p => p.service_id === service.id) || [];
+            const serviceAttrs = attributes?.filter(a => a.service_id === service.id) || [];
             const isExpanded = expandedServices[service.id];
 
             return (
@@ -137,43 +152,75 @@ export function IntaxServicesView() {
                   </div>
                 </div>
 
-                {/* Service Content (Plans & Prices) */}
+                {/* Service Content (Plans, Prices & Attributes) */}
                 {isExpanded && (
                   <div className="p-4 bg-white space-y-4">
                     {servicePlans.length === 0 ? (
                       <p className="text-center text-sm text-slate-500 py-4 italic">No plans defined for this service</p>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {servicePlans.map(plan => {
                           const planPrices = prices?.filter(pr => pr.service_plan_id === plan.id) || [];
+                          const planAttrValues = attributeValues?.filter(v => v.service_plan_id === plan.id) || [];
+                          
                           return (
-                            <div key={plan.id} className="border rounded-lg p-4 bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                              <div className="flex items-center gap-2 mb-3">
-                                <ListTree className="h-4 w-4 text-blue-500" />
-                                <h4 className="font-bold text-slate-900 text-sm">{plan.name}</h4>
+                            <div key={plan.id} className="flex flex-col border rounded-2xl p-5 bg-slate-50/30 hover:bg-slate-50/60 transition-all border-slate-100 shadow-sm">
+                              <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="p-1.5 bg-white rounded-md border border-slate-200">
+                                    <ListTree className="h-4 w-4 text-blue-600" />
+                                  </div>
+                                  <h4 className="font-bold text-slate-900">{plan.name}</h4>
+                                </div>
                               </div>
                               
-                              <div className="space-y-2">
+                              {/* Prices Section */}
+                              <div className="space-y-3 mb-5">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                  <DollarSign className="h-3 w-3" /> Pricing
+                                </p>
                                 {planPrices.length === 0 ? (
-                                  <p className="text-[10px] text-slate-400 italic">No pricing configured</p>
+                                  <p className="text-[10px] text-slate-400 italic px-2">No pricing configured</p>
                                 ) : (
                                   planPrices.map(price => (
-                                    <div key={price.id} className="flex flex-col p-2 bg-white rounded border border-slate-100 text-xs">
+                                    <div key={price.id} className="flex flex-col p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
                                       <div className="flex justify-between items-center mb-1">
-                                        <span className="font-medium text-slate-600">{price.name || "Base Price"}</span>
-                                        <span className="font-bold text-blue-600">₹{price.amount.toLocaleString()}</span>
+                                        <span className="font-bold text-slate-700 text-xs">{price.name || "Default Tier"}</span>
+                                        <span className="font-black text-blue-600 text-sm">₹{price.amount.toLocaleString()}</span>
                                       </div>
-                                      <div className="flex items-center gap-2 text-[10px] text-slate-400">
-                                        <DollarSign className="h-3 w-3" />
-                                        <span>MRP: ₹{price.mrp.toLocaleString()}</span>
-                                        <span>•</span>
-                                        <span>GST: {price.gst_rate}%</span>
-                                      </div>
-                                      <div className="mt-1 text-[10px] text-slate-500 font-medium">
-                                        Validity: {price.month ? `${price.month} Months` : price.day ? `${price.day} Days` : "Lifetime"}
+                                      <div className="flex items-center justify-between text-[10px] text-slate-500">
+                                        <div className="flex gap-2">
+                                          <span className="line-through text-slate-300">₹{price.mrp.toLocaleString()}</span>
+                                          <span className="bg-blue-50 text-blue-600 px-1.5 rounded-full font-bold">GST {price.gst_rate}%</span>
+                                        </div>
+                                        <span className="bg-slate-100 text-slate-600 px-1.5 rounded-full font-medium">
+                                          {price.month ? `${price.month} Months` : price.day ? `${price.day} Days` : "Lifetime"}
+                                        </span>
                                       </div>
                                     </div>
                                   ))
+                                )}
+                              </div>
+
+                              {/* Features/Attributes Section */}
+                              <div className="mt-auto pt-4 border-t border-slate-100 space-y-3">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                  <CheckCircle2 className="h-3 w-3 text-emerald-500" /> Features
+                                </p>
+                                {serviceAttrs.length === 0 ? (
+                                  <p className="text-[10px] text-slate-400 italic px-2">No attributes defined</p>
+                                ) : (
+                                  <ul className="space-y-2">
+                                    {serviceAttrs.map(attr => {
+                                      const val = planAttrValues.find(v => v.service_attribute_id === attr.id);
+                                      return (
+                                        <li key={attr.id} className="flex items-start justify-between text-[11px]">
+                                          <span className="text-slate-500">{attr.name}</span>
+                                          <span className="font-bold text-slate-800 text-right">{val?.value || "—"}</span>
+                                        </li>
+                                      );
+                                    })}
+                                  </ul>
                                 )}
                               </div>
                             </div>

@@ -27,9 +27,9 @@ export async function GET(req: NextRequest) {
     }
 
     if (enabled === "true") {
-      query = query.eq("enabled", true);
+      query = query.eq("is_enabled", true);
     } else if (enabled === "false") {
-      query = query.eq("enabled", false);
+      query = query.eq("is_enabled", false);
     }
 
     const { data, error } = await query.order("created_at", { ascending: false });
