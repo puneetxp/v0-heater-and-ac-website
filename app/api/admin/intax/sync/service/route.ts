@@ -40,10 +40,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Prepare product data
+    const monthlyPrice = Number(price.amount);
+    const dailyPrice = price.day === 1 ? monthlyPrice : Math.round(monthlyPrice / 30);
+
     const productData = {
       name: plan.name,
       category: category,
-      price_per_month: price.amount,
+      price_per_month: monthlyPrice,
+      price_per_day: dailyPrice,
       is_available: plan.enable === 1,
       description: `${service.name} - ${price.name || "Standard Plan"}`,
       updated_at: new Date().toISOString(),
