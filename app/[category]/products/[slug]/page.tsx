@@ -75,9 +75,25 @@ export default async function ProductPage(props: {
     notFound();
   }
 
+  // 3. Fetch seasonal plans for this product
+  let plans = [];
+  if (dbProduct && dbProduct.id) {
+    const { data: dbPlans } = await supabase
+      .from("seasonal_plans")
+      .select("*")
+      .eq("product_id", dbProduct.id)
+      .eq("is_active", true)
+      .order("base_price", { ascending: true });
+    
+    if (dbPlans) {
+      plans = dbPlans;
+    }
+  }
+
   return (
     <ProductDetailView 
       product={dbProduct} 
+      plans={plans}
       categoryParam={params.category} 
       slugParam={params.slug} 
     />

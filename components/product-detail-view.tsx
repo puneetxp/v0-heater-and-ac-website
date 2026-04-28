@@ -25,12 +25,14 @@ interface Product {
 
 interface ProductDetailViewProps {
   product: Product;
+  plans: any[];
   categoryParam: string;
   slugParam: string;
 }
 
 export function ProductDetailView({
   product: dbProduct,
+  plans: dbPlans,
   categoryParam,
   slugParam,
 }: ProductDetailViewProps) {
@@ -38,8 +40,9 @@ export function ProductDetailView({
   const backLink = `/${categoryParam}`;
   
   // Interactivity states
-  const [selectedVariant, setSelectedVariant] = useState("standard");
-  const [selectedPlan, setSelectedPlan] = useState("monthly");
+  const [selectedPlanId, setSelectedPlanId] = useState<string | number | null>(
+    dbPlans.length > 0 ? dbPlans[0].id : null
+  );
 
   // Determine badge color and icon based on product type
   const isCooling = dbProduct.category.toLowerCase().includes("ac");
@@ -64,44 +67,8 @@ export function ProductDetailView({
     isAvailable: dbProduct.is_available,
   };
 
-  // Mock variants for now - in a real app these would come from the DB
-  const variants = [
-    {
-      id: "lite",
-      name: "Economy",
-      multiplier: 0.9,
-      description: "Essential performance",
-    },
-    {
-      id: "standard",
-      name: "Standard",
-      multiplier: 1.0,
-      description: "Balanced efficiency",
-    },
-    {
-      id: "pro",
-      name: "Premium",
-      multiplier: 1.2,
-      description: "Maximum performance",
-    },
-  ];
-
-  const plans = [
-    { id: "monthly", name: "Monthly", months: 1, discount: 0 },
-    { id: "quarterly", name: "Quarterly", months: 3, discount: 10 },
-    { id: "annual", name: "Annual", months: 12, discount: 20 },
-  ];
-
-  const selectedVariantData = variants.find((v) => v.id === selectedVariant);
-  const selectedPlanData = plans.find((p) => p.id === selectedPlan);
-
-  const variantPrice = Math.round(
-    product.basePrice * (selectedVariantData?.multiplier || 1),
-  );
-  const discountedPrice = Math.round(
-    variantPrice * (1 - (selectedPlanData?.discount || 0) / 100),
-  );
-  const totalPrice = discountedPrice * (selectedPlanData?.months || 1);
+  const selectedPlan = dbPlans.find((p) => p.id === selectedPlanId);
+  const totalPrice = selectedPlan ? selectedPlan.base_price : 0;
 
   const backColor = isCooling
     ? "text-blue-600 hover:text-blue-700"
@@ -157,102 +124,75 @@ export function ProductDetailView({
                 <p className="text-xl text-gray-600">{product.description}</p>
               </div>
 
-              <Card className="border-2 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-lg">Select Option</CardTitle>
+              <Card className="border-2 shadow-sm overflow-hidden">
+                <CardHeader className="bg-slate-50/50 border-b">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-primary" />
+                    Select Rental Plan
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid gap-3">
-                    {variants.map((variant) => (
-                      <button
-                        key={variant.id}
-                        disabled={!product.isAvailable}
-                        onClick={() => setSelectedVariant(variant.id)}
-                        className={`p-4 rounded-lg border-2 transition-all text-left ${
-                          selectedVariant === variant.id
-                            ? "border-blue-600 bg-blue-50/50"
-                            : "border-gray-100 hover:border-blue-200"
-                        } ${!product.isAvailable ? "opacity-50 cursor-not-allowed" : ""}`}
-                      >
-                        <div className="flex justify-between items-center">
-                            <div className="font-bold text-lg">{variant.name}</div>
-                            <div className="font-bold text-blue-600 text-lg">
-                                ₹{Math.round(product.basePrice * variant.multiplier)}/mo
-                            </div>
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {variant.description}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-lg">Select Rental Plan</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {plans.map((plan) => (
-                    <button
-                      key={plan.id}
-                      disabled={!product.isAvailable}
-                      onClick={() => setSelectedPlan(plan.id)}
-                      className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
-                        selectedPlan === plan.id
-                          ? "border-blue-600 bg-blue-50/50"
-                          : "border-gray-100 hover:border-blue-200"
-                      } ${!product.isAvailable ? "opacity-50 cursor-not-allowed" : ""}`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <div className="font-bold">{plan.name}</div>
-                          <div className="text-sm text-gray-600 mt-1">
-                            ₹{Math.round(discountedPrice)}/month
-                          </div>
-                        </div>
-                        {plan.discount > 0 && (
-                          <Badge className="bg-green-600 text-white">
-                            Save {plan.discount}%
-                          </Badge>
-                        )}
+                <CardContent className="p-0">
+                  <div className="divide-y divide-gray-100">
+                    {dbPlans.length === 0 ? (
+                      <div className="p-8 text-center text-muted-foreground italic">
+                        No active rental plans available for this item.
                       </div>
-                    </button>
-                  ))}
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-md">
-                <CardHeader>
-                  <CardTitle className="text-lg">Total Cost Calculation</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">Monthly Rate:</span>
-                    <span className="font-semibold">₹{variantPrice}</span>
-                  </div>
-                  {selectedPlanData?.discount
-                    ? (
-                      <div className="flex justify-between text-green-600">
-                        <span>Discount ({selectedPlanData.discount}%):</span>
-                        <span>
-                          -₹{Math.round(
-                            variantPrice * selectedPlanData.discount / 100,
+                    ) : (
+                      dbPlans.map((plan) => (
+                        <button
+                          key={plan.id}
+                          disabled={!product.isAvailable}
+                          onClick={() => setSelectedPlanId(plan.id)}
+                          className={`w-full p-5 text-left transition-all relative flex items-center justify-between ${
+                            selectedPlanId === plan.id
+                              ? "bg-blue-50/30"
+                              : "hover:bg-gray-50"
+                          } ${!product.isAvailable ? "opacity-50 cursor-not-allowed" : ""}`}
+                        >
+                          {selectedPlanId === plan.id && (
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600" />
                           )}
-                        </span>
-                      </div>
-                    )
-                    : null}
-                  <div className="border-t pt-4 flex justify-between text-xl font-bold text-blue-700">
-                    <span>
-                      Total for {selectedPlanData?.months}{" "}
-                      month{selectedPlanData?.months !== 1 ? "s" : ""}:
-                    </span>
-                    <span>₹{totalPrice}</span>
+                          <div className="flex-1">
+                            <div className="font-bold text-lg text-slate-900">{plan.name}</div>
+                            {plan.valid_until && (
+                              <div className="text-[10px] text-orange-600 font-semibold uppercase tracking-wider mt-1 flex items-center gap-1">
+                                <Flame className="h-3 w-3" />
+                                Valid till: {new Date(plan.valid_until).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <div className="font-black text-2xl text-blue-600">
+                              ₹{plan.base_price.toLocaleString()}
+                            </div>
+                            <div className="text-[10px] text-slate-400 font-medium uppercase tracking-tighter">
+                               {plan.duration_months} Month{plan.duration_months !== 1 ? 's' : ''} Duration
+                            </div>
+                          </div>
+                        </button>
+                      ))
+                    )}
                   </div>
                 </CardContent>
               </Card>
+
+              {selectedPlan && (
+                <Card className="border-2 border-blue-100 bg-gradient-to-br from-blue-50/50 to-white shadow-sm">
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-slate-500 font-medium">Selected Plan:</span>
+                      <span className="font-bold text-slate-900">{selectedPlan.name}</span>
+                    </div>
+                    <div className="flex justify-between items-center mb-6 pt-4 border-t border-blue-100">
+                      <span className="text-slate-500 font-medium text-lg">Total Payable:</span>
+                      <div className="text-right">
+                        <span className="text-3xl font-black text-blue-600">₹{selectedPlan.base_price.toLocaleString()}</span>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Inclusive of all taxes</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               <Button
                 asChild
@@ -262,8 +202,8 @@ export function ProductDetailView({
                 } ${!product.isAvailable ? "opacity-50 cursor-not-allowed grayscale pointer-events-none" : ""}`}
               >
                 <Link
-                  href={`/booking/${slugParam}?variant=${selectedVariant}&plan=${selectedPlan}`}
-                  onClick={(e) => !product.isAvailable && e.preventDefault()}
+                  href={`/booking/${slugParam}?planId=${selectedPlanId}`}
+                  onClick={(e) => (!product.isAvailable || !selectedPlanId) && e.preventDefault()}
                 >
                   {product.isAvailable ? "Proceed to Booking" : "Currently Unavailable"}
                 </Link>
