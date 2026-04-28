@@ -526,7 +526,97 @@ export type AllAPIModels =
   | ApiApiKey
   | ApiChatSession
   | ApiChatMessage
-  | ApiValueAsset;
+  | ApiValueAsset
+  | ApiAdminUser
+  | ApiApiConfig
+  | ApiBooking
+  | ApiDemoLogin
+  | ApiProfile
+  | ApiRentalPlan
+  | ApiSeasonalPlan;
+
+export interface ApiAdminUser extends APIBaseModel {
+  email: string;
+  username: string;
+  is_active: boolean;
+}
+
+export interface ApiApiConfig extends APIBaseModel {
+  name: string;
+  provider: string;
+  api_key: string;
+  book_id: number | null;
+  is_enabled: boolean;
+  description: string | null;
+  settings: any;
+  created_by: string | null;
+  updated_by: string | null;
+}
+
+export interface ApiBooking extends APIBaseModel {
+  user_id: string;
+  product_id: number;
+  start_date: string;
+  end_date: string;
+  rental_type: string;
+  quantity: number;
+  status: string;
+  subtotal: number;
+  gst_amount: number;
+  total_amount: number;
+  deposit_amount: number;
+  delivery_address: string;
+  delivery_city: string;
+  delivery_state: string;
+  delivery_pincode: string;
+  notes: string | null;
+  plan_id: number | null;
+}
+
+export interface ApiDemoLogin extends APIBaseModel {
+  username: string;
+  email: string;
+  user_type: string;
+}
+
+export interface ApiProfile extends APIBaseModel {
+  full_name: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  pincode: string | null;
+  gst_number: string | null;
+  company_name: string | null;
+  role: string;
+}
+
+export interface ApiRentalPlan extends APIBaseModel {
+  name: string;
+  description: string | null;
+  duration_months: number;
+  discount_percentage: number;
+  features: string[] | null;
+  is_popular: boolean;
+  is_active: boolean;
+}
+
+export interface ApiSeasonalPlan extends APIBaseModel {
+  name: string;
+  season: string;
+  description: string | null;
+  discount_percentage: number;
+  duration_months: number;
+  is_active: boolean;
+  valid_from: string | null;
+  valid_until: string | null;
+  features: any;
+  base_price: number;
+  pricing_per_unit: number;
+  start_month: number | null;
+  end_month: number | null;
+  product_id: number | null;
+}
 
 export type ModelNames =
   | 'account'
@@ -588,4 +678,11 @@ export type ModelNames =
   | 'active_role'
   | 'api_key'
   | 'lead'
-  | 'passkey';
+  | 'passkey'
+  | 'admin_user'
+  | 'api_config'
+  | 'booking'
+  | 'demo_login'
+  | 'profile'
+  | 'rental_plan'
+  | 'seasonal_plan';

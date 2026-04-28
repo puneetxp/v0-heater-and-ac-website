@@ -24,6 +24,12 @@ import type {
   ApiRecordStock,
   ApiAccount,
   ApiBook,
+  ApiBooking,
+  ApiProfile,
+  ApiSeasonalPlan,
+  ApiRentalPlan,
+  ApiAdminUser,
+  ApiApiConfig,
 } from './types';
 
 // ============================================
@@ -381,4 +387,66 @@ export async function updateBook(
   updates: Partial<Omit<ApiBook, keyof import('./types').APIBaseModel>>,
 ): Promise<ApiBook | null> {
   return intaxUpdate<ApiBook>('book', id, updates);
+}
+
+// ============================================
+// Bookings & Reservations
+// ============================================
+
+/**
+ * Get all bookings
+ */
+export async function getAllBookings(): Promise<ApiBooking[]> {
+  return intaxGetAll<ApiBooking>('booking');
+}
+
+/**
+ * Get booking by ID
+ */
+export async function getBookingById(id: string): Promise<ApiBooking | null> {
+  return intaxGetById<ApiBooking>('booking', id as any);
+}
+
+/**
+ * Get bookings for a user
+ */
+export async function getBookingsByUser(userId: string): Promise<ApiBooking[]> {
+  return intaxWhere<ApiBooking>('booking', { user_id: userId });
+}
+
+// ============================================
+// Profiles & Users
+// ============================================
+
+/**
+ * Get profile by user ID
+ */
+export async function getProfileByUserId(userId: string): Promise<ApiProfile | null> {
+  const profiles = await intaxWhere<ApiProfile>('profile', { id: userId });
+  return profiles.length > 0 ? profiles[0] : null;
+}
+
+// ============================================
+// Seasonal & Rental Plans
+// ============================================
+
+/**
+ * Get all seasonal plans
+ */
+export async function getAllSeasonalPlans(): Promise<ApiSeasonalPlan[]> {
+  return intaxGetAll<ApiSeasonalPlan>('seasonal_plan');
+}
+
+/**
+ * Get all active seasonal plans
+ */
+export async function getActiveSeasonalPlans(): Promise<ApiSeasonalPlan[]> {
+  return intaxWhere<ApiSeasonalPlan>('seasonal_plan', { is_active: true });
+}
+
+/**
+ * Get all rental plans
+ */
+export async function getAllRentalPlans(): Promise<ApiRentalPlan[]> {
+  return intaxGetAll<ApiRentalPlan>('rental_plan');
 }

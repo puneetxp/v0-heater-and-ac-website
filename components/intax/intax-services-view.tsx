@@ -90,10 +90,10 @@ export function IntaxServicesView() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ service, plan, price }),
       });
-      
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Sync failed");
-      
+
       alert(`Successfully synced: ${plan.name}`);
     } catch (error: any) {
       alert(`Sync error: ${error.message}`);
@@ -182,7 +182,7 @@ export function IntaxServicesView() {
             return (
               <div key={service.id} className="border rounded-xl bg-white shadow-sm overflow-hidden transition-all">
                 {/* Service Header */}
-                <div 
+                <div
                   className={`flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 ${isExpanded ? 'bg-slate-50/50 border-b' : ''}`}
                   onClick={() => toggleService(service.id)}
                 >
@@ -201,9 +201,9 @@ export function IntaxServicesView() {
                       <p className="text-sm font-bold text-slate-900">{servicePlans.length}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         className="h-8 gap-2 text-blue-600 border-blue-100 hover:bg-blue-50"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -214,9 +214,9 @@ export function IntaxServicesView() {
                         {syncingServiceId === service.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                         <span className="hidden sm:inline">Sync All to Site</span>
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         className="h-8 w-8 text-slate-400 hover:text-red-600"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -245,15 +245,15 @@ export function IntaxServicesView() {
                           // Fetch prices for this specific plan record
                           const planPrices = prices?.filter(pr => pr.service_plan_id === plan.id && pr.enable === 1) || [];
                           acc[plan.name].mergedPrices.push(...planPrices);
-                          
+
                           const planAttrValues = attributeValues?.filter(v => v.service_plan_id === plan.id && v.enable === 1) || [];
                           acc[plan.name].mergedAttrValues.push(...planAttrValues);
-                          
+
                           return acc;
                         }, {} as Record<string, any>)).map((groupedPlan: any) => {
                           // Deduplicate prices by amount and month to be even cleaner
                           const uniquePrices = Array.from(new Map(groupedPlan.mergedPrices.map((p: any) => [`${p.amount}-${p.month}`, p])).values());
-                          
+
                           return (
                             <div key={groupedPlan.name} className="flex flex-col border rounded-2xl p-5 bg-slate-50/30 hover:bg-slate-50/60 transition-all border-slate-100 shadow-sm">
                               <div className="flex items-center justify-between mb-4">
@@ -267,7 +267,7 @@ export function IntaxServicesView() {
                                   </div>
                                 </div>
                               </div>
-                              
+
                               {/* Prices Section */}
                               <div className="space-y-3 mb-5">
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -285,9 +285,9 @@ export function IntaxServicesView() {
                                         </div>
                                         <div className="flex items-center gap-2">
                                           <span className="font-black text-blue-600 text-sm">₹{price.amount.toLocaleString()}</span>
-                                          <Button 
-                                            variant="ghost" 
-                                            size="icon" 
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
                                             className="h-6 w-6 opacity-0 group-hover/price:opacity-100 transition-opacity text-blue-500 hover:text-blue-700 hover:bg-blue-50"
                                             onClick={(e) => {
                                               e.stopPropagation();

@@ -40,24 +40,27 @@ export async function POST(req: NextRequest) {
     }
 
     // Prepare product data
+    const productName = `${service.name} ${plan.name}`.trim();
     const monthlyPrice = Number(price.amount);
-    const dailyPrice = price.day === 1 ? monthlyPrice : Math.round(monthlyPrice / 30);
+    const dailyPrice = price.day && price.day > 0 ? Number(price.amount) / price.day : Math.round(monthlyPrice / 30);
 
     const productData = {
-      name: plan.name,
+      name: productName,
       category: category,
       price_per_month: monthlyPrice,
       price_per_day: dailyPrice,
       is_available: plan.enable === 1,
-      description: `${service.name} - ${price.name || "Standard Plan"}`,
+      description: `${service.name} - ${plan.name}`,
       updated_at: new Date().toISOString(),
     };
 
     // 1. Sync to Products table
+    let productId: number | null = null;
+    
     const { data: existingProduct, error: fetchError } = await supabase
       .from("products")
       .select("id")
-      .eq("name", plan.name)
+      .eq("name", productName)
       .eq("category", category)
       .maybeSingle();
 
@@ -67,27 +70,31 @@ export async function POST(req: NextRequest) {
     }
 
     if (existingProduct) {
+      productId = existingProduct.id;
       const { error: updateError } = await supabase
         .from("products")
         .update(productData)
-        .eq("id", existingProduct.id);
+        .eq("id", productId);
       
       if (updateError) {
         console.error("[intax-sync] Product update error:", updateError);
         throw new Error(`Failed to update product: ${updateError.message}`);
       }
     } else {
-      const { error: insertError } = await supabase
+      const { data: newProduct, error: insertError } = await supabase
         .from("products")
         .insert({
           ...productData,
           created_at: new Date().toISOString(),
-        });
+        })
+        .select("id")
+        .single();
 
       if (insertError) {
         console.error("[intax-sync] Product insert error:", insertError);
         throw new Error(`Failed to create product: ${insertError.message}`);
       }
+      productId = newProduct.id;
     }
 
     // 2. Sync to Seasonal Plans table
@@ -95,23 +102,28 @@ export async function POST(req: NextRequest) {
     if (category === "oil_heater") season = "winter";
     else if (category === "split_ac" || category === "window_ac") season = "summer";
 
+    const planName = price.name || "Standard Plan";
+
     const planData = {
-      name: `${plan.name} - ${price.name || "Default"}`,
+      name: planName,
       season: season,
-      description: `${service.name}: ${plan.name} (${price.name || "Standard"})`,
-      base_price: Number(price.amount), // Ensure it's a number
+      description: `${service.name} ${plan.name} - ${planName}`,
+      base_price: Number(price.amount),
       pricing_per_unit: Number(price.amount),
-      duration_months: Number(price.month) || 1,
+      duration_months: Number(price.month) || (price.day ? price.day / 30 : 1),
       discount_percentage: 0,
-      is_active: plan.enable === 1,
+      is_active: plan.enable === 1 && price.enable !== 0,
       start_month: season === "winter" ? 10 : 4,
       end_month: season === "winter" ? 3 : 9,
+      product_id: productId, // Link to the product
+      valid_until: price.end_date || null,
     };
 
     const { data: existingPlan, error: planFetchError } = await supabase
       .from("seasonal_plans")
       .select("id")
       .eq("name", planData.name)
+      .eq("product_id", productId)
       .maybeSingle();
 
     if (planFetchError) {
