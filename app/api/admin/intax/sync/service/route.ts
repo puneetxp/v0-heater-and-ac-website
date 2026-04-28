@@ -31,26 +31,42 @@ export async function POST(req: NextRequest) {
     const serviceNameLower = service.name.toLowerCase();
     if (serviceNameLower.includes("heater") || serviceNameLower.includes("heating")) {
       category = "oil_heater";
-    } else if (serviceNameLower.includes("window ac")) {
+    } else if (serviceNameLower.includes("window ac") || (serviceNameLower.includes("window") && serviceNameLower.includes("air conditioner"))) {
       category = "window_ac";
-    } else if (serviceNameLower.includes("split ac")) {
+    } else if (serviceNameLower.includes("split ac") || (serviceNameLower.includes("split") && serviceNameLower.includes("air conditioner"))) {
       category = "split_ac";
-    } else if (serviceNameLower.includes("ac") || serviceNameLower.includes("cooling")) {
+    } else if (serviceNameLower.includes("ac") || serviceNameLower.includes("air conditioner") || serviceNameLower.includes("cooling")) {
       category = "split_ac"; // Default AC to split
     }
 
+    // Determine the base product name based on Intax service name to match existing DB
+    let baseName = service.name;
+    if (serviceNameLower.includes("window air conditioner")) {
+      baseName = "Window AC";
+    } else if (serviceNameLower.includes("split air conditioner")) {
+      baseName = "Split AC";
+    } else if (serviceNameLower.includes("oil filled room heater")) {
+      baseName = "Oil Heater";
+    }
+
+    // Ensure capacity casing matches existing DB (e.g. "9 fin" -> "9 Fin")
+    let capacityName = plan.name;
+    if (capacityName.toLowerCase().includes("fin")) {
+      capacityName = capacityName.replace(/fin/i, "Fin");
+    }
+
     // Prepare product data
-    const productName = `${service.name} ${plan.name}`.trim();
+    const productName = `${baseName} ${capacityName}`.trim();
     const monthlyPrice = Number(price.amount);
     const dailyPrice = price.day && price.day > 0 ? Number(price.amount) / price.day : Math.round(monthlyPrice / 30);
 
     const productData = {
       name: productName,
       category: category,
+      capacity: capacityName,
       price_per_month: monthlyPrice,
       price_per_day: dailyPrice,
       is_available: plan.enable === 1,
-      description: `${service.name} - ${plan.name}`,
       updated_at: new Date().toISOString(),
     };
 
