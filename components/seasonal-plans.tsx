@@ -23,36 +23,8 @@ interface SeasonalPlan {
   end_month?: number
 }
 
-// Default fallback plans when Supabase is not available
-const DEFAULT_PLANS: SeasonalPlan[] = [
-  {
-    id: 1,
-    name: "Summer Comfort",
-    season: "summer",
-    description: "Perfect for hot summer months",
-    discount_percentage: 10,
-    duration_months: 3,
-    features: ["24/7 Customer Support", "Free Installation", "Emergency Service"],
-    valid_from: "2024-04-01",
-    valid_until: "2024-09-30",
-    base_price: 1499,
-  },
-  {
-    id: 2,
-    name: "Winter Warmth",
-    season: "winter",
-    description: "Essential heating for cold season",
-    discount_percentage: 15,
-    duration_months: 4,
-    features: ["24/7 Customer Support", "Free Installation", "Thermostat Control"],
-    valid_from: "2024-10-01",
-    valid_until: "2025-03-31",
-    base_price: 899,
-  },
-]
-
 export function SeasonalPlans() {
-  const [plans, setPlans] = useState<SeasonalPlan[]>(DEFAULT_PLANS)
+  const [plans, setPlans] = useState<SeasonalPlan[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = useSupabaseClient()
 
@@ -60,7 +32,7 @@ export function SeasonalPlans() {
     async function fetchPlans() {
       // If Supabase is not available, use default plans
       if (!supabase) {
-        setPlans(DEFAULT_PLANS)
+        setPlans([])
         setLoading(false)
         return
       }
@@ -75,11 +47,11 @@ export function SeasonalPlans() {
         if (data) {
           setPlans(data)
         } else {
-          setPlans(DEFAULT_PLANS)
+          setPlans([])
         }
       } catch (error) {
         console.warn("[v0] Failed to fetch seasonal plans:", error)
-        setPlans(DEFAULT_PLANS)
+        setPlans([])
       }
       setLoading(false)
     }
@@ -193,6 +165,11 @@ export function SeasonalPlans() {
         </div>
       </section>
     )
+  }
+
+  // If no plans are found, don't render anything
+  if (plans.length === 0) {
+    return null
   }
 
   return (
