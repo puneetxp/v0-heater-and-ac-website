@@ -1,12 +1,9 @@
-"use client"
-
-import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Check, Snowflake, Sun, Calendar } from "lucide-react"
-import { useSupabaseClient } from "@/lib/hooks/use-supabase"
+import { createServerClient } from "@/lib/supabase/server"
 
 interface SeasonalPlan {
   id: number
@@ -23,41 +20,23 @@ interface SeasonalPlan {
   end_month?: number
 }
 
-export function SeasonalPlans() {
-  const [plans, setPlans] = useState<SeasonalPlan[]>([])
-  const [loading, setLoading] = useState(true)
-  const supabase = useSupabaseClient()
+export async function SeasonalPlans() {
+  let plans: SeasonalPlan[] = []
 
-  useEffect(() => {
-    async function fetchPlans() {
-      // If Supabase is not available, use default plans
-      if (!supabase) {
-        setPlans([])
-        setLoading(false)
-        return
-      }
+  try {
+    const supabase = await createServerClient()
+    const { data } = await supabase
+      .from("seasonal_plans")
+      .select("*")
+      .eq("is_active", true)
+      .order("duration_months", { ascending: true })
 
-      try {
-        const { data } = await supabase
-          .from("seasonal_plans")
-          .select("*")
-          .eq("is_active", true)
-          .order("duration_months", { ascending: true })
-
-        if (data) {
-          setPlans(data)
-        } else {
-          setPlans([])
-        }
-      } catch (error) {
-        console.warn("[v0] Failed to fetch seasonal plans:", error)
-        setPlans([])
-      }
-      setLoading(false)
+    if (data) {
+      plans = data
     }
-
-    fetchPlans()
-  }, [supabase])
+  } catch (error) {
+    console.warn("[v0] Failed to fetch seasonal plans server-side:", error)
+  }
 
   const summerPlans = plans.filter((p) => p.season === "summer")
   const winterPlans = plans.filter((p) => p.season === "winter")
@@ -157,15 +136,6 @@ export function SeasonalPlans() {
     </Card>
   )
 
-  if (loading) {
-    return (
-      <section className="py-16 md:py-20 lg:py-24">
-        <div className="container mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
-          <div className="text-center">Loading plans...</div>
-        </div>
-      </section>
-    )
-  }
 
   // If no plans are found, don't render anything
   if (plans.length === 0) {

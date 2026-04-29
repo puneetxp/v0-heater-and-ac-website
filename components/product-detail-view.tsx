@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Header } from "@/components/header";
 import { ProductAnimatedBackground } from "@/components/product-animated-bg";
 import { Footer } from "@/components/footer";
@@ -8,9 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Check, Flame, Wind, Zap } from "lucide-react";
+import { ArrowLeft, Check, Flame, ShoppingCart, Wind, Zap } from "lucide-react";
 import Link from "next/link";
 import { getFallbackImages } from "@/lib/supabase/storage";
+import { useCart } from "@/lib/contexts/cart-context";
 
 interface Product {
   id: string;
@@ -69,6 +71,38 @@ export function ProductDetailView({
 
   const selectedPlan = dbPlans.find((p) => p.id === selectedPlanId);
   const totalPrice = selectedPlan ? selectedPlan.base_price : 0;
+
+  const { addToCart } = useCart();
+  const router = useRouter();
+
+  const handleAddToCart = () => {
+    if (!selectedPlan) return;
+    
+    addToCart({
+      productId: dbProduct.id,
+      planId: selectedPlanId!,
+      quantity: 1,
+      productData: {
+        name: dbProduct.name,
+        image_url: product.image,
+        category: dbProduct.category,
+        price_per_month: dbProduct.price_per_month,
+      },
+      planData: {
+        name: selectedPlan.name,
+        base_price: selectedPlan.base_price,
+        duration_months: selectedPlan.duration_months,
+      }
+    });
+    
+    // Optional: show a toast or notification
+    alert("Added to cart!");
+  };
+
+  const handleBuyNow = () => {
+    handleAddToCart();
+    router.push("/cart");
+  };
 
   const backColor = isCooling
     ? "text-blue-600 hover:text-blue-700"
@@ -194,20 +228,28 @@ export function ProductDetailView({
                 </Card>
               )}
 
-              <Button
-                asChild
-                disabled={!product.isAvailable}
-                className={`w-full h-12 text-white text-lg shadow-lg ${
-                    isCooling ? "bg-blue-600 hover:bg-blue-700" : "bg-orange-600 hover:bg-orange-700"
-                } ${!product.isAvailable ? "opacity-50 cursor-not-allowed grayscale pointer-events-none" : ""}`}
-              >
-                <Link
-                  href={`/booking/${slugParam}?planId=${selectedPlanId}`}
-                  onClick={(e) => (!product.isAvailable || !selectedPlanId) && e.preventDefault()}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Button
+                  onClick={handleAddToCart}
+                  disabled={!product.isAvailable || !selectedPlanId}
+                  variant="outline"
+                  size="lg"
+                  className="h-14 font-bold text-lg border-primary/20 hover:border-primary/40 text-primary hover:bg-primary/5 transition-all duration-300 shadow-sm"
                 >
-                  {product.isAvailable ? "Proceed to Booking" : "Currently Unavailable"}
-                </Link>
-              </Button>
+                  <ShoppingCart className="mr-2 h-5 w-5" />
+                  Add to Cart
+                </Button>
+
+                <Button
+                  onClick={handleBuyNow}
+                  disabled={!product.isAvailable || !selectedPlanId}
+                  size="lg"
+                  className="h-14 font-bold text-lg bg-primary hover:bg-primary/95 transition-all duration-300 shadow-xl shadow-primary/20 hover:shadow-primary/30"
+                >
+                  <Zap className="mr-2 h-5 w-5" />
+                  Buy Now
+                </Button>
+              </div>
             </div>
           </div>
 

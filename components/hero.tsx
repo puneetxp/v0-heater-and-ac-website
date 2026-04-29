@@ -1,8 +1,44 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Snowflake, Wind, Flame } from "lucide-react"
+import { createServerClient } from "@/lib/supabase/server"
 
-export function Hero() {
+export async function Hero() {
+  let acPrice = "1,499"
+  let heaterPrice = "899"
+
+  try {
+    const supabase = await createServerClient()
+    
+    // Fetch minimum price for any AC
+    const { data: acPlans } = await supabase
+      .from("seasonal_plans")
+      .select("base_price, products!inner(category)")
+      .eq("is_active", true)
+      .or("category.eq.window_ac,category.eq.split_ac", { foreignTable: "products" })
+      .order("base_price", { ascending: true })
+      .limit(1)
+
+    if (acPlans?.[0]) {
+      acPrice = acPlans[0].base_price.toLocaleString()
+    }
+
+    // Fetch minimum price for any Heater
+    const { data: heaterPlans } = await supabase
+      .from("seasonal_plans")
+      .select("base_price, products!inner(category)")
+      .eq("is_active", true)
+      .eq("products.category", "oil_heater")
+      .order("base_price", { ascending: true })
+      .limit(1)
+
+    if (heaterPlans?.[0]) {
+      heaterPrice = heaterPlans[0].base_price.toLocaleString()
+    }
+  } catch (err) {
+    console.error("[v0] Failed to fetch hero prices server-side:", err)
+  }
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-blue-50/50 via-white to-white dark:from-blue-950/20 dark:via-background dark:to-background">
       {/* Decorative blobs with animation */}
@@ -86,7 +122,7 @@ export function Hero() {
                     </div>
                     <div>
                       <div className="font-bold text-sm text-foreground">Split AC</div>
-                      <div className="text-xs text-muted-foreground font-semibold">₹1,499/month</div>
+                      <div className="text-xs text-muted-foreground font-semibold">₹{acPrice}/month</div>
                     </div>
                   </div>
                 </div>
@@ -98,7 +134,7 @@ export function Hero() {
                     </div>
                     <div>
                       <div className="font-bold text-sm text-foreground">Oil Heater</div>
-                      <div className="text-xs text-muted-foreground font-semibold">₹899/month</div>
+                      <div className="text-xs text-muted-foreground font-semibold">₹{heaterPrice}/month</div>
                     </div>
                   </div>
                 </div>

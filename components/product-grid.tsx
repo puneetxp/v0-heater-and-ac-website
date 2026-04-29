@@ -1,74 +1,57 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { ProductCard } from "@/components/product-card";
 import { CategorySection } from "@/components/category-section";
 import { allProducts } from "@/lib/product-data";
-import { useSupabaseClient } from "@/lib/hooks/use-supabase";
+import { createServerClient } from "@/lib/supabase/server";
 
-export function ProductGrid() {
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const supabase = useSupabaseClient();
+export async function ProductGrid() {
+  let productsWithPrices: any[] = [];
 
-  useEffect(() => {
-    async function fetchProducts() {
-      if (!supabase) {
-        setLoading(false);
-        return;
-      }
+  try {
+    const supabase = await createServerClient();
+    
+    // Fetch all active products
+    const { data: dbProducts } = await supabase
+      .from("products")
+      .select("*")
+      .eq("is_active", true);
 
-      try {
-        // Fetch all active products
-        const { data: dbProducts } = await supabase
-          .from("products")
-          .select("*")
-          .eq("is_active", true);
+    if (dbProducts) {
+      // For each product, fetch its lowest seasonal plan price
+      productsWithPrices = await Promise.all(
+        dbProducts.map(async (p) => {
+          const { data: plans } = await supabase
+            .from("seasonal_plans")
+            .select("base_price")
+            .eq("product_id", p.id)
+            .eq("is_active", true)
+            .order("base_price", { ascending: true })
+            .limit(1);
 
-        if (dbProducts) {
-          // For each product, fetch its lowest seasonal plan price
-          const productsWithPrices = await Promise.all(
-            dbProducts.map(async (p) => {
-              const { data: plans } = await supabase
-                .from("seasonal_plans")
-                .select("base_price")
-                .eq("product_id", p.id)
-                .eq("is_active", true)
-                .order("base_price", { ascending: true })
-                .limit(1);
-
-              return {
-                ...p,
-                // Use DB price_per_month as a fallback, or the lowest plan price
-                price: plans?.[0]?.base_price || p.price_per_month || 0,
-                // Fallback to static image if DB doesn't have one
-                image: p.image_url || null,
-                features: p.features || [],
-              };
-            })
-          );
-          setProducts(productsWithPrices);
-        }
-      } catch (error) {
-        console.error("[v0] Failed to fetch products for grid:", error);
-      } finally {
-        setLoading(false);
-      }
+          return {
+            ...p,
+            // Use DB price_per_month as a fallback, or the lowest plan price
+            price: plans?.[0]?.base_price || p.price_per_month || 0,
+            // Fallback to static image if DB doesn't have one
+            image: p.image_url || null,
+            features: p.features || [],
+          };
+        })
+      );
     }
-
-    fetchProducts();
-  }, [supabase]);
+  } catch (error) {
+    console.error("[v0] Failed to fetch products for grid server-side:", error);
+  }
 
   // Grouping logic
-  const acProducts = products.filter(p => p.category === "window_ac" || p.category === "split_ac");
-  const heaterProducts = products.filter(p => p.category === "oil_heater");
+  const acProducts = productsWithPrices.filter(p => p.category === "window_ac" || p.category === "split_ac");
+  const heaterProducts = productsWithPrices.filter(p => p.category === "oil_heater");
 
-  // Fallback to static data ONLY if loading is finished and DB is empty
-  const finalAC = (!loading && products.length === 0) 
+  // Fallback to static data ONLY if DB is empty
+  const finalAC = productsWithPrices.length === 0 
     ? [...allProducts.windowAC, ...allProducts.splitAC] 
     : acProducts;
   
-  const finalHeater = (!loading && products.length === 0)
+  const finalHeater = productsWithPrices.length === 0
     ? [...allProducts.oilHeater]
     : heaterProducts;
 
@@ -109,41 +92,37 @@ export function ProductGrid() {
         </div>
       </div>
 
-      {loading ? (
-        <div className="py-20 text-center text-muted-foreground">Loading products...</div>
-      ) : (
-        <>
-          {/* Air Conditioners Section - Cooling Theme */}
-          {finalAC.length > 0 && (
-            <CategorySection
-              title="Air Conditioners"
-              description="Premium cooling solutions for any space. Efficient, quiet, and ready to keep your environment perfectly cool."
-              category="cooling"
-            >
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                {finalAC.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            </CategorySection>
-          )}
+      <>
+        {/* Air Conditioners Section - Cooling Theme */}
+        {finalAC.length > 0 && (
+          <CategorySection
+            title="Air Conditioners"
+            description="Premium cooling solutions for any space. Efficient, quiet, and ready to keep your environment perfectly cool."
+            category="cooling"
+          >
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {finalAC.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </CategorySection>
+        )}
 
-          {/* Heaters Section - Heating Theme */}
-          {finalHeater.length > 0 && (
-            <CategorySection
-              title="Heaters"
-              description="Reliable heating solutions for winter comfort. Fast, efficient, and perfect for any room size."
-              category="heating"
-            >
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                {finalHeater.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            </CategorySection>
-          )}
-        </>
-      )}
+        {/* Heaters Section - Heating Theme */}
+        {finalHeater.length > 0 && (
+          <CategorySection
+            title="Heaters"
+            description="Reliable heating solutions for winter comfort. Fast, efficient, and perfect for any room size."
+            category="heating"
+          >
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {finalHeater.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </CategorySection>
+        )}
+      </>
     </section>
   );
 }

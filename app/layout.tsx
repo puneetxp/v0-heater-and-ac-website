@@ -2,6 +2,7 @@ import type React from "react";
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { SupabaseProvider } from "./providers";
+import { CartProvider } from "@/lib/contexts/cart-context";
 import { AnimatedBackground } from "@/components/animated-background";
 import "./globals.css";
 
@@ -69,8 +70,8 @@ export const metadata: Metadata = {
     images: ["https://acrentservice.com/twitter-image.jpg"],
   },
   robots: {
-    index: false,
-    follow: false,
+    index: true,
+    follow: true,
     nocache: true,
     googleBot: {
       index: true,
@@ -149,8 +150,10 @@ export default function RootLayout({
       <body className="font-sans antialiased relative">
         <AnimatedBackground />
         <SupabaseProvider>
-          {children}
-          <Analytics />
+          <CartProvider>
+            {children}
+            <Analytics />
+          </CartProvider>
         </SupabaseProvider>
       </body>
     </html>
