@@ -3,7 +3,8 @@ import { createServerClient } from "@/lib/supabase/server"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Mail, Phone, MapPin, Calendar } from "lucide-react"
+import { Mail, Phone, MapPin, Calendar, Trash2 } from "lucide-react"
+import { DeleteButton } from "@/components/admin/delete-button"
 
 export default async function AdminUsersPage() {
   await checkAdminAccess()
@@ -66,9 +67,17 @@ export default async function AdminUsersPage() {
                 </div>
               </div>
 
-              <Button variant="outline" size="sm" className="w-full bg-transparent">
-                View Details
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="flex-1 bg-transparent border-slate-200">
+                  View Details
+                </Button>
+                <DeleteButton
+                  id={user.id}
+                  endpoint="/api/admin/users/[id]/delete"
+                  resourceName="User"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 bg-transparent border-slate-200"
+                />
+              </div>
             </CardContent>
           </Card>
         ))}

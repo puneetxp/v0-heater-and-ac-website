@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Trash2, Check, Sun, Snowflake, Calendar } from "lucide-react"
 import { PlanFormDialog } from "@/components/admin/plan-form-dialog"
+import { DeleteButton } from "@/components/admin/delete-button"
 
 export default async function AdminPlansPage() {
   await checkAdminAccess()
@@ -114,9 +115,12 @@ export default async function AdminPlansPage() {
 
               <div className="flex gap-2 pt-4">
                 <PlanFormDialog planId={plan.id} isEdit />
-                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 bg-transparent">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <DeleteButton
+                  id={plan.id}
+                  endpoint="/api/admin/plans/[id]/delete"
+                  resourceName="Plan"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 bg-transparent border-slate-200"
+                />
               </div>
             </CardContent>
           </Card>

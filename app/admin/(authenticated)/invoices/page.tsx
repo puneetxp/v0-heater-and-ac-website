@@ -3,7 +3,8 @@ import { createServerClient } from "@/lib/supabase/server"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { FileText, Download, Eye } from "lucide-react"
+import { FileText, Download, Eye, Trash2 } from "lucide-react"
+import { DeleteButton } from "@/components/admin/delete-button"
 
 export default async function AdminInvoicesPage() {
   await checkAdminAccess()
@@ -67,16 +68,22 @@ export default async function AdminInvoicesPage() {
                     <p className="text-sm text-slate-500">Total Amount</p>
                   </div>
 
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline">
-                      <Eye className="h-4 w-4 mr-1" />
-                      View
-                    </Button>
-                    <Button size="sm" variant="outline">
-                      <Download className="h-4 w-4 mr-1" />
-                      Download
-                    </Button>
-                  </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline">
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        <Download className="h-4 w-4 mr-1" />
+                        Download
+                      </Button>
+                      <DeleteButton
+                        id={invoice.id}
+                        endpoint="/api/admin/invoices/[id]/delete"
+                        resourceName="Invoice"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 bg-transparent border-slate-200"
+                      />
+                    </div>
                 </div>
               </div>
             </CardContent>

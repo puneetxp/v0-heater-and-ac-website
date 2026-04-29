@@ -9,6 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getFallbackImages } from "@/lib/supabase/storage";
+import { DeleteButton } from "@/components/admin/delete-button";
 
 interface Product {
     id: string;
@@ -27,7 +28,6 @@ interface ProductGridProps {
 export function ProductGrid({ initialProducts }: ProductGridProps) {
     const router = useRouter();
     const [products, setProducts] = useState(initialProducts);
-    const [deletingId, setDeletingId] = useState<string | null>(null);
 
     async function handleToggleAvailability(id: string, currentStatus: boolean) {
         const newStatus = !currentStatus;
@@ -67,25 +67,6 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
         }
     }
 
-    async function handleDelete(id: string) {
-        if (!confirm("Are you sure you want to delete this product?")) return;
-
-        setDeletingId(id);
-        try {
-            const res = await fetch(`/api/admin/products/${id}/delete`, {
-                method: "DELETE",
-            });
-            if (!res.ok) throw new Error("Failed to delete");
-
-            setProducts(products.filter((p) => p.id !== id));
-            router.refresh();
-        } catch (err) {
-            alert("Failed to delete product. Please try again.");
-            console.error(err);
-        } finally {
-            setDeletingId(null);
-        }
-    }
 
     return (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -158,19 +139,12 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
                                 <Edit className="h-4 w-4 mr-1" />
                                 Edit
                             </Link>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={deletingId === product.id}
-                                onClick={() => handleDelete(product.id)}
-                                className="text-red-600 hover:text-red-700 bg-transparent"
-                            >
-                                {deletingId === product.id
-                                    ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                    )
-                                    : <Trash2 className="h-4 w-4" />}
-                            </Button>
+                            <DeleteButton
+                                id={product.id}
+                                endpoint="/api/admin/products/[id]/delete"
+                                resourceName="Product"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 bg-transparent border-slate-200"
+                            />
                         </div>
                     </CardContent>
                 </Card>

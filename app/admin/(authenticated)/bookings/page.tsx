@@ -3,7 +3,8 @@ import { createServerClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MapPin, Phone, Mail } from "lucide-react"
+import { MapPin, Phone, Mail, Trash2 } from "lucide-react"
+import { DeleteButton } from "@/components/admin/delete-button"
 
 export default async function AdminBookingsPage() {
   await checkAdminAccess()
@@ -101,6 +102,12 @@ export default async function AdminBookingsPage() {
                 <Button size="sm" variant="outline">
                   Update Status
                 </Button>
+                <DeleteButton
+                  id={booking.id}
+                  endpoint="/api/admin/bookings/[id]/delete"
+                  resourceName="Booking"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 ml-auto bg-transparent border-slate-200"
+                />
               </div>
             </CardContent>
           </Card>
