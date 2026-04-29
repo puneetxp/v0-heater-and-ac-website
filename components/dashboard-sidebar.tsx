@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Wind, Home, Calendar, RefreshCw, FileText, CreditCard, User, Settings, LogOut } from "lucide-react"
+import { Wind, Home, Calendar, RefreshCw, FileText, CreditCard, User, Settings, LogOut, MapPin } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useSupabaseClient } from "@/lib/hooks/use-supabase"
 import { useRouter } from "next/navigation"
@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation"
 const menuItems = [
   { href: "/dashboard", icon: Home, label: "Dashboard" },
   { href: "/dashboard/bookings", icon: Calendar, label: "My Bookings" },
+  { href: "/dashboard/addresses", icon: MapPin, label: "Addresses" },
   { href: "/dashboard/subscriptions", icon: RefreshCw, label: "Subscriptions" },
   { href: "/dashboard/invoices", icon: FileText, label: "Invoices" },
   { href: "/dashboard/payments", icon: CreditCard, label: "Payments" },
@@ -23,6 +24,7 @@ export function DashboardSidebar() {
   const supabase = useSupabaseClient()
 
   const handleSignOut = async () => {
+    if (!supabase) return;
     await supabase.auth.signOut()
     router.push("/")
     router.refresh()

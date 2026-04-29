@@ -106,7 +106,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, 0);
 
   const totalDeposit = items.reduce((total, item) => {
-    return total + ((item.productData.deposit_amount || 0) * item.quantity);
+    // Fallback: If deposit_amount is missing but it's an AC product, default to 2000
+    const deposit = item.productData.deposit_amount ?? (
+      item.productData.category.toLowerCase().includes('ac') ? 2000 : 0
+    );
+    return total + (deposit * item.quantity);
   }, 0);
 
   return (

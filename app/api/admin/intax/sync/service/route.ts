@@ -133,6 +133,7 @@ export async function POST(req: NextRequest) {
       end_month: season === "winter" ? 3 : 9,
       product_id: productId, // Link to the product
       valid_until: price.end_date || null,
+      intax_service_plan_price_id: price.id, // Map back to ERP for subscription sync
     };
 
     const { data: existingPlan, error: planFetchError } = await supabase

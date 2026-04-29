@@ -1,16 +1,17 @@
 import { createBrowserClient as createBrowserClientBase } from "@supabase/ssr"
 import type { SupabaseClient } from "@supabase/supabase-js"
 
-let client: SupabaseClient | undefined | null = null
+let client: SupabaseClient | undefined | null = undefined
 
 export function createBrowserClient() {
-  // Return null if already checked and failed
-  if (client === null) {
-    return null
-  }
-
+  // Return cached client if already created
   if (client) {
     return client
+  }
+
+  // Return null if already tried and failed
+  if (client === null) {
+    return null
   }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL

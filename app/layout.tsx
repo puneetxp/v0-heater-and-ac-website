@@ -1,3 +1,4 @@
+import { Toaster } from "sonner";
 import type React from "react";
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
@@ -153,6 +154,7 @@ export default function RootLayout({
           <CartProvider>
             {children}
             <Analytics />
+            <Toaster richColors position="bottom-right" />
           </CartProvider>
         </SupabaseProvider>
       </body>
