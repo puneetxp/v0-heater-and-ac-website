@@ -43,9 +43,9 @@ export function Header() {
       <div className="container mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="h-14 w-14 rounded-lg shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 overflow-hidden border-2 border-primary/20">
+            <div className="h-14 w-14 rounded-lg shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 overflow-hidden border border-primary/5">
               <img 
-                src="/acrent-logo.jpg" 
+                src="/acrent-logo-v2.jpg" 
                 alt="ACRentService" 
                 className="h-full w-full object-cover"
               />

@@ -12,9 +12,9 @@ export function Footer() {
             {/* Brand */}
             <div className="space-y-4">
               <Link href="/" className="flex items-center gap-3 group">
-                <div className="h-12 w-12 rounded-lg shadow-md overflow-hidden border border-primary/20 group-hover:shadow-lg transition-shadow">
+                <div className="h-12 w-12 rounded-lg shadow-md overflow-hidden border border-primary/5 group-hover:shadow-lg transition-shadow">
                   <img 
-                    src="/acrent-logo.jpg" 
+                    src="/acrent-logo-v2.jpg" 
                     alt="ACRentService" 
                     className="h-full w-full object-cover"
                   />

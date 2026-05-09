@@ -1,7 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Check, Snowflake, Sun, Calendar } from "lucide-react"
 import { createServerClient } from "@/lib/supabase/server"
 
@@ -47,53 +46,38 @@ export async function SeasonalPlans() {
     plans = [
       {
         id: 1,
-        name: "Summer Cool Bundle",
+        name: "Summer Cool - Premium",
         season: "summer",
-        description: "Stay cool during hot summers with our premium cooling solution",
-        discount_percentage: 15,
+        description: "Ultimate cooling for peak summer months",
+        discount_percentage: 25,
         duration_months: 3,
-        features: ["Professional Installation", "24/7 Support", "Free Maintenance", "Flexible Upgrades"],
+        features: ["Professional Installation", "24/7 Premium Support", "Free Maintenance", "Flexible Upgrades", "Free Service Swap"],
         valid_from: "2025-03-01",
         valid_until: "2025-05-31",
-        base_price: 5000,
+        base_price: 6000,
         start_month: 3,
         end_month: 5,
       },
       {
         id: 2,
-        name: "Winter Warm Bundle",
+        name: "Winter Warm - Premium",
         season: "winter",
-        description: "Stay warm and cozy throughout the winter season",
-        discount_percentage: 15,
+        description: "Complete warmth and comfort for winter",
+        discount_percentage: 25,
         duration_months: 3,
-        features: ["Professional Installation", "24/7 Support", "Free Maintenance", "Energy Efficiency"],
+        features: ["Professional Installation", "24/7 Premium Support", "Free Maintenance", "Energy Efficiency", "Free Service Swap"],
         valid_from: "2025-10-01",
         valid_until: "2025-12-31",
-        base_price: 4000,
+        base_price: 5000,
         start_month: 10,
-        end_month: 12,
-      },
-      {
-        id: 3,
-        name: "Year-Round Premium",
-        season: "year_round",
-        description: "Complete comfort all year long with our premium package",
-        discount_percentage: 35,
-        duration_months: 12,
-        features: ["Installation", "Priority Support", "Regular Maintenance", "Free Upgrades", "Swap Anytime", "Extended Warranty"],
-        valid_from: "2025-01-01",
-        valid_until: "2025-12-31",
-        base_price: 18000,
-        start_month: 1,
         end_month: 12,
       },
     ]
   }
 
+  // Filter to only show summer and winter (remove year_round and end_season)
   const summerPlans = plans.filter((p) => p.season === "summer")
   const winterPlans = plans.filter((p) => p.season === "winter")
-  const yearRoundPlans = plans.filter((p) => p.season === "year_round")
-  const endSeasonPlans = plans.filter((p) => p.season === "end_season")
 
   const getSeasonIcon = (season: string) => {
     switch (season) {
@@ -260,92 +244,55 @@ export async function SeasonalPlans() {
           </div>
         </div>
 
-        {/* Seasonal Tabs */}
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4 mb-12 h-auto p-1">
-            <TabsTrigger value="all" className="flex items-center gap-2 py-3">
-              <Calendar className="h-4 w-4" />
-              <span className="hidden sm:inline">All Plans</span>
-              <span className="sm:hidden">All</span>
-            </TabsTrigger>
-            <TabsTrigger value="summer" className="flex items-center gap-2 py-3">
-              <Sun className="h-4 w-4" />
-              <span className="hidden sm:inline">Summer</span>
-              <span className="sm:hidden">Summer</span>
-            </TabsTrigger>
-            <TabsTrigger value="winter" className="flex items-center gap-2 py-3">
-              <Snowflake className="h-4 w-4" />
-              <span className="hidden sm:inline">Winter</span>
-              <span className="sm:hidden">Winter</span>
-            </TabsTrigger>
-            <TabsTrigger value="year-round" className="flex items-center gap-2 py-3">
-              <Calendar className="h-4 w-4" />
-              <span className="hidden sm:inline">Year-Round</span>
-              <span className="sm:hidden">Year</span>
-            </TabsTrigger>
-          </TabsList>
+        {/* Summer Section */}
+        <div className="space-y-6 mb-16">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-lg bg-orange-100">
+              <Sun className="h-6 w-6 text-orange-600" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900">Summer Plans</h3>
+              <p className="text-sm text-slate-600">Beat the heat with our cooling solutions</p>
+            </div>
+          </div>
+          {summerPlans.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
+              {summerPlans.map((plan) => (
+                <PlanCard key={plan.id} plan={plan} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-slate-50 rounded-lg">
+              <Sun className="h-12 w-12 text-yellow-300 mx-auto mb-4" />
+              <p className="text-slate-600 font-medium">Summer plans coming soon!</p>
+            </div>
+          )}
+        </div>
 
-          <TabsContent value="all" className="mt-0">
-            {plans.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                {plans.map((plan) => (
-                  <PlanCard key={plan.id} plan={plan} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <Calendar className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                <p className="text-slate-600 font-medium">No seasonal bundles available at the moment</p>
-                <p className="text-sm text-slate-500 mt-2">Check back soon for our seasonal offers!</p>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="summer" className="mt-0">
-            {summerPlans.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                {summerPlans.map((plan) => (
-                  <PlanCard key={plan.id} plan={plan} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <Sun className="h-12 w-12 text-yellow-300 mx-auto mb-4" />
-                <p className="text-slate-600 font-medium">No summer bundles available</p>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="winter" className="mt-0">
-            {winterPlans.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                {winterPlans.map((plan) => (
-                  <PlanCard key={plan.id} plan={plan} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <Snowflake className="h-12 w-12 text-blue-300 mx-auto mb-4" />
-                <p className="text-slate-600 font-medium">No winter bundles available</p>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="year-round" className="mt-0">
-            {yearRoundPlans.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                {yearRoundPlans.map((plan) => (
-                  <PlanCard key={plan.id} plan={plan} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <Calendar className="h-12 w-12 text-green-300 mx-auto mb-4" />
-                <p className="text-slate-600 font-medium">No year-round bundles available</p>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+        {/* Winter Section */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-lg bg-blue-100">
+              <Snowflake className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900">Winter Plans</h3>
+              <p className="text-sm text-slate-600">Stay cozy and warm all winter long</p>
+            </div>
+          </div>
+          {winterPlans.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
+              {winterPlans.map((plan) => (
+                <PlanCard key={plan.id} plan={plan} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-slate-50 rounded-lg">
+              <Snowflake className="h-12 w-12 text-blue-300 mx-auto mb-4" />
+              <p className="text-slate-600 font-medium">Winter plans coming soon!</p>
+            </div>
+          )}
+        </div>
 
         {/* Bottom Info */}
         <div className="mt-16 text-center space-y-4">
