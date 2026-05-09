@@ -199,29 +199,32 @@ export async function SeasonalPlans() {
   }
 
   return (
-    <section id="seasonal" className="py-16 md:py-20 lg:py-24 relative overflow-hidden scroll-mt-20">
-      {/* Background decoration */}
+    <section id="seasonal" className="py-20 md:py-28 lg:py-32 relative overflow-hidden scroll-mt-24 bg-gradient-to-b from-primary/5 to-transparent">
+      {/* Enhanced Background decoration */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl" />
+        <div className="absolute top-10 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/4 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl" />
       </div>
 
       <div className="container mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center space-y-4 mb-12 md:mb-16">
-          <Badge variant="secondary" className="text-sm px-4 py-1.5">
+        <div className="text-center space-y-6 mb-14 md:mb-20">
+          <Badge variant="secondary" className="text-sm px-4 py-1.5 inline-block">
             Seasonal Plans
           </Badge>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-balance">
-            Save Big with{" "}
-            <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              Seasonal Bundles
-            </span>
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-pretty">
-            Choose the perfect plan based on the season. Get the best rates with our seasonal bundles and end-of-season
-            sales.
-          </p>
+          <div className="space-y-3">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-balance">
+              Save Big with{" "}
+              <span className="bg-gradient-to-r from-primary via-primary/80 to-orange-500 bg-clip-text text-transparent">
+                Seasonal Bundles
+              </span>
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto text-pretty">
+              Choose the perfect plan based on the season. Get the best rates with our seasonal bundles and end-of-season
+              sales.
+            </p>
+          </div>
         </div>
 
         {/* Seasonal Tabs */}

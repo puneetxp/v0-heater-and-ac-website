@@ -42,15 +42,18 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-sm">
       <div className="container mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="h-11 w-11 rounded-lg shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300 overflow-hidden">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="h-14 w-14 rounded-lg shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 overflow-hidden border-2 border-primary/20">
               <img 
                 src="/acrent-logo.jpg" 
                 alt="ACRentService" 
                 className="h-full w-full object-cover"
               />
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">ACRentService</span>
+            <div className="hidden sm:block">
+              <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">ACRentService</span>
+              <p className="text-xs text-muted-foreground">Premium AC & Heater Rentals</p>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}

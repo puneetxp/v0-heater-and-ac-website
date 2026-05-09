@@ -12,12 +12,18 @@ export default function Home() {
     <main className="min-h-screen relative z-10">
       <Snowflakes />
       <Header />
-      <div className="space-y-16 md:space-y-24 lg:space-y-32">
+      <div className="space-y-0 md:space-y-0 lg:space-y-0">
         <Hero />
-        <ProductGrid />
+        <div className="px-4 md:px-6 lg:px-8 py-8 md:py-12">
+          <ProductGrid />
+        </div>
         <SeasonalPlans />
-        <Features />
-        <HowItWorks />
+        <div className="px-4 md:px-6 lg:px-8 py-8 md:py-12">
+          <Features />
+        </div>
+        <div className="px-4 md:px-6 lg:px-8 py-8 md:py-12">
+          <HowItWorks />
+        </div>
       </div>
       <Footer />
     </main>

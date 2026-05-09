@@ -11,15 +11,18 @@ export function Footer() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
             {/* Brand */}
             <div className="space-y-4">
-              <Link href="/" className="flex items-center gap-2.5 group">
-                <div className="h-10 w-10 rounded-xl shadow-sm overflow-hidden">
+              <Link href="/" className="flex items-center gap-3 group">
+                <div className="h-12 w-12 rounded-lg shadow-md overflow-hidden border border-primary/20 group-hover:shadow-lg transition-shadow">
                   <img 
                     src="/acrent-logo.jpg" 
                     alt="ACRentService" 
                     className="h-full w-full object-cover"
                   />
                 </div>
-                <span className="text-xl font-bold text-primary">ACRentService</span>
+                <div>
+                  <span className="text-xl font-bold text-primary block">ACRentService</span>
+                  <span className="text-xs text-muted-foreground">Rentals & Services</span>
+                </div>
               </Link>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
                 Your trusted partner for AC and heater rentals. Comfort delivered to your doorstep.
