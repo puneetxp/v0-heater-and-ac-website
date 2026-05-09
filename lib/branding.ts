@@ -16,6 +16,7 @@ export const BRANDING = {
   // Contact Information
   contact: {
     email: "hello@acrentservice.com",
+    supportEmail: "support@acrentservice.com",
     adminEmail: "admin@acrentservice.com",
     phone: "+91 98765 43210",
   },
@@ -92,7 +93,7 @@ export function getAdminEmail(): string {
  * Get customer support email
  */
 export function getSupportEmail(): string {
-  return BRANDING.contact.email
+  return BRANDING.contact.supportEmail
 }
 
 /**

@@ -199,7 +199,7 @@ export async function SeasonalPlans() {
   }
 
   return (
-    <section className="py-16 md:py-20 lg:py-24 relative overflow-hidden">
+    <section id="seasonal" className="py-16 md:py-20 lg:py-24 relative overflow-hidden scroll-mt-20">
       {/* Background decoration */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/5 rounded-full blur-3xl" />

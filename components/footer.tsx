@@ -12,8 +12,12 @@ export function Footer() {
             {/* Brand */}
             <div className="space-y-4">
               <Link href="/" className="flex items-center gap-2.5 group">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-sm">
-                  <Wind className="h-5 w-5 text-primary-foreground" />
+                <div className="h-10 w-10 rounded-xl shadow-sm overflow-hidden">
+                  <img 
+                    src="/acrent-logo.jpg" 
+                    alt="ACRentService" 
+                    className="h-full w-full object-cover"
+                  />
                 </div>
                 <span className="text-xl font-bold text-primary">ACRentService</span>
               </Link>
@@ -93,13 +97,13 @@ export function Footer() {
                 </li>
                 <li>
                   <a
-                    href="mailto:hello@acrentservice.com"
+                    href="mailto:support@acrentservice.com"
                     className="flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
                   >
                     <div className="h-9 w-9 rounded-lg bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/15 transition-colors flex-shrink-0">
                       <Mail className="h-4 w-4 text-secondary" />
                     </div>
-                    <span>hello@acrentservice.com</span>
+                    <span>support@acrentservice.com</span>
                   </a>
                 </li>
                 <li>
