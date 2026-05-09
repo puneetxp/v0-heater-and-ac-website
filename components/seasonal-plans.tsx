@@ -32,7 +32,21 @@ export async function SeasonalPlans() {
       .order("duration_months", { ascending: true })
 
     if (data) {
-      plans = data
+      plans = data.filter((plan) => {
+        // Filter criteria: Show only bundles that look good
+        // Require: Has pricing, has features, has discount, has valid months
+        return (
+          plan.base_price &&
+          plan.base_price > 0 &&
+          plan.features &&
+          Array.isArray(plan.features) &&
+          plan.features.length > 0 &&
+          plan.discount_percentage &&
+          plan.discount_percentage > 0 &&
+          plan.start_month &&
+          plan.end_month
+        )
+      })
     }
   } catch (error) {
     console.warn("[v0] Failed to fetch seasonal plans server-side:", error)
@@ -71,28 +85,69 @@ export async function SeasonalPlans() {
     }
   }
 
-  const PlanCard = ({ plan }: { plan: SeasonalPlan }) => (
-    <Card className="relative hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden group">
-      {/* Gradient header bar */}
-      <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${getSeasonColor(plan.season)}`} />
+  const getQualityLevel = (plan: SeasonalPlan): "premium" | "excellent" | "great" => {
+    const featureCount = plan.features?.length || 0
+    const discountLevel = plan.discount_percentage || 0
 
-      {plan.season === "end_season" && (
-        <div className="absolute -top-3 w-full flex justify-center">
-          <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg px-3 py-2.5 mt-2">
-            Special Sale!
-          </Badge>
-        </div>
-      )}
+    if (featureCount >= 6 && discountLevel >= 30) return "premium"
+    if (featureCount >= 5 && discountLevel >= 25) return "excellent"
+    return "great"
+  }
 
-      <CardHeader className="space-y-4 pb-6">
-        <div className="flex items-start justify-between">
-          <div className={`p-2.5 rounded-xl bg-gradient-to-br ${getSeasonColor(plan.season)} text-white`}>
-            {getSeasonIcon(plan.season)}
+  const getQualityBadge = (quality: string) => {
+    switch (quality) {
+      case "premium":
+        return { color: "bg-gradient-to-r from-amber-500 to-yellow-500", label: "Premium Bundle" }
+      case "excellent":
+        return { color: "bg-gradient-to-r from-blue-500 to-cyan-500", label: "Excellent Value" }
+      case "great":
+        return { color: "bg-gradient-to-r from-green-500 to-emerald-500", label: "Great Deal" }
+      default:
+        return { color: "bg-gray-500", label: "Bundle" }
+    }
+  }
+
+  const PlanCard = ({ plan }: { plan: SeasonalPlan }) => {
+    const quality = getQualityLevel(plan)
+    const qualityBadge = getQualityBadge(quality)
+
+    return (
+      <Card className="relative hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden group">
+        {/* Gradient header bar */}
+        <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${getSeasonColor(plan.season)}`} />
+
+        {(plan.season === "end_season" || quality === "premium") && (
+          <div className="absolute -top-3 w-full flex justify-center">
+            {plan.season === "end_season" ? (
+              <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg px-3 py-2.5 mt-2">
+                Special Sale!
+              </Badge>
+            ) : (
+              <Badge className={`${qualityBadge.color} text-white shadow-lg px-3 py-2.5 mt-2`}>
+                {qualityBadge.label}
+              </Badge>
+            )}
           </div>
-          {plan.discount_percentage > 0 && (
-            <Badge className="bg-green-100 text-green-700 font-semibold">Save {plan.discount_percentage}%</Badge>
-          )}
-        </div>
+        )}
+
+        <CardHeader className="space-y-4 pb-6">
+          <div className="flex items-start justify-between">
+            <div className={`p-2.5 rounded-xl bg-gradient-to-br ${getSeasonColor(plan.season)} text-white`}>
+              {getSeasonIcon(plan.season)}
+            </div>
+            <div className="flex flex-col gap-2 items-end">
+              {plan.discount_percentage > 0 && (
+                <Badge className="bg-green-100 text-green-700 font-semibold text-xs px-2 py-1">
+                  Save {plan.discount_percentage}%
+                </Badge>
+              )}
+              {quality !== "premium" && plan.season !== "end_season" && (
+                <Badge className={`${qualityBadge.color} text-white text-xs px-2 py-1`}>
+                  {qualityBadge.label}
+                </Badge>
+              )}
+            </div>
+          </div>
 
         <div>
           <CardTitle className="text-xl font-bold mb-2">{plan.name}</CardTitle>
@@ -134,7 +189,8 @@ export async function SeasonalPlans() {
         </Button>
       </CardContent>
     </Card>
-  )
+    )
+  }
 
 
   // If no plans are found, don't render anything
@@ -194,35 +250,64 @@ export async function SeasonalPlans() {
           </TabsList>
 
           <TabsContent value="all" className="mt-0">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              {plans.map((plan) => (
-                <PlanCard key={plan.id} plan={plan} />
-              ))}
-            </div>
+            {plans.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                {plans.map((plan) => (
+                  <PlanCard key={plan.id} plan={plan} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Calendar className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                <p className="text-slate-600 font-medium">No seasonal bundles available at the moment</p>
+                <p className="text-sm text-slate-500 mt-2">Check back soon for our seasonal offers!</p>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="summer" className="mt-0">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              {summerPlans.map((plan) => (
-                <PlanCard key={plan.id} plan={plan} />
-              ))}
-            </div>
+            {summerPlans.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                {summerPlans.map((plan) => (
+                  <PlanCard key={plan.id} plan={plan} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Sun className="h-12 w-12 text-yellow-300 mx-auto mb-4" />
+                <p className="text-slate-600 font-medium">No summer bundles available</p>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="winter" className="mt-0">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              {winterPlans.map((plan) => (
-                <PlanCard key={plan.id} plan={plan} />
-              ))}
-            </div>
+            {winterPlans.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                {winterPlans.map((plan) => (
+                  <PlanCard key={plan.id} plan={plan} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Snowflake className="h-12 w-12 text-blue-300 mx-auto mb-4" />
+                <p className="text-slate-600 font-medium">No winter bundles available</p>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="year-round" className="mt-0">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              {yearRoundPlans.map((plan) => (
-                <PlanCard key={plan.id} plan={plan} />
-              ))}
-            </div>
+            {yearRoundPlans.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                {yearRoundPlans.map((plan) => (
+                  <PlanCard key={plan.id} plan={plan} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Calendar className="h-12 w-12 text-green-300 mx-auto mb-4" />
+                <p className="text-slate-600 font-medium">No year-round bundles available</p>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 
