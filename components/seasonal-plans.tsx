@@ -38,43 +38,6 @@ export async function SeasonalPlans() {
     console.warn("[v0] Failed to fetch seasonal plans server-side:", error)
   }
 
-  // Always render the section - even with empty state
-  // This ensures the #seasonal anchor always exists for navigation
-
-  // Add sample data if no plans found (for demonstration)
-  if (plans.length === 0) {
-    plans = [
-      {
-        id: 1,
-        name: "Summer Cool - Premium",
-        season: "summer",
-        description: "Ultimate cooling for peak summer months",
-        discount_percentage: 25,
-        duration_months: 3,
-        features: ["Professional Installation", "24/7 Premium Support", "Free Maintenance", "Flexible Upgrades", "Free Service Swap"],
-        valid_from: "2025-03-01",
-        valid_until: "2025-05-31",
-        base_price: 6000,
-        start_month: 3,
-        end_month: 5,
-      },
-      {
-        id: 2,
-        name: "Winter Warm - Premium",
-        season: "winter",
-        description: "Complete warmth and comfort for winter",
-        discount_percentage: 25,
-        duration_months: 3,
-        features: ["Professional Installation", "24/7 Premium Support", "Free Maintenance", "Energy Efficiency", "Free Service Swap"],
-        valid_from: "2025-10-01",
-        valid_until: "2025-12-31",
-        base_price: 5000,
-        start_month: 10,
-        end_month: 12,
-      },
-    ]
-  }
-
   // Filter to only show summer and winter (remove year_round and end_season)
   const summerPlans = plans.filter((p) => p.season === "summer")
   const winterPlans = plans.filter((p) => p.season === "winter")
@@ -171,46 +134,46 @@ export async function SeasonalPlans() {
             </div>
           </div>
 
-        <div>
-          <CardTitle className="text-xl font-bold mb-2">{plan.name}</CardTitle>
-          <CardDescription className="text-sm">{plan.description}</CardDescription>
-        </div>
-
-        <div className="space-y-2 border-t pt-3">
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-primary">₹{plan.base_price?.toLocaleString()}</span>
-            <span className="text-muted-foreground font-medium">per month</span>
+          <div>
+            <CardTitle className="text-xl font-bold mb-2">{plan.name}</CardTitle>
+            <CardDescription className="text-sm">{plan.description}</CardDescription>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Duration: {plan.duration_months} month{plan.duration_months !== 1 ? "s" : ""}
-          </p>
-        </div>
 
-        {plan.start_month && plan.end_month && (
-          <p className="text-xs text-muted-foreground">
-            Available: {new Date(2025, plan.start_month - 1).toLocaleDateString("en-US", { month: "short" })} -{" "}
-            {new Date(2025, plan.end_month - 1).toLocaleDateString("en-US", { month: "short" })}
-          </p>
-        )}
-      </CardHeader>
+          <div className="space-y-2 border-t pt-3">
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-primary">₹{plan.base_price?.toLocaleString()}</span>
+              <span className="text-muted-foreground font-medium">per month</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Duration: {plan.duration_months} month{plan.duration_months !== 1 ? "s" : ""}
+            </p>
+          </div>
 
-      <CardContent className="space-y-6">
-        <ul className="space-y-3">
-          {plan.features.map((feature, index) => (
-            <li key={index} className="flex items-start gap-3 text-sm">
-              <div className="mt-0.5 rounded-full bg-primary/10 p-0.5">
-                <Check className="h-4 w-4 text-primary" />
-              </div>
-              <span className="text-muted-foreground leading-relaxed">{feature}</span>
-            </li>
-          ))}
-        </ul>
+          {plan.start_month && plan.end_month && (
+            <p className="text-xs text-muted-foreground">
+              Available: {new Date(2025, plan.start_month - 1).toLocaleDateString("en-US", { month: "short" })} -{" "}
+              {new Date(2025, plan.end_month - 1).toLocaleDateString("en-US", { month: "short" })}
+            </p>
+          )}
+        </CardHeader>
 
-        <Button className="w-full group-hover:shadow-lg transition-shadow" size="lg">
-          Choose Plan
-        </Button>
-      </CardContent>
-    </Card>
+        <CardContent className="space-y-6">
+          <ul className="space-y-3">
+            {plan.features.map((feature, index) => (
+              <li key={index} className="flex items-start gap-3 text-sm">
+                <div className="mt-0.5 rounded-full bg-primary/10 p-0.5">
+                  <Check className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-muted-foreground leading-relaxed">{feature}</span>
+              </li>
+            ))}
+          </ul>
+
+          <Button className="w-full group-hover:shadow-lg transition-shadow" size="lg">
+            Choose Plan
+          </Button>
+        </CardContent>
+      </Card>
     )
   }
 
@@ -257,7 +220,7 @@ export async function SeasonalPlans() {
           </div>
           {summerPlans.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
-              {summerPlans.map((plan) => (
+              {summerPlans.filter(i => i.name != 'Monthly').map((plan) => (
                 <PlanCard key={plan.id} plan={plan} />
               ))}
             </div>
@@ -282,7 +245,7 @@ export async function SeasonalPlans() {
           </div>
           {winterPlans.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
-              {winterPlans.map((plan) => (
+              {winterPlans.filter(i => i.name != 'Monthly').map((plan) => (
                 <PlanCard key={plan.id} plan={plan} />
               ))}
             </div>
