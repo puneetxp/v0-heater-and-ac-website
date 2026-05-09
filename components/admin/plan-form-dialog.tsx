@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,10 +20,25 @@ interface PlanFormDialogProps {
   isEdit?: boolean;
 }
 
+interface FormData {
+  name: string;
+  description: string;
+  season: string;
+  base_price: string;
+  pricing_per_unit: string;
+  discount_percentage: string;
+  duration_months: string;
+  start_month: string;
+  end_month: string;
+}
+
 export function PlanFormDialog({ planId, isEdit }: PlanFormDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [loadingPlan, setLoadingPlan] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     description: "",
     season: "summer",
@@ -35,9 +50,46 @@ export function PlanFormDialog({ planId, isEdit }: PlanFormDialogProps) {
     end_month: "",
   });
 
+  // Load plan data when editing
+  useEffect(() => {
+    if (isEdit && planId && open) {
+      loadPlanData();
+    }
+  }, [isEdit, planId, open]);
+
+  const loadPlanData = async () => {
+    setLoadingPlan(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/admin/plans/${planId}`);
+      if (!response.ok) {
+        throw new Error("Failed to load plan data");
+      }
+      const data = await response.json();
+      setFormData({
+        name: data.name || "",
+        description: data.description || "",
+        season: data.season || "summer",
+        base_price: data.base_price?.toString() || "",
+        pricing_per_unit: data.pricing_per_unit?.toString() || "",
+        discount_percentage: data.discount_percentage?.toString() || "",
+        duration_months: data.duration_months?.toString() || "",
+        start_month: data.start_month?.toString() || "",
+        end_month: data.end_month?.toString() || "",
+      });
+    } catch (err) {
+      setError("Failed to load plan data");
+      console.error("Error loading plan:", err);
+    } finally {
+      setLoadingPlan(false);
+    }
+  };
+
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
+    setSuccess(null);
 
     try {
       const endpoint = isEdit
@@ -52,12 +104,19 @@ export function PlanFormDialog({ planId, isEdit }: PlanFormDialogProps) {
       });
 
       if (response.ok) {
-        setOpen(false);
-        // Refresh page or trigger refetch
-        window.location.reload();
+        setSuccess(isEdit ? "Plan updated successfully!" : "Plan created successfully!");
+        setTimeout(() => {
+          setOpen(false);
+          // Refresh page to show updated data
+          window.location.reload();
+        }, 1000);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || "Failed to save plan");
       }
     } catch (error) {
       console.error("Error saving plan:", error);
+      setError("An error occurred while saving the plan");
     } finally {
       setLoading(false);
     }
@@ -88,7 +147,22 @@ export function PlanFormDialog({ planId, isEdit }: PlanFormDialogProps) {
             {isEdit ? "Edit Plan" : "Create New Seasonal Plan"}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+            {success}
+          </div>
+        )}
+        {loadingPlan && (
+          <div className="text-center py-4">
+            <p className="text-slate-600">Loading plan data...</p>
+          </div>
+        )}
+        <form onSubmit={handleSubmit} className="space-y-4" style={{ display: loadingPlan ? 'none' : 'block' }}>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Plan Name</Label>

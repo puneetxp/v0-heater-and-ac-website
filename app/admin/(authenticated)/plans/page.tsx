@@ -14,7 +14,13 @@ export default async function AdminPlansPage() {
   const { data: plans } = await supabase
     .from("seasonal_plans")
     .select("*")
+    .order("season", { ascending: true })
     .order("duration_months", { ascending: true })
+
+  const getMonthName = (month: number): string => {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return months[month - 1] || "";
+  };
 
   const getSeasonIcon = (season: string) => {
     switch (season) {
@@ -40,7 +46,34 @@ export default async function AdminPlansPage() {
       default:
         return "from-gray-500 to-gray-600"
     }
-  }
+  };
+
+  const getSeasonLabel = (season: string) => {
+    switch (season) {
+      case "summer":
+        return "Summer Plans"
+      case "winter":
+        return "Winter Plans"
+      case "year_round":
+        return "Year-Round Plans"
+      case "end_season":
+        return "End Season Sales"
+      default:
+        return "Other Plans"
+    }
+  };
+
+  // Group plans by season
+  const groupedPlans = plans?.reduce((acc, plan) => {
+    const season = plan.season;
+    if (!acc[season]) {
+      acc[season] = [];
+    }
+    acc[season].push(plan);
+    return acc;
+  }, {} as Record<string, typeof plans>);
+
+  const seasonOrder = ["summer", "winter", "year_round", "end_season"];
 
   return (
     <div className="space-y-8">
@@ -52,8 +85,20 @@ export default async function AdminPlansPage() {
         <PlanFormDialog />
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {plans?.map((plan) => (
+      <div className="space-y-12">
+        {seasonOrder.map((season) => {
+          const seasonPlans = groupedPlans?.[season];
+          if (!seasonPlans || seasonPlans.length === 0) return null;
+
+          return (
+            <div key={season} className="space-y-4">
+              <div className="border-b-2 border-slate-200 pb-2">
+                <h2 className="text-xl font-semibold text-slate-900">{getSeasonLabel(season)}</h2>
+                <p className="text-sm text-slate-600">{seasonPlans.length} plan(s) available</p>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {seasonPlans.map((plan) => (
           <Card key={plan.id} className="overflow-hidden hover:shadow-lg transition-shadow">
             <div className={`h-2 bg-gradient-to-r ${getSeasonColor(plan.season)}`} />
 
@@ -94,9 +139,10 @@ export default async function AdminPlansPage() {
               </div>
 
               {plan.start_month && plan.end_month && (
-                <p className="text-xs text-slate-600">
-                  Available: Month {plan.start_month} - {plan.end_month}
-                </p>
+                <div className="bg-slate-50 p-2 rounded text-xs text-slate-600 space-y-1">
+                  <p><strong>Valid:</strong> {getMonthName(plan.start_month)} - {getMonthName(plan.end_month)}</p>
+                  <p><strong>Months:</strong> {plan.start_month} - {plan.end_month}</p>
+                </div>
               )}
 
               {plan.features && plan.features.length > 0 && (
@@ -124,8 +170,19 @@ export default async function AdminPlansPage() {
               </div>
             </CardContent>
           </Card>
-        ))}
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
+
+      {!plans || plans.length === 0 && (
+        <div className="text-center py-12">
+          <Calendar className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+          <p className="text-slate-600">No seasonal plans available. Create one to get started!</p>
+        </div>
+      )}
     </div>
   )
 }

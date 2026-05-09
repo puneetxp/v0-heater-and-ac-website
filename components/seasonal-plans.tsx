@@ -1,7 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Check, Snowflake, Sun, Calendar } from "lucide-react"
 import { createServerClient } from "@/lib/supabase/server"
 
@@ -31,17 +30,54 @@ export async function SeasonalPlans() {
       .eq("is_active", true)
       .order("duration_months", { ascending: true })
 
-    if (data) {
+    if (data && data.length > 0) {
+      // Show all active plans
       plans = data
     }
   } catch (error) {
     console.warn("[v0] Failed to fetch seasonal plans server-side:", error)
   }
 
+  // Always render the section - even with empty state
+  // This ensures the #seasonal anchor always exists for navigation
+
+  // Add sample data if no plans found (for demonstration)
+  if (plans.length === 0) {
+    plans = [
+      {
+        id: 1,
+        name: "Summer Cool - Premium",
+        season: "summer",
+        description: "Ultimate cooling for peak summer months",
+        discount_percentage: 25,
+        duration_months: 3,
+        features: ["Professional Installation", "24/7 Premium Support", "Free Maintenance", "Flexible Upgrades", "Free Service Swap"],
+        valid_from: "2025-03-01",
+        valid_until: "2025-05-31",
+        base_price: 6000,
+        start_month: 3,
+        end_month: 5,
+      },
+      {
+        id: 2,
+        name: "Winter Warm - Premium",
+        season: "winter",
+        description: "Complete warmth and comfort for winter",
+        discount_percentage: 25,
+        duration_months: 3,
+        features: ["Professional Installation", "24/7 Premium Support", "Free Maintenance", "Energy Efficiency", "Free Service Swap"],
+        valid_from: "2025-10-01",
+        valid_until: "2025-12-31",
+        base_price: 5000,
+        start_month: 10,
+        end_month: 12,
+      },
+    ]
+  }
+
+  // Filter to only show summer and winter (remove year_round and end_season)
   const summerPlans = plans.filter((p) => p.season === "summer")
   const winterPlans = plans.filter((p) => p.season === "winter")
-  const yearRoundPlans = plans.filter((p) => p.season === "year_round")
-  const endSeasonPlans = plans.filter((p) => p.season === "end_season")
 
   const getSeasonIcon = (season: string) => {
     switch (season) {
@@ -71,28 +107,69 @@ export async function SeasonalPlans() {
     }
   }
 
-  const PlanCard = ({ plan }: { plan: SeasonalPlan }) => (
-    <Card className="relative hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden group">
-      {/* Gradient header bar */}
-      <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${getSeasonColor(plan.season)}`} />
+  const getQualityLevel = (plan: SeasonalPlan): "premium" | "excellent" | "great" => {
+    const featureCount = plan.features?.length || 0
+    const discountLevel = plan.discount_percentage || 0
 
-      {plan.season === "end_season" && (
-        <div className="absolute -top-3 w-full flex justify-center">
-          <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg px-3 py-2.5 mt-2">
-            Special Sale!
-          </Badge>
-        </div>
-      )}
+    if (featureCount >= 6 && discountLevel >= 30) return "premium"
+    if (featureCount >= 5 && discountLevel >= 25) return "excellent"
+    return "great"
+  }
 
-      <CardHeader className="space-y-4 pb-6">
-        <div className="flex items-start justify-between">
-          <div className={`p-2.5 rounded-xl bg-gradient-to-br ${getSeasonColor(plan.season)} text-white`}>
-            {getSeasonIcon(plan.season)}
+  const getQualityBadge = (quality: string) => {
+    switch (quality) {
+      case "premium":
+        return { color: "bg-gradient-to-r from-amber-500 to-yellow-500", label: "Premium Bundle" }
+      case "excellent":
+        return { color: "bg-gradient-to-r from-blue-500 to-cyan-500", label: "Excellent Value" }
+      case "great":
+        return { color: "bg-gradient-to-r from-green-500 to-emerald-500", label: "Great Deal" }
+      default:
+        return { color: "bg-gray-500", label: "Bundle" }
+    }
+  }
+
+  const PlanCard = ({ plan }: { plan: SeasonalPlan }) => {
+    const quality = getQualityLevel(plan)
+    const qualityBadge = getQualityBadge(quality)
+
+    return (
+      <Card className="relative hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden group">
+        {/* Gradient header bar */}
+        <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${getSeasonColor(plan.season)}`} />
+
+        {(plan.season === "end_season" || quality === "premium") && (
+          <div className="absolute -top-3 w-full flex justify-center">
+            {plan.season === "end_season" ? (
+              <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg px-3 py-2.5 mt-2">
+                Special Sale!
+              </Badge>
+            ) : (
+              <Badge className={`${qualityBadge.color} text-white shadow-lg px-3 py-2.5 mt-2`}>
+                {qualityBadge.label}
+              </Badge>
+            )}
           </div>
-          {plan.discount_percentage > 0 && (
-            <Badge className="bg-green-100 text-green-700 font-semibold">Save {plan.discount_percentage}%</Badge>
-          )}
-        </div>
+        )}
+
+        <CardHeader className="space-y-4 pb-6">
+          <div className="flex items-start justify-between">
+            <div className={`p-2.5 rounded-xl bg-gradient-to-br ${getSeasonColor(plan.season)} text-white`}>
+              {getSeasonIcon(plan.season)}
+            </div>
+            <div className="flex flex-col gap-2 items-end">
+              {plan.discount_percentage > 0 && (
+                <Badge className="bg-green-100 text-green-700 font-semibold text-xs px-2 py-1">
+                  Save {plan.discount_percentage}%
+                </Badge>
+              )}
+              {quality !== "premium" && plan.season !== "end_season" && (
+                <Badge className={`${qualityBadge.color} text-white text-xs px-2 py-1`}>
+                  {qualityBadge.label}
+                </Badge>
+              )}
+            </div>
+          </div>
 
         <div>
           <CardTitle className="text-xl font-bold mb-2">{plan.name}</CardTitle>
@@ -134,97 +211,88 @@ export async function SeasonalPlans() {
         </Button>
       </CardContent>
     </Card>
-  )
-
-
-  // If no plans are found, don't render anything
-  if (plans.length === 0) {
-    return null
+    )
   }
 
+
   return (
-    <section className="py-16 md:py-20 lg:py-24 relative overflow-hidden">
-      {/* Background decoration */}
+    <section id="seasonal" className="py-20 md:py-28 lg:py-32 relative overflow-hidden scroll-mt-24 bg-gradient-to-b from-primary/5 to-transparent">
+      {/* Enhanced Background decoration */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl" />
+        <div className="absolute top-10 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/4 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl" />
       </div>
 
       <div className="container mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center space-y-4 mb-12 md:mb-16">
-          <Badge variant="secondary" className="text-sm px-4 py-1.5">
+        <div className="text-center space-y-6 mb-14 md:mb-20">
+          <Badge variant="secondary" className="text-sm px-4 py-1.5 inline-block">
             Seasonal Plans
           </Badge>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-balance">
-            Save Big with{" "}
-            <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              Seasonal Bundles
-            </span>
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-pretty">
-            Choose the perfect plan based on the season. Get the best rates with our seasonal bundles and end-of-season
-            sales.
-          </p>
+          <div className="space-y-3">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-balance">
+              Save Big with{" "}
+              <span className="bg-gradient-to-r from-primary via-primary/80 to-orange-500 bg-clip-text text-transparent">
+                Seasonal Bundles
+              </span>
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto text-pretty">
+              Choose the perfect plan based on the season. Get the best rates with our seasonal bundles and end-of-season
+              sales.
+            </p>
+          </div>
         </div>
 
-        {/* Seasonal Tabs */}
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4 mb-12 h-auto p-1">
-            <TabsTrigger value="all" className="flex items-center gap-2 py-3">
-              <Calendar className="h-4 w-4" />
-              <span className="hidden sm:inline">All Plans</span>
-              <span className="sm:hidden">All</span>
-            </TabsTrigger>
-            <TabsTrigger value="summer" className="flex items-center gap-2 py-3">
-              <Sun className="h-4 w-4" />
-              <span className="hidden sm:inline">Summer</span>
-              <span className="sm:hidden">Summer</span>
-            </TabsTrigger>
-            <TabsTrigger value="winter" className="flex items-center gap-2 py-3">
-              <Snowflake className="h-4 w-4" />
-              <span className="hidden sm:inline">Winter</span>
-              <span className="sm:hidden">Winter</span>
-            </TabsTrigger>
-            <TabsTrigger value="year-round" className="flex items-center gap-2 py-3">
-              <Calendar className="h-4 w-4" />
-              <span className="hidden sm:inline">Year-Round</span>
-              <span className="sm:hidden">Year</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="all" className="mt-0">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              {plans.map((plan) => (
-                <PlanCard key={plan.id} plan={plan} />
-              ))}
+        {/* Summer Section */}
+        <div className="space-y-6 mb-16">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-lg bg-orange-100">
+              <Sun className="h-6 w-6 text-orange-600" />
             </div>
-          </TabsContent>
-
-          <TabsContent value="summer" className="mt-0">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900">Summer Plans</h3>
+              <p className="text-sm text-slate-600">Beat the heat with our cooling solutions</p>
+            </div>
+          </div>
+          {summerPlans.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
               {summerPlans.map((plan) => (
                 <PlanCard key={plan.id} plan={plan} />
               ))}
             </div>
-          </TabsContent>
+          ) : (
+            <div className="text-center py-12 bg-slate-50 rounded-lg">
+              <Sun className="h-12 w-12 text-yellow-300 mx-auto mb-4" />
+              <p className="text-slate-600 font-medium">Summer plans coming soon!</p>
+            </div>
+          )}
+        </div>
 
-          <TabsContent value="winter" className="mt-0">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        {/* Winter Section */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-lg bg-blue-100">
+              <Snowflake className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900">Winter Plans</h3>
+              <p className="text-sm text-slate-600">Stay cozy and warm all winter long</p>
+            </div>
+          </div>
+          {winterPlans.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
               {winterPlans.map((plan) => (
                 <PlanCard key={plan.id} plan={plan} />
               ))}
             </div>
-          </TabsContent>
-
-          <TabsContent value="year-round" className="mt-0">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              {yearRoundPlans.map((plan) => (
-                <PlanCard key={plan.id} plan={plan} />
-              ))}
+          ) : (
+            <div className="text-center py-12 bg-slate-50 rounded-lg">
+              <Snowflake className="h-12 w-12 text-blue-300 mx-auto mb-4" />
+              <p className="text-slate-600 font-medium">Winter plans coming soon!</p>
             </div>
-          </TabsContent>
-        </Tabs>
+          )}
+        </div>
 
         {/* Bottom Info */}
         <div className="mt-16 text-center space-y-4">
