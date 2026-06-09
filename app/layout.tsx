@@ -2,6 +2,7 @@ import { Toaster } from "sonner";
 import type React from "react";
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { SupabaseProvider } from "./providers";
 import { CartProvider } from "@/lib/contexts/cart-context";
 import { AnimatedBackground } from "@/components/animated-background";
@@ -154,6 +155,7 @@ export default function RootLayout({
           <CartProvider>
             {children}
             <Analytics />
+            <SpeedInsights />
             <Toaster richColors position="bottom-right" />
           </CartProvider>
         </SupabaseProvider>
