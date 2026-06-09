@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Wind, Mail, MapPin } from "lucide-react"
+import { Wind, Mail, Phone, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
@@ -87,6 +87,17 @@ export function Footer() {
             <div className="space-y-4">
               <h3 className="font-semibold text-foreground">Get in Touch</h3>
               <ul className="space-y-3">
+                <li>
+                  <a
+                    href="tel:+919220929373"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+                  >
+                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors flex-shrink-0">
+                      <Phone className="h-4 w-4 text-primary" />
+                    </div>
+                    <span>09220929373</span>
+                  </a>
+                </li>
                 <li>
                   <a
                     href="mailto:support@acrentservice.com"
