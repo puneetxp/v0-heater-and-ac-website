@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSupabaseClient } from "@/lib/hooks/use-supabase";
 import { getFallbackImages } from "@/lib/supabase/storage"; // Added getFallbackImages import
+import { sendBookingToTelegram } from "@/lib/telegram";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -90,7 +91,7 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
 
     try {
       if (!supabase) throw new Error("Supabase client not initialized");
-      const { error } = await supabase.from("bookings").insert({
+      const { data, error } = await supabase.from("bookings").insert({
         user_id: user.id,
         product_id: product.id,
         start_date: startDate.toISOString().split("T")[0],
@@ -107,9 +108,32 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
         delivery_pincode: formData.deliveryPincode,
         notes: formData.notes,
         status: "pending",
-      });
+      }).select();
 
       if (error) throw error;
+
+      // Send booking notification to Telegram
+      if (data && data.length > 0) {
+        const booking = data[0];
+        const bookingData = {
+          id: booking.id,
+          customerName: profile?.full_name || user.email,
+          customerPhone: profile?.phone || "Not provided",
+          customerEmail: user.email,
+          productType: product.name,
+          rentalStartDate: startDate.toISOString().split("T")[0],
+          rentalEndDate: endDate.toISOString().split("T")[0],
+          quantity: formData.quantity,
+          totalPrice: total,
+          address: `${formData.deliveryAddress}, ${formData.deliveryCity}, ${formData.deliveryState} ${formData.deliveryPincode}`,
+          notes: formData.notes,
+        };
+
+        // Send to Telegram (non-blocking)
+        sendBookingToTelegram(bookingData).catch((err) =>
+          console.error("[v0] Failed to send Telegram notification:", err)
+        );
+      }
 
       router.push("/dashboard/bookings");
     } catch (err) {

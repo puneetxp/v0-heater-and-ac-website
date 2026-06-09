@@ -89,13 +89,13 @@ export function Footer() {
               <ul className="space-y-3">
                 <li>
                   <a
-                    href="tel:+919876543210"
+                    href="tel:+919220929373"
                     className="flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
                   >
                     <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors flex-shrink-0">
                       <Phone className="h-4 w-4 text-primary" />
                     </div>
-                    <span>+91 98765 43210</span>
+                    <span>09220929373</span>
                   </a>
                 </li>
                 <li>
@@ -114,10 +114,27 @@ export function Footer() {
                     <div className="h-9 w-9 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
                       <MapPin className="h-4 w-4 text-accent" />
                     </div>
-                    <span>123 Business District, Mumbai, India</span>
+                    <span>Plot No. 1409, Ardee City Gate Number 2 Rd, Sarswati Kunj II, Ardee City, Sector 52, Gurugram, Haryana 122003</span>
                   </div>
                 </li>
               </ul>
+            </div>
+          </div>
+
+          {/* Google Maps */}
+          <div className="border-t pt-8 mb-8">
+            <h3 className="font-semibold text-foreground mb-4">Visit Us</h3>
+            <div className="rounded-lg overflow-hidden border border-muted shadow-sm">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3508.325500181444!2d77.0781420754938!3d28.439602675770526!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d19b51804713d%3A0x8db5d7e84126926a!2sAC%20Rent%20in%20Gurgaon-RentExa!5e0!3m2!1sen!2sin!4v1780983353661!5m2!1sen!2sin"
+                width="100%"
+                height="300"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="w-full"
+              />
             </div>
           </div>
 

@@ -1,4 +1,7 @@
 import { Shield, Wrench, Clock, CreditCard } from "lucide-react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { ArrowRight } from "lucide-react"
 
 const features = [
   {
@@ -83,6 +86,30 @@ export function Features() {
               </div>
             )
           })}
+        </div>
+
+        {/* CTA Section */}
+        <div className="mt-16 md:mt-20 text-center space-y-6 p-8 md:p-12 rounded-3xl bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 border-2 border-primary/20 hover:border-primary/40 transition-all">
+          <h3 className="text-2xl md:text-3xl font-bold">Ready to Experience the Difference?</h3>
+          <p className="text-muted-foreground max-w-2xl mx-auto text-balance">
+            Start your comfort journey today with flexible rental plans tailored to your needs.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link href="/#products">
+              <Button
+                size="lg"
+                className="gradient-primary text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all text-base px-8 py-6"
+              >
+                View Plans
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+            <Link href="/auth/sign-up">
+              <Button size="lg" variant="outline" className="text-base px-8 py-6 hover:bg-primary/5 bg-transparent">
+                Get Started
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </section>
