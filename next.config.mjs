@@ -15,7 +15,6 @@ const nextConfig = {
   generateEtags: true,
   productionBrowserSourceMaps: false,
   reactStrictMode: true,
-  swcMinify: true,
   headers: async () => {
     return [
       {
