@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/contexts/cart-context";
 import { useSupabaseClient } from "@/lib/hooks/use-supabase";
 import { useRouter } from "next/navigation";
-import { Badge, CheckCircle2, CreditCard, Link, MapPin, Truck, User } from "lucide-react";
+import Link from "next/link";
+import { Badge, CheckCircle2, CreditCard, MapPin, Truck, User } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 export default function CheckoutPage() {
@@ -300,27 +301,27 @@ export default function CheckoutPage() {
     <main className="min-h-screen flex flex-col bg-slate-50/50">
       <Header />
       <div className="flex-1 container mx-auto max-w-6xl px-4 py-12">
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-8 animate-in fade-in duration-500">
           <div className="lg:col-span-2 space-y-6">
             {!user && (
-              <Card className="border-none shadow-sm overflow-hidden">
-                <CardHeader className="bg-blue-600 text-white">
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
+              <Card className="border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-md overflow-hidden rounded-2xl">
+                <CardHeader className="bg-gradient-to-r from-primary/10 to-blue-500/10 border-b border-slate-100/50 py-5">
+                  <CardTitle className="flex items-center gap-2.5 text-lg font-black text-slate-800">
+                    <User className="h-5 w-5 text-primary animate-pulse" />
                     Express Checkout
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="grid md:grid-cols-2 gap-6 items-center">
                     <div>
-                      <p className="text-slate-600 mb-4 font-medium">Save your address and track orders by signing in.</p>
-                      <Button onClick={handleGoogleLogin} variant="outline" className="w-full h-12 gap-2 border-slate-200 hover:bg-slate-50">
+                      <p className="text-slate-600 mb-4 font-semibold text-sm">Save your address and track orders by signing in.</p>
+                      <Button onClick={handleGoogleLogin} variant="outline" className="w-full h-12 gap-3 border-slate-200 hover:bg-slate-50 rounded-xl transition-all duration-300 font-bold hover:shadow-sm">
                         <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="Google" />
                         Sign in with Google
                       </Button>
                     </div>
                     <div className="hidden md:flex flex-col items-center border-l pl-6 border-slate-100">
-                      <p className="text-slate-400 text-sm italic">Or continue as guest below</p>
+                      <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Or continue as guest below</p>
                     </div>
                   </div>
                 </CardContent>
@@ -328,9 +329,9 @@ export default function CheckoutPage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <Card className="border-none shadow-sm">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
+              <Card className="border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-md rounded-2xl overflow-hidden">
+                <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-primary/10 to-blue-500/10 border-b border-slate-100/50 py-5">
+                  <CardTitle className="flex items-center gap-2.5 text-lg font-black text-slate-800">
                     <MapPin className="h-5 w-5 text-primary" />
                     Delivery Information
                   </CardTitle>
@@ -357,7 +358,7 @@ export default function CheckoutPage() {
                     </Button>
                   )}
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="p-6 space-y-6">
                   {/* Saved Addresses Section */}
                   {user && savedAddresses.length > 0 && !showNewAddressForm && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -389,79 +390,94 @@ export default function CheckoutPage() {
                   )}
 
                   {/* Manual Form Section - Always show and pre-fill */}
-                  <div className="space-y-4">
-                    {/* Pincode Section - Moved to top for better UX */}
-                    <div className="space-y-2 relative">
-                      <Label htmlFor="pincode">Pincode (Auto-fills City & State)</Label>
-                      <div className="relative">
-                        <Input
-                          id="pincode"
-                          required
-                          maxLength={6}
-                          value={formData.pincode}
-                          onChange={e => setFormData({ ...formData, pincode: e.target.value.replace(/\D/g, '') })}
-                          placeholder="e.g. 122003"
-                          className="text-lg tracking-widest font-mono h-12"
-                        />
-                        {isPincodeLoading && (
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                            <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full" />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Pincode Results Dropdown */}
-                      {pincodeResults.length > 0 && (
-                        <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                          <div className="p-2 bg-slate-50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                            Select Area / Location
-                          </div>
-                          <div className="max-h-48 overflow-y-auto">
-                            {pincodeResults.map((loc, idx) => (
-                              <button
-                                key={idx}
-                                type="button"
-                                onClick={() => handleSelectLocation(loc)}
-                                className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors group flex flex-col"
-                              >
-                                <span className="text-sm font-bold text-slate-900 group-hover:text-primary">{loc.vpo}</span>
-                                <span className="text-[10px] text-slate-500">{loc.district}, {loc.state}</span>
-                              </button>
-                            ))}
-                          </div>
+                  <div className="space-y-6">
+                    {/* Part 1: Contact Details */}
+                    <div className="space-y-4">
+                      <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest border-b pb-2 flex items-center gap-2">
+                        <User className="h-4 w-4 text-primary" />
+                        1. Contact Information
+                      </h3>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="name" className="text-xs font-semibold text-slate-600">Full Name</Label>
+                          <Input id="name" required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Enter your full name" className="h-11 rounded-xl focus-visible:ring-primary/20 border-slate-200" />
                         </div>
-                      )}
+                        <div className="space-y-2">
+                          <Label htmlFor="email" className="text-xs font-semibold text-slate-600">Email Address</Label>
+                          <Input id="email" type="email" required value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="email@example.com" className="h-11 rounded-xl focus-visible:ring-primary/20 border-slate-200" />
+                        </div>
+                      </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="phone" className="text-xs font-semibold text-slate-600">Phone Number</Label>
+                          <Input id="phone" type="tel" required value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} placeholder="+91 XXXXX XXXXX" className="h-11 rounded-xl focus-visible:ring-primary/20 border-slate-200" />
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                    {/* Part 2: Delivery Details */}
+                    <div className="space-y-4 pt-4">
+                      <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest border-b pb-2 flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-primary" />
+                        2. Delivery Address
+                      </h3>
                       <div className="grid md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="name">Full Name</Label>
-                          <Input id="name" required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="John Doe" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="email">Email Address</Label>
-                          <Input id="email" type="email" required value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="john@example.com" />
+                        <div className="space-y-2 relative">
+                          <Label htmlFor="pincode" className="text-xs font-semibold text-slate-600">Pincode (Auto-fills City & State)</Label>
+                          <div className="relative">
+                            <Input
+                              id="pincode"
+                              required
+                              maxLength={6}
+                              value={formData.pincode}
+                              onChange={e => setFormData({ ...formData, pincode: e.target.value.replace(/\D/g, '') })}
+                              placeholder="e.g. 122003"
+                              className="text-base tracking-widest font-mono h-11 rounded-xl focus-visible:ring-primary/20 border-slate-200"
+                            />
+                            {isPincodeLoading && (
+                              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Pincode Results Dropdown */}
+                          {pincodeResults.length > 0 && (
+                            <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                              <div className="p-2 bg-slate-50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                Select Area / Location
+                              </div>
+                              <div className="max-h-48 overflow-y-auto">
+                                {pincodeResults.map((loc, idx) => (
+                                  <button
+                                    key={idx}
+                                    type="button"
+                                    onClick={() => handleSelectLocation(loc)}
+                                    className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors group flex flex-col"
+                                  >
+                                    <span className="text-sm font-bold text-slate-900 group-hover:text-primary">{loc.vpo}</span>
+                                    <span className="text-[10px] text-slate-500">{loc.district}, {loc.state}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="phone">Phone Number</Label>
-                          <Input id="phone" type="tel" required value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} placeholder="+91 XXXXX XXXXX" />
-                        </div>
-                      </div>
+
                       <div className="space-y-2">
-                        <Label htmlFor="address">Full Address</Label>
-                        <Textarea id="address" required value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} rows={3} placeholder="Apartment, Street, Area..." />
+                        <Label htmlFor="address" className="text-xs font-semibold text-slate-600">Full Address (House/Flat No., Building Name, Street)</Label>
+                        <Textarea id="address" required value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} rows={3} placeholder="Apartment, Street, Area..." className="rounded-xl resize-none focus-visible:ring-primary/20 border-slate-200" />
                       </div>
+                      
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="city">City</Label>
-                          <Input id="city" required value={formData.city} onChange={e => setFormData({ ...formData, city: e.target.value })} />
+                          <Label htmlFor="city" className="text-xs font-semibold text-slate-600">City</Label>
+                          <Input id="city" required value={formData.city} onChange={e => setFormData({ ...formData, city: e.target.value })} placeholder="City" className="h-11 rounded-xl focus-visible:ring-primary/20 border-slate-200" />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="state">State</Label>
-                          <Input id="state" required value={formData.state} onChange={e => setFormData({ ...formData, state: e.target.value })} />
+                          <Label htmlFor="state" className="text-xs font-semibold text-slate-600">State</Label>
+                          <Input id="state" required value={formData.state} onChange={e => setFormData({ ...formData, state: e.target.value })} placeholder="State" className="h-11 rounded-xl focus-visible:ring-primary/20 border-slate-200" />
                         </div>
                       </div>
                     </div>
@@ -469,36 +485,36 @@ export default function CheckoutPage() {
                 </CardContent>
               </Card>
 
-              {((user && savedAddresses.length > 0 && !showNewAddressForm) || formData.pincode.length === 6) && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <Card className="border-none shadow-sm">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <CreditCard className="h-5 w-5 text-primary" />
-                        Payment Method
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 flex items-center gap-3">
-                        <Truck className="h-6 w-6 text-slate-400" />
-                        <div>
-                          <p className="font-bold text-slate-700">Cash/Payment on Delivery</p>
-                          <p className="text-xs text-slate-500">Pay after installation. Free maintenance included.</p>
-                        </div>
+              <div className="space-y-6 pt-4">
+                <Card className="border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-md rounded-2xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-primary/10 to-blue-500/10 border-b border-slate-100/50 py-5">
+                    <CardTitle className="flex items-center gap-2.5 text-lg font-black text-slate-800">
+                      <CreditCard className="h-5 w-5 text-primary" />
+                      Payment Method
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <div className="p-4 rounded-xl bg-blue-50/30 border border-primary/10 flex items-center gap-3.5 hover:bg-blue-50/50 transition-colors duration-300">
+                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                        <Truck className="h-5 w-5" />
                       </div>
-                    </CardContent>
-                  </Card>
+                      <div>
+                        <p className="font-black text-slate-900 text-sm">Cash / Pay on Delivery</p>
+                        <p className="text-xs text-slate-500 font-medium">Pay securely after successful delivery and installation.</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-                  <Button type="submit" disabled={isLoading} className="w-full h-16 text-xl font-bold bg-primary hover:bg-primary/95 shadow-lg shadow-primary/20">
-                    {isLoading ? "Processing Order..." : "Confirm Rental Booking"}
-                  </Button>
-                </div>
-              )}
+                <Button type="submit" disabled={isLoading} className="w-full h-16 rounded-2xl text-xl font-bold bg-primary hover:bg-primary/95 text-white shadow-xl shadow-primary/20 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]">
+                  {isLoading ? "Processing Order..." : "Confirm Rental Booking"}
+                </Button>
+              </div>
             </form>
           </div>
 
           <div className="lg:col-span-1">
-            <Card className="sticky top-24 border-none shadow-xl overflow-hidden pt-0 bg-white/80 backdrop-blur-xl">
+            <Card className="sticky top-24 border-0 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden pt-0 bg-white/90 backdrop-blur-xl rounded-2xl border border-slate-100 animate-in slide-in-from-right-4 duration-500">
               <CardHeader className="bg-slate-900 text-white py-6">
                 <CardTitle className="text-xl font-black flex items-center justify-between">
                   Order Summary
@@ -516,13 +532,13 @@ export default function CheckoutPage() {
                           <p className="text-sm font-black text-slate-900 group-hover:text-primary transition-colors leading-tight">
                             {item.productData.name}
                           </p>
-                          <div className="flex items-center gap-2 mt-1">
+                          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                             <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">
                               {item.quantity} x {item.planData?.name || "Monthly"}
                             </p>
                             {item.productData.deposit_amount && item.productData.deposit_amount > 0 && (
-                              <Badge variant="outline" className="text-[8px] py-0 h-4 bg-orange-50 text-orange-600 border-orange-100 font-black">
-                                +Deposit
+                              <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 bg-orange-50 text-orange-600 border-orange-100 font-bold shrink-0 rounded">
+                                Refundable Deposit
                               </Badge>
                             )}
                           </div>
@@ -584,6 +600,6 @@ export default function CheckoutPage() {
         </div>
         <Footer />
       </div>
-    </main >
+    </main>
   );
 }
