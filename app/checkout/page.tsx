@@ -304,7 +304,7 @@ export default function CheckoutPage() {
         <div className="grid lg:grid-cols-3 gap-8 animate-in fade-in duration-500">
           <div className="lg:col-span-2 space-y-6">
             {!user && (
-              <Card className="border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-md overflow-hidden rounded-2xl">
+              <Card className="border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-md overflow-hidden rounded-2xl pt-0 pb-6">
                 <CardHeader className="bg-gradient-to-r from-primary/10 to-blue-500/10 border-b border-slate-100/50 py-5">
                   <CardTitle className="flex items-center gap-2.5 text-lg font-black text-slate-800">
                     <User className="h-5 w-5 text-primary animate-pulse" />
@@ -329,7 +329,7 @@ export default function CheckoutPage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <Card className="border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-md rounded-2xl overflow-hidden">
+              <Card className="border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-md rounded-2xl overflow-hidden pt-0 pb-6">
                 <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-primary/10 to-blue-500/10 border-b border-slate-100/50 py-5">
                   <CardTitle className="flex items-center gap-2.5 text-lg font-black text-slate-800">
                     <MapPin className="h-5 w-5 text-primary" />
@@ -486,7 +486,7 @@ export default function CheckoutPage() {
               </Card>
 
               <div className="space-y-6 pt-4">
-                <Card className="border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-md rounded-2xl overflow-hidden">
+                <Card className="border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-md rounded-2xl overflow-hidden pt-0 pb-6">
                   <CardHeader className="bg-gradient-to-r from-primary/10 to-blue-500/10 border-b border-slate-100/50 py-5">
                     <CardTitle className="flex items-center gap-2.5 text-lg font-black text-slate-800">
                       <CreditCard className="h-5 w-5 text-primary" />
@@ -514,7 +514,7 @@ export default function CheckoutPage() {
           </div>
 
           <div className="lg:col-span-1">
-            <Card className="sticky top-24 border-0 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden pt-0 bg-white/90 backdrop-blur-xl rounded-2xl border border-slate-100 animate-in slide-in-from-right-4 duration-500">
+            <Card className="sticky top-24 border-0 shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden pt-0 pb-6 bg-white/90 backdrop-blur-xl rounded-2xl border border-slate-100 animate-in slide-in-from-right-4 duration-500">
               <CardHeader className="bg-slate-900 text-white py-6">
                 <CardTitle className="text-xl font-black flex items-center justify-between">
                   Order Summary
