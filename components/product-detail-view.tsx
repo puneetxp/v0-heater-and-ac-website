@@ -31,6 +31,7 @@ interface ProductDetailViewProps {
   plans: any[];
   categoryParam: string;
   slugParam: string;
+  initialPlanId?: string;
 }
 
 export function ProductDetailView({
@@ -38,14 +39,22 @@ export function ProductDetailView({
   plans: dbPlans,
   categoryParam,
   slugParam,
+  initialPlanId,
 }: ProductDetailViewProps) {
   // Back link uses category parameter
   const backLink = `/${categoryParam}`;
 
   // Interactivity states
-  const [selectedPlanId, setSelectedPlanId] = useState<string | number | null>(
-    dbPlans.length > 0 ? dbPlans[0].id : null
-  );
+  const [selectedPlanId, setSelectedPlanId] = useState<string | number | null>(() => {
+    if (initialPlanId) {
+      const planExists = dbPlans.some(p => String(p.id) === String(initialPlanId));
+      if (planExists) {
+        const matched = dbPlans.find(p => String(p.id) === String(initialPlanId));
+        return matched ? matched.id : initialPlanId;
+      }
+    }
+    return dbPlans.length > 0 ? dbPlans[0].id : null;
+  });
 
   // Determine badge color and icon based on product type
   const isCooling = dbProduct.category.toLowerCase().includes("ac");

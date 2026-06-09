@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Check, Snowflake, Sun, Calendar } from "lucide-react"
 import { createServerClient } from "@/lib/supabase/server"
+import { generateProductSlug } from "@/lib/utils"
+import Link from "next/link"
 
 interface SeasonalPlan {
   id: number
@@ -17,6 +19,13 @@ interface SeasonalPlan {
   base_price?: number
   start_month?: number
   end_month?: number
+  products?: {
+    id: string | number
+    name: string
+    category: string
+    capacity: string
+    image_url?: string
+  } | null
 }
 
 export async function SeasonalPlans() {
@@ -26,7 +35,7 @@ export async function SeasonalPlans() {
     const supabase = await createServerClient()
     const { data } = await supabase
       .from("seasonal_plans")
-      .select("*")
+      .select("*, products(*)")
       .eq("is_active", true)
       .order("duration_months", { ascending: true })
 
@@ -169,9 +178,24 @@ export async function SeasonalPlans() {
             ))}
           </ul>
 
-          <Button className="w-full group-hover:shadow-lg transition-shadow" size="lg">
-            Choose Plan
-          </Button>
+          {plan.products ? (
+            <Button className="w-full group-hover:shadow-lg transition-shadow font-semibold" size="lg" asChild>
+              <Link 
+                href={`/${
+                  plan.products.category.toLowerCase().includes("heater") || 
+                  plan.products.category.toLowerCase().includes("oil")
+                    ? "heating"
+                    : "cooling"
+                }/products/${generateProductSlug(plan.products.name)}?plan=${plan.id}`}
+              >
+                Choose Plan
+              </Link>
+            </Button>
+          ) : (
+            <Button className="w-full group-hover:shadow-lg transition-shadow font-semibold" size="lg">
+              Choose Plan
+            </Button>
+          )}
         </CardContent>
       </Card>
     )

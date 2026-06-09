@@ -8,8 +8,10 @@ export const dynamic = "force-dynamic";
 
 export default async function ProductPage(props: {
   params: Promise<{ category: string; slug: string }>;
+  searchParams: Promise<{ plan?: string }>;
 }) {
   const params = await props.params;
+  const { plan } = await props.searchParams;
   const supabase = await createServerClient();
 
   // 1. Try to find the product in the Database first
@@ -96,6 +98,7 @@ export default async function ProductPage(props: {
       plans={plans}
       categoryParam={params.category} 
       slugParam={params.slug} 
+      initialPlanId={plan}
     />
   );
 }
