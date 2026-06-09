@@ -18,7 +18,8 @@ export const BRANDING = {
     email: "hello@acrentservice.com",
     supportEmail: "support@acrentservice.com",
     adminEmail: "admin@acrentservice.com",
-    phone: "+91 98765 43210",
+    phone: "09220929373",
+    alternatePhone: "+91-9220929373",
   },
 
   // Social Media
@@ -51,13 +52,13 @@ export const BRANDING = {
     name: "ACRentService",
     type: "LocalBusiness",
     address: {
-      street: "123 Business District",
-      city: "New Delhi",
-      state: "Delhi",
-      postalCode: "110001",
+      street: "Plot No. 1409, Ardee City Gate Number 2 Rd",
+      city: "Gurugram",
+      state: "Haryana",
+      postalCode: "122003",
       country: "IN",
     },
-    phone: "+91-888-888-8888",
+    phone: "09220929373",
     operatingHours: {
       dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
       opens: "09:00",
