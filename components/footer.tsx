@@ -152,10 +152,7 @@ export function Footer() {
 
           {/* Bottom */}
           <div className="border-t pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex flex-col gap-2 text-center sm:text-left">
-              <p>&copy; 2025 ACRentService. All rights reserved.</p>
-              <p>&copy; 2025 puneetxp. All rights reserved.</p>
-            </div>
+            <p>&copy; 2025 puneetxp. All rights reserved.</p>
             <div className="flex gap-6">
               <Link href="#" className="hover:text-foreground transition-colors">
                 Privacy Policy
