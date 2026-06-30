@@ -1,7 +1,6 @@
 import Link from "next/link"
 import { Wind, Mail, Phone, MapPin } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { NewsletterForm } from "@/components/newsletter-form"
 
 export function Footer() {
   return (
@@ -143,10 +142,7 @@ export function Footer() {
             <div className="max-w-md space-y-4">
               <h3 className="font-semibold text-foreground">Subscribe to our newsletter</h3>
               <p className="text-sm text-muted-foreground">Get updates on new products and exclusive offers.</p>
-              <div className="flex gap-2">
-                <Input type="email" placeholder="Enter your email" className="flex-1" />
-                <Button className="bg-primary hover:bg-primary/90">Subscribe</Button>
-              </div>
+              <NewsletterForm />
             </div>
           </div>
 
