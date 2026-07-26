@@ -47,13 +47,6 @@ export default function LoginPage() {
     setIsLoading(true);
     setError(null);
 
-    // Static admin bypass
-    if (email === "admin@acrentservice.com" && password === "admin123") {
-        localStorage.setItem("admin_authenticated", "true");
-        router.push("/admin/dashboard");
-        return;
-    }
-
     if (!supabase) {
       setError("Authentication service unavailable.");
       setIsLoading(false);
@@ -68,9 +61,31 @@ export default function LoginPage() {
 
       if (authError) throw authError;
 
-      // Check if user has an active subscription/booking before redirecting to dashboard
+      // Check if user is admin
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        // Check admin_users table for admin role
+        const { data: adminUser } = await supabase
+          .from("admin_users")
+          .select("id, is_active")
+          .eq("email", user.email)
+          .single();
+
+        if (adminUser && adminUser.is_active) {
+          // Set secure admin session via API (no localStorage)
+          const sessionResponse = await fetch("/api/auth/verify-admin", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: user.email, password }),
+          });
+
+          if (sessionResponse.ok) {
+            router.push("/admin/dashboard");
+            return;
+          }
+        }
+
+        // Regular user - check for active bookings
         const { data: activeBookings } = await supabase
           .from("bookings")
           .select("id")
@@ -204,20 +219,6 @@ export default function LoginPage() {
             </div>
           </CardContent>
         </Card>
-
-        <div className="mt-8 p-4 rounded-xl bg-slate-900 text-white shadow-xl">
-           <p className="text-[10px] uppercase tracking-widest font-black text-slate-500 mb-2">Admin Access</p>
-           <div className="space-y-1">
-             <p className="text-xs flex justify-between">
-               <span className="text-slate-400 font-bold">User:</span>
-               <code className="text-blue-400 font-mono">admin@acrentservice.com</code>
-             </p>
-             <p className="text-xs flex justify-between">
-               <span className="text-slate-400 font-bold">Pass:</span>
-               <code className="text-blue-400 font-mono">admin123</code>
-             </p>
-           </div>
-        </div>
       </div>
     </div>
   );
