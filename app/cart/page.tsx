@@ -29,7 +29,7 @@ export default function CartPage() {
             Looks like you haven't added any rental services yet. Browse our premium ACs and heaters to get started.
           </p>
           <Button asChild size="lg" className="px-8 bg-primary hover:bg-primary/90">
-            <Link href="/">Browse Products</Link>
+            <Link href="/#products">Browse Products</Link>
           </Button>
         </div>
         <Footer />
