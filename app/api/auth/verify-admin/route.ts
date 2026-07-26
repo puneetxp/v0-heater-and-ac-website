@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
+import { createAdminClient } from "@/lib/supabase/admin"
+import bcrypt from "bcryptjs"
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,21 +14,42 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verify admin credentials against environment variables (server-side only)
-    const adminEmail = process.env.ADMIN_EMAIL
-    const adminPassword = process.env.ADMIN_PASSWORD
-
-    if (!adminEmail || !adminPassword) {
-      console.error("[v0] Admin credentials not configured in environment")
+    // Get admin client
+    const adminClient = createAdminClient()
+    if (!adminClient) {
+      console.error("[v0] Failed to create admin client")
       return NextResponse.json(
-        { error: "Admin authentication not configured" },
+        { error: "Server configuration error" },
         { status: 500 }
       )
     }
 
-    // Check credentials
-    if (email.toLowerCase().trim() !== adminEmail.toLowerCase() || password !== adminPassword) {
-      // Don't reveal which part is wrong for security
+    // Query admin_users table
+    const { data: adminUser, error: queryError } = await adminClient
+      .from("admin_users")
+      .select("id, email, password_hash, is_active")
+      .eq("email", email.toLowerCase())
+      .single()
+
+    if (queryError || !adminUser) {
+      console.error("[v0] Admin user not found:", queryError)
+      return NextResponse.json(
+        { error: "Invalid credentials" },
+        { status: 401 }
+      )
+    }
+
+    // Check if admin is active
+    if (!adminUser.is_active) {
+      return NextResponse.json(
+        { error: "This admin account has been deactivated" },
+        { status: 403 }
+      )
+    }
+
+    // Verify password hash
+    const passwordMatch = await bcrypt.compare(password, adminUser.password_hash)
+    if (!passwordMatch) {
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 }
@@ -36,8 +59,8 @@ export async function POST(request: NextRequest) {
     // Create secure httpOnly cookie (cannot be accessed from JavaScript)
     const cookieStore = await cookies()
     const adminSession = {
-      id: "admin",
-      email: email,
+      id: adminUser.id,
+      email: adminUser.email,
       role: "admin",
       loginTime: new Date().toISOString(),
     }

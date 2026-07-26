@@ -22,13 +22,17 @@ export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isCreatingFirstAdmin, setIsCreatingFirstAdmin] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     // Trim whitespace from inputs
     const trimmedEmail = email.trim().toLowerCase();
@@ -49,8 +53,8 @@ export default function AdminLoginPage() {
 
       if (response.ok) {
         // Server sets secure httpOnly cookie - no localStorage needed
-        setLoading(false);
-        router.push("/admin/dashboard");
+        setSuccess("Login successful!");
+        setTimeout(() => router.push("/admin/dashboard"), 500);
         return;
       } else {
         const data = await response.json();
@@ -64,8 +68,63 @@ export default function AdminLoginPage() {
       setLoading(false);
       return;
     }
+  };
 
+  const handleCreateFirstAdmin = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    setIsCreatingFirstAdmin(true);
+    setError(null);
+    setSuccess(null);
 
+    // Trim whitespace from inputs
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedEmail || !trimmedPassword) {
+      setError("Email and password are required");
+      setIsCreatingFirstAdmin(false);
+      return;
+    }
+
+    if (trimmedPassword.length < 6) {
+      setError("Password must be at least 6 characters long");
+      setIsCreatingFirstAdmin(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/auth/init-admin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: trimmedEmail,
+          password: trimmedPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess("Admin account created! Switching to login mode...");
+        setShowCreateForm(false);
+        setPassword("");
+        setTimeout(() => {
+          handleLogin(e);
+        }, 1000);
+        return;
+      } else {
+        setError(data.error || "Failed to create admin account");
+        setIsCreatingFirstAdmin(false);
+        return;
+      }
+    } catch (err) {
+      console.error("[v0] Error creating admin:", err);
+      setError("Failed to create admin account. Please try again.");
+      setIsCreatingFirstAdmin(false);
+      return;
+    }
   };
 
   return (
@@ -89,61 +148,157 @@ export default function AdminLoginPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
+          {success && (
+            <Alert className="mb-4 border-green-200 bg-green-50">
+              <AlertDescription className="text-green-800">
+                {success}
+              </AlertDescription>
+            </Alert>
+          )}
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
+          {!showCreateForm ? (
+            <>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading}
-              size="lg"
-            >
-              {loading
-                ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
-                  </>
-                )
-                : (
-                  <>
-                    <Shield className="mr-2 h-4 w-4" />
-                    Sign In as Admin
-                  </>
-                )}
-            </Button>
-          </form>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={loading}
+                  size="lg"
+                >
+                  {loading
+                    ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Signing in...
+                      </>
+                    )
+                    : (
+                      <>
+                        <Shield className="mr-2 h-4 w-4" />
+                        Sign In as Admin
+                      </>
+                    )}
+                </Button>
+              </form>
+
+              <div className="mt-4 text-center text-sm text-muted-foreground">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateForm(true);
+                    setError(null);
+                    setEmail("");
+                    setPassword("");
+                  }}
+                  className="text-primary hover:underline"
+                >
+                  Create first admin account
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <form onSubmit={handleCreateFirstAdmin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="create-email">Email</Label>
+                  <Input
+                    id="create-email"
+                    type="email"
+                    placeholder="admin@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={isCreatingFirstAdmin}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="create-password">Password</Label>
+                  <Input
+                    id="create-password"
+                    type="password"
+                    placeholder="Create a strong password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={isCreatingFirstAdmin}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Minimum 6 characters
+                  </p>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isCreatingFirstAdmin}
+                  size="lg"
+                >
+                  {isCreatingFirstAdmin
+                    ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating Admin...
+                      </>
+                    )
+                    : (
+                      <>
+                        <Shield className="mr-2 h-4 w-4" />
+                        Create Admin Account
+                      </>
+                    )}
+                </Button>
+              </form>
+
+              <div className="mt-4 text-center text-sm text-muted-foreground">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateForm(false);
+                    setError(null);
+                    setEmail("");
+                    setPassword("");
+                  }}
+                  className="text-primary hover:underline"
+                >
+                  Back to login
+                </button>
+              </div>
+            </>
+          )}
+
+          <div className="mt-6 text-center text-sm text-muted-foreground border-t pt-4">
             <Link href="/" className="hover:text-primary transition-colors">
               ← Back to website
             </Link>
