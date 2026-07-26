@@ -103,6 +103,8 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
     }
   };
 
+  const selectedPlan = plans.find((p) => String(p.id) === String(selectedPlanId));
+
   const calculatePrice = () => {
     if (!formData.startDate) {
       return { subtotal: 0, gstAmount: 0, total: 0, deposit: 0, discount: 0, discountAmount: 0 };
@@ -249,8 +251,6 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
     return { start, end };
   };
   const { start: calculatedStart, end: calculatedEnd } = getDates();
-
-  const selectedPlan = plans.find((p) => String(p.id) === String(selectedPlanId));
 
   return (
     <div className="grid gap-8 md:grid-cols-2">
