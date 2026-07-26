@@ -8,6 +8,7 @@ import { useCart } from "@/lib/contexts/cart-context";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
+import { generateProductSlug } from "@/lib/utils";
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, itemCount, subtotal, totalDeposit } = useCart();
@@ -44,67 +45,80 @@ export default function CartPage() {
         
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
-            {items.map((item) => (
-              <Card key={`${item.productId}-${item.planId}`} className="overflow-hidden border-none shadow-sm">
-                <CardContent className="p-4 md:p-6">
-                  <div className="flex gap-4 md:gap-6">
-                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
-                      <img 
-                        src={item.productData.image_url} 
-                        alt={item.productData.name} 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    
-                    <div className="flex-1 flex flex-col justify-between">
-                      <div>
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-lg md:text-xl font-bold text-slate-900">{item.productData.name}</h3>
-                            <p className="text-sm text-slate-500 font-medium uppercase tracking-wider">{item.planData?.name || "Monthly Plan"}</p>
-                          </div>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="text-slate-400 hover:text-red-500 hover:bg-red-50 -mt-2 -mr-2"
-                            onClick={() => removeFromCart(item.productId, item.planId)}
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </Button>
-                        </div>
-                      </div>
+            {items.map((item) => {
+              const isHeating = item.productData.category.toLowerCase().includes("heater") ||
+                item.productData.category.toLowerCase().includes("oil");
+              const parentCategory = isHeating ? "heating" : "cooling";
+              const slug = generateProductSlug(item.productData.name);
+              const detailsUrl = `/${parentCategory}/products/${slug}`;
+
+              return (
+                <Card key={`${item.productId}-${item.planId}`} className="overflow-hidden border-none shadow-sm">
+                  <CardContent className="p-4 md:p-6">
+                    <div className="flex gap-4 md:gap-6">
+                      <Link 
+                        href={detailsUrl}
+                        className="w-24 h-24 md:w-32 md:h-32 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 hover:opacity-90 transition-opacity block"
+                      >
+                        <img 
+                          src={item.productData.image_url} 
+                          alt={item.productData.name} 
+                          className="w-full h-full object-cover"
+                        />
+                      </Link>
                       
-                      <div className="flex items-end justify-between mt-4">
-                        <div className="flex items-center border rounded-lg overflow-hidden bg-white shadow-sm">
-                          <button 
-                            className="p-2 hover:bg-slate-50 transition-colors border-r"
-                            onClick={() => updateQuantity(item.productId, item.planId, item.quantity - 1)}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </button>
-                          <span className="px-4 font-bold text-slate-700 min-w-[40px] text-center">
-                            {item.quantity}
-                          </span>
-                          <button 
-                            className="p-2 hover:bg-slate-50 transition-colors border-l"
-                            onClick={() => updateQuantity(item.productId, item.planId, item.quantity + 1)}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </button>
+                      <div className="flex-1 flex flex-col justify-between">
+                        <div>
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <Link href={detailsUrl} className="hover:text-primary transition-colors block">
+                                <h3 className="text-lg md:text-xl font-bold text-slate-900">{item.productData.name}</h3>
+                              </Link>
+                              <p className="text-sm text-slate-500 font-medium uppercase tracking-wider">{item.planData?.name || "Monthly Plan"}</p>
+                            </div>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="text-slate-400 hover:text-red-500 hover:bg-red-50 -mt-2 -mr-2"
+                              onClick={() => removeFromCart(item.productId, item.planId)}
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </Button>
+                          </div>
                         </div>
                         
-                        <div className="text-right">
-                          <div className="text-xl font-black text-primary">
-                            ₹{((item.planData?.base_price || item.productData.price_per_month) * item.quantity).toLocaleString()}
+                        <div className="flex items-end justify-between mt-4">
+                          <div className="flex items-center border rounded-lg overflow-hidden bg-white shadow-sm">
+                            <button 
+                              className="p-2 hover:bg-slate-50 transition-colors border-r"
+                              onClick={() => updateQuantity(item.productId, item.planId, item.quantity - 1)}
+                            >
+                              <Minus className="h-4 w-4" />
+                            </button>
+                            <span className="px-4 font-bold text-slate-700 min-w-[40px] text-center">
+                              {item.quantity}
+                            </span>
+                            <button 
+                              className="p-2 hover:bg-slate-50 transition-colors border-l"
+                              onClick={() => updateQuantity(item.productId, item.planId, item.quantity + 1)}
+                            >
+                              <Plus className="h-4 w-4" />
+                            </button>
                           </div>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase">Rental Fee</p>
+                          
+                          <div className="text-right">
+                            <div className="text-xl font-black text-primary">
+                              ₹{((item.planData?.base_price || item.productData.price_per_month) * item.quantity).toLocaleString()}
+                            </div>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase">Rental Fee</p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
           
           <div className="lg:col-span-1">

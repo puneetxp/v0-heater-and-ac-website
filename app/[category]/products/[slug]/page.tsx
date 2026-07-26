@@ -1,7 +1,7 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { ProductDetailView } from "@/components/product-detail-view";
 import { allProducts } from "@/lib/product-data";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { generateProductSlug } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -74,7 +74,7 @@ export default async function ProductPage(props: {
   }
 
   if (!dbProduct) {
-    notFound();
+    redirect("/" + params.category);
   }
 
   // 3. Fetch seasonal plans for this product
