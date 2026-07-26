@@ -4,7 +4,6 @@ import type React from "react";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSupabaseClient } from "@/lib/hooks/use-supabase";
 import {
   Card,
   CardContent,
@@ -20,7 +19,6 @@ import { Loader2, Shield } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminLoginPage() {
-  const supabase = useSupabaseClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -36,91 +34,38 @@ export default function AdminLoginPage() {
     const trimmedEmail = email.trim().toLowerCase();
     const trimmedPassword = password.trim();
 
-    // Static admin credentials
-    const STATIC_ADMIN_EMAILS = ["admin@comfortrent.com", "admin@acrentservice.com"];
-    const STATIC_ADMIN_PASSWORD = "admin123";
+    try {
+      // Verify admin credentials via secure server endpoint (no hardcoded credentials in client)
+      const response = await fetch("/api/auth/verify-admin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: trimmedEmail,
+          password: trimmedPassword,
+        }),
+      });
 
-    // Check if using static admin credentials
-    if (
-      STATIC_ADMIN_EMAILS.includes(trimmedEmail) &&
-      trimmedPassword === STATIC_ADMIN_PASSWORD
-    ) {
-      const adminSession = {
-        id: "static-admin",
-        email: trimmedEmail,
-        role: "admin",
-        loginTime: new Date().toISOString(),
-      };
-
-      try {
-        // Try to set via API route for server-side cookie
-        await fetch("/api/auth/set-admin-session", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(adminSession),
-        });
-
-        // Store in localStorage as backup
-        localStorage.setItem("admin_session", JSON.stringify(adminSession));
-
+      if (response.ok) {
+        // Server sets secure httpOnly cookie - no localStorage needed
         setLoading(false);
         router.push("/admin/dashboard");
         return;
-      } catch (err) {
-        console.error("[v0] Error with admin login:", err);
-        setError("Failed to login securely. Please try again.");
+      } else {
+        const data = await response.json();
+        setError(data.error || "Invalid credentials");
         setLoading(false);
         return;
       }
-    }
-
-    // Safety check for supabase client
-    if (!supabase) {
-      setError(
-        "Login system is currently unavailable (Missing configuration).",
-      );
+    } catch (err) {
+      console.error("[v0] Error with admin login:", err);
+      setError("Failed to login. Please try again.");
       setLoading(false);
       return;
     }
 
-    try {
-      // Sign in via Supabase
-      const { data: authData, error: authError } = await supabase.auth
-        .signInWithPassword({
-          email: trimmedEmail,
-          password: trimmedPassword,
-        });
 
-      if (authError) {
-        setError(authError.message);
-        setLoading(false);
-        return;
-      }
-
-      if (authData.user) {
-        // Check if user is admin
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", authData.user.id)
-          .single();
-
-        if (profileError || profile?.role !== "admin") {
-          await supabase.auth.signOut();
-          setError("Access denied. Admin privileges required.");
-          setLoading(false);
-          return;
-        }
-
-        router.push("/admin/dashboard");
-      }
-    } catch (err) {
-      console.error("[v0] Auth error:", err);
-      setError("An unexpected error occurred. Please try again.");
-      setLoading(false);
-    }
   };
 
   return (
