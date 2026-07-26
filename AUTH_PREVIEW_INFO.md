@@ -25,12 +25,9 @@ This is a **browser security feature**, not an error.
    - Full functionality with all authentication features
    - No browser restrictions
 
-## Demo Login Credentials
+## Admin Login
 
-Email: `admin@comfortrent.com`  
-Password: `admin123`
-
-These work in both the preview and deployed version.
+To access the admin portal, use your configured admin credentials from environment variables (ADMIN_EMAIL and ADMIN_PASSWORD).
 
 ## Next Steps
 
