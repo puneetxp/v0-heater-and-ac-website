@@ -152,8 +152,18 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
     const { subtotal, gstAmount, total, deposit } = calculatePrice();
 
     const startDate = new Date(formData.startDate);
-    const endDate = new Date(startDate);
-    endDate.setMonth(endDate.getMonth() + formData.durationMonths);
+    let endDate: Date;
+    if (formData.rentalType === "seasonal" && selectedPlan?.valid_until) {
+      endDate = new Date(selectedPlan.valid_until);
+      const currentYear = new Date().getFullYear();
+      if (endDate.getFullYear() < currentYear) {
+        endDate.setFullYear(currentYear);
+      }
+    } else {
+      endDate = new Date(startDate);
+      const months = formData.durationMonths || 1;
+      endDate.setMonth(endDate.getMonth() + months);
+    }
 
     try {
       if (!supabase) throw new Error("Supabase client not initialized");
@@ -223,8 +233,19 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
     if (!formData.startDate) return { start: null, end: null };
     const start = new Date(formData.startDate);
     if (isNaN(start.getTime())) return { start: null, end: null };
-    const end = new Date(start);
-    end.setMonth(end.getMonth() + formData.durationMonths);
+    
+    let end: Date;
+    if (formData.rentalType === "seasonal" && selectedPlan?.valid_until) {
+      end = new Date(selectedPlan.valid_until);
+      const currentYear = new Date().getFullYear();
+      if (end.getFullYear() < currentYear) {
+        end.setFullYear(currentYear);
+      }
+    } else {
+      end = new Date(start);
+      const months = formData.durationMonths || 1;
+      end.setMonth(end.getMonth() + months);
+    }
     return { start, end };
   };
   const { start: calculatedStart, end: calculatedEnd } = getDates();
@@ -364,21 +385,26 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
                 {formData.rentalType === "seasonal" ? (
                   <div className="space-y-2">
                     <Label htmlFor="seasonalPlan" className="text-slate-700 font-bold text-sm">Select Season Plan</Label>
-                    <Select
-                      value={selectedPlanId?.toString() || ""}
-                      onValueChange={handlePlanChange}
-                    >
-                      <SelectTrigger id="seasonalPlan" className="bg-white border-slate-200">
-                        <SelectValue placeholder="Select plan" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {plans.map((p) => (
-                          <SelectItem key={p.id} value={p.id.toString()}>
-                            {p.name} ({p.duration_months} M - ₹{p.base_price.toLocaleString()})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {plans.length > 0 && selectedPlanId ? (
+                      <Select
+                        key={selectedPlanId.toString()}
+                        value={selectedPlanId.toString()}
+                        onValueChange={handlePlanChange}
+                      >
+                        <SelectTrigger id="seasonalPlan" className="bg-white border-slate-200">
+                          <SelectValue placeholder="Select plan" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {plans.map((p) => (
+                            <SelectItem key={p.id} value={p.id.toString()}>
+                              {p.name} ({p.duration_months} M - ₹{p.base_price.toLocaleString()})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="h-10 w-full animate-pulse bg-slate-100 rounded-lg border border-slate-200" />
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-2">
