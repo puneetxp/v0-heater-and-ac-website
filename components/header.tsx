@@ -152,9 +152,6 @@ export function Header() {
                   <Link href="/#contact" className="text-base font-medium hover:text-primary transition-colors">
                     Contact
                   </Link>
-                  <Link href="/admin/login" className="text-base font-medium hover:text-primary transition-colors">
-                    Admin
-                  </Link>
                   <div className="flex flex-col gap-3 mt-6">
                     {user ? (
                       <Button asChild className="w-full bg-primary hover:bg-primary/90">

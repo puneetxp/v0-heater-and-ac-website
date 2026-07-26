@@ -11,22 +11,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Check for localStorage admin session (works in preview)
-        const adminSession = localStorage.getItem("admin_session")
-        if (adminSession) {
-          try {
-            const session = JSON.parse(adminSession)
-            if (session.id === "static-admin" && session.role === "admin") {
-              setIsAuthenticated(true)
-              setIsLoading(false)
-              return
-            }
-          } catch (e) {
-            console.error("[v0] Failed to parse admin session:", e)
-          }
-        }
-
-        // Check for server-side cookie (try to fetch a protected endpoint)
+        // Check for secure httpOnly admin cookie via server endpoint
         const response = await fetch("/api/auth/check-admin", {
           method: "GET",
         })

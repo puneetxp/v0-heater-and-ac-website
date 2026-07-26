@@ -4,34 +4,16 @@ import { cookies } from "next/headers";
 
 export async function checkAdminAccess() {
   try {
-    const supabase = await createServerClient();
     const cookieStore = await cookies();
 
-    const { data, error: authError } = await supabase.auth.getUser();
-    const user = data?.user;
-
-    // Check if this is a Supabase authenticated user
-    if (user && !authError) {
-      try {
-        const { data: profile } = await supabase.from("profiles").select("role")
-          .eq("id", user.id).single();
-
-        if (profile?.role === "admin") {
-          return { user, profile };
-        }
-      } catch (err) {
-        console.error("[v0] profile check failed:", err);
-      }
-    }
-
-    // Check for static admin session in cookies
+    // Check for secure httpOnly admin session cookie
     const adminSessionCookie = cookieStore.get("admin_session");
     if (adminSessionCookie) {
       try {
         const session = JSON.parse(adminSessionCookie.value);
-        if (session.id === "static-admin" && session.role === "admin") {
+        if (session.id === "admin" && session.role === "admin") {
           return {
-            user: { id: "static-admin", email: session.email },
+            user: { id: "admin", email: session.email },
             profile: { role: "admin" },
           };
         }

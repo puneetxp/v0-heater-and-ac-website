@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, Menu } from "lucide-react"
+import { Bell, Menu, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Wind, Home, Calendar, RefreshCw, FileText, CreditCard, User, Settings, LogOut } from "lucide-react"
@@ -8,6 +8,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { useSupabaseClient } from "@/lib/hooks/use-supabase"
+import { useEffect, useState } from "react"
 
 const menuItems = [
   { href: "/dashboard", icon: Home, label: "Dashboard" },
@@ -23,6 +24,35 @@ export function DashboardHeader({ user }: { user: any }) {
   const supabase = useSupabaseClient()
   const pathname = usePathname()
   const router = useRouter()
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!supabase || !user?.email) {
+        setLoading(false)
+        return
+      }
+
+      try {
+        const { data: adminUser } = await supabase
+          .from("admin_users")
+          .select("id, is_active")
+          .eq("email", user.email)
+          .single()
+
+        if (adminUser && adminUser.is_active) {
+          setIsAdmin(true)
+        }
+      } catch (error) {
+        console.error("[v0] Failed to check admin status:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    checkAdminStatus()
+  }, [user?.email, supabase])
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -90,6 +120,19 @@ export function DashboardHeader({ user }: { user: any }) {
               3
             </span>
           </Button>
+          {!loading && isAdmin && (
+            <Button 
+              asChild 
+              variant="outline" 
+              size="sm"
+              className="gap-2 border-amber-200 hover:bg-amber-50 hover:border-amber-300"
+            >
+              <Link href="/admin/dashboard">
+                <Shield className="h-4 w-4" />
+                <span className="hidden sm:inline">Admin</span>
+              </Link>
+            </Button>
+          )}
           <div className="flex items-center gap-3">
             <div className="hidden md:block text-right">
               <p className="text-sm font-medium">{user.user_metadata?.full_name || user.email}</p>

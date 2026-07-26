@@ -6,37 +6,17 @@ export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies()
     
-    // 1. Check for server-side static cookie
+    // Check for secure httpOnly admin cookie
     const adminSession = cookieStore.get("admin_session")
     if (adminSession) {
       try {
         const session = JSON.parse(adminSession.value)
-        if (session.id === "static-admin" && session.role === "admin") {
+        if (session.id === "admin" && session.role === "admin") {
           return NextResponse.json({ authenticated: true })
         }
       } catch (e) {
         console.error("[v0] Failed to parse admin session cookie:", e)
       }
-    }
-
-    // 2. Check for Supabase session
-    try {
-      const supabase = await createServerClient()
-      const { data: { user } } = await supabase.auth.getUser()
-
-      if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single()
-
-        if (profile?.role === "admin") {
-          return NextResponse.json({ authenticated: true })
-        }
-      }
-    } catch (supabaseError) {
-      console.error("[v0] Supabase auth check failed in API:", supabaseError)
     }
 
     return NextResponse.json({ authenticated: false }, { status: 401 })
