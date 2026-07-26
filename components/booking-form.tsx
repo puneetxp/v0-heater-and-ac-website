@@ -44,6 +44,7 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
 
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>("");
+  const [saveAddressForFuture, setSaveAddressForFuture] = useState(true);
 
   // Fetch saved addresses from user_addresses table
   useEffect(() => {
@@ -258,6 +259,33 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
         sendBookingToTelegram(bookingData).catch((err) =>
           console.error("[v0] Failed to send Telegram notification:", err)
         );
+      }
+
+      // Automatically save the address to user_addresses if checkbox is checked
+      if (saveAddressForFuture && (savedAddresses.length === 0 || selectedAddressId === "new")) {
+        try {
+          const isDuplicate = savedAddresses.some(
+            (addr) =>
+              addr.address.toLowerCase().trim() === formData.deliveryAddress.toLowerCase().trim() &&
+              addr.pincode.trim() === formData.deliveryPincode.trim()
+          );
+
+          if (!isDuplicate) {
+            await supabase.from("user_addresses").insert({
+              user_id: user.id,
+              label: savedAddresses.length === 0 ? "Home" : `Address ${savedAddresses.length + 1}`,
+              full_name: profile?.full_name || user.email?.split("@")[0] || "Customer",
+              phone: profile?.phone || "",
+              address: formData.deliveryAddress,
+              city: formData.deliveryCity,
+              state: formData.deliveryState,
+              pincode: formData.deliveryPincode,
+              is_default: savedAddresses.length === 0, // Set as default if it's their very first address!
+            });
+          }
+        } catch (addrErr) {
+          console.error("[BookingForm] Failed to automatically save address:", addrErr);
+        }
       }
 
       router.push("/dashboard/bookings");
@@ -668,6 +696,22 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
                   />
                 </div>
               </div>
+
+              {/* Save Address Checkbox */}
+              {(savedAddresses.length === 0 || selectedAddressId === "new") && (
+                <div className="flex items-center space-x-2.5 pt-2 bg-blue-50/30 p-3.5 rounded-xl border border-dashed border-blue-200">
+                  <input
+                    type="checkbox"
+                    id="saveAddress"
+                    checked={saveAddressForFuture}
+                    onChange={(e) => setSaveAddressForFuture(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer accent-blue-600"
+                  />
+                  <Label htmlFor="saveAddress" className="text-xs text-slate-700 font-extrabold cursor-pointer leading-none">
+                    Save this address to my profile for future orders
+                  </Label>
+                </div>
+              )}
 
               {/* Special Instructions */}
               <div className="space-y-2">
