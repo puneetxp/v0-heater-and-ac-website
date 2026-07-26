@@ -1,10 +1,10 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSupabaseClient } from "@/lib/hooks/use-supabase";
-import { getFallbackImages } from "@/lib/supabase/storage"; // Added getFallbackImages import
+import { getFallbackImages } from "@/lib/supabase/storage";
 import { sendBookingToTelegram } from "@/lib/telegram";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +17,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Package } from "lucide-react";
+import { Calendar, Package, Flame, Zap, RotateCcw, Info } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -38,10 +39,14 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
   const [error, setError] = useState<string | null>(null);
   const supabase = useSupabaseClient();
 
+  // State for loaded plans
+  const [plans, setPlans] = useState<any[]>([]);
+  const [selectedPlanId, setSelectedPlanId] = useState<string | number | null>(null);
+
   const [formData, setFormData] = useState({
-    startMonth: "",
-    durationMonths: 1,
-    rentalType: "monthly",
+    startDate: new Date().toISOString().split("T")[0], // Exact date instead of month
+    durationMonths: 1, // Will be overridden if seasonal
+    rentalType: "seasonal", // Default to seasonal as preferred option
     quantity: 1,
     deliveryAddress: profile?.address || "",
     deliveryCity: profile?.city || "",
@@ -50,26 +55,88 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
     notes: "",
   });
 
+  // Fetch seasonal plans for the product
+  useEffect(() => {
+    const fetchPlans = async () => {
+      if (!supabase || !product?.id) return;
+      try {
+        const { data, error: plansErr } = await supabase
+          .from("seasonal_plans")
+          .select("*")
+          .eq("product_id", product.id)
+          .eq("is_active", true)
+          .order("base_price", { ascending: true });
+
+        if (plansErr) throw plansErr;
+
+        if (data && data.length > 0) {
+          setPlans(data);
+          setSelectedPlanId(data[0].id);
+          setFormData((prev) => ({
+            ...prev,
+            rentalType: "seasonal",
+            durationMonths: data[0].duration_months,
+          }));
+        } else {
+          // Fallback if no seasonal plans exist
+          setFormData((prev) => ({
+            ...prev,
+            rentalType: "monthly",
+            durationMonths: 1,
+          }));
+        }
+      } catch (err) {
+        console.error("[BookingForm] Error fetching plans:", err);
+      }
+    };
+    fetchPlans();
+  }, [supabase, product?.id]);
+
+  const handlePlanChange = (planId: string) => {
+    setSelectedPlanId(planId);
+    const plan = plans.find((p) => String(p.id) === String(planId));
+    if (plan) {
+      setFormData((prev) => ({
+        ...prev,
+        durationMonths: plan.duration_months,
+      }));
+    }
+  };
+
   const calculatePrice = () => {
-    if (!formData.startMonth || !formData.durationMonths) {
-      return { subtotal: 0, gstAmount: 0, total: 0, deposit: 0, discount: 0 };
+    if (!formData.startDate) {
+      return { subtotal: 0, gstAmount: 0, total: 0, deposit: 0, discount: 0, discountAmount: 0 };
     }
 
-    // Calculate discount based on duration
-    let discount = 0;
-    if (formData.durationMonths >= 12) discount = 20;
-    else if (formData.durationMonths >= 6) discount = 15;
-    else if (formData.durationMonths >= 3) discount = 10;
+    if (formData.rentalType === "seasonal") {
+      const selectedPlan = plans.find((p) => String(p.id) === String(selectedPlanId));
+      if (!selectedPlan) {
+        return { subtotal: 0, gstAmount: 0, total: 0, deposit: 0, discount: 0, discountAmount: 0 };
+      }
 
-    const basePrice = product.price_per_month * formData.durationMonths *
-      formData.quantity;
-    const discountAmount = (basePrice * discount) / 100;
-    const subtotal = basePrice - discountAmount;
-    const gstAmount = subtotal * 0.18;
-    const total = subtotal + gstAmount;
-    const deposit = product.deposit_amount * formData.quantity;
+      const subtotal = selectedPlan.base_price * formData.quantity;
+      const gstAmount = subtotal * 0.18;
+      const total = subtotal + gstAmount;
+      const deposit = product.deposit_amount * formData.quantity;
+      const discount = selectedPlan.discount_percentage || 0;
 
-    return { subtotal, gstAmount, total, deposit, discount, discountAmount };
+      return { subtotal, gstAmount, total, deposit, discount, discountAmount: 0 };
+    } else {
+      // Monthly custom duration rental
+      let discount = 0;
+      if (formData.durationMonths >= 12) discount = 20;
+      else if (formData.durationMonths >= 6) discount = 15;
+      else if (formData.durationMonths >= 3) discount = 10;
+
+      const basePrice = product.price_per_month * formData.durationMonths * formData.quantity;
+      const discountAmount = (basePrice * discount) / 100;
+      const subtotal = basePrice - discountAmount;
+      const gstAmount = subtotal * 0.18;
+      const total = subtotal + gstAmount;
+      const deposit = product.deposit_amount * formData.quantity;
+
+      return { subtotal, gstAmount, total, deposit, discount, discountAmount };
+    }
   };
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
@@ -84,33 +151,36 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
 
     const { subtotal, gstAmount, total, deposit } = calculatePrice();
 
-    // Calculate start and end dates from start month
-    const startDate = new Date(formData.startMonth + "-01");
+    const startDate = new Date(formData.startDate);
     const endDate = new Date(startDate);
     endDate.setMonth(endDate.getMonth() + formData.durationMonths);
 
     try {
       if (!supabase) throw new Error("Supabase client not initialized");
-      const { data, error } = await supabase.from("bookings").insert({
-        user_id: user.id,
-        product_id: product.id,
-        start_date: startDate.toISOString().split("T")[0],
-        end_date: endDate.toISOString().split("T")[0],
-        rental_type: formData.rentalType,
-        quantity: formData.quantity,
-        subtotal,
-        gst_amount: gstAmount,
-        total_amount: total,
-        deposit_amount: deposit,
-        delivery_address: formData.deliveryAddress,
-        delivery_city: formData.deliveryCity,
-        delivery_state: formData.deliveryState,
-        delivery_pincode: formData.deliveryPincode,
-        notes: formData.notes,
-        status: "pending",
-      }).select();
+      const { data, error: bookingErr } = await supabase
+        .from("bookings")
+        .insert({
+          user_id: user.id,
+          product_id: product.id,
+          start_date: startDate.toISOString().split("T")[0],
+          end_date: endDate.toISOString().split("T")[0],
+          rental_type: formData.rentalType,
+          plan_id: formData.rentalType === "seasonal" ? selectedPlanId : null,
+          quantity: formData.quantity,
+          subtotal,
+          gst_amount: gstAmount,
+          total_amount: total,
+          deposit_amount: deposit,
+          delivery_address: formData.deliveryAddress,
+          delivery_city: formData.deliveryCity,
+          delivery_state: formData.deliveryState,
+          delivery_pincode: formData.deliveryPincode,
+          notes: formData.notes,
+          status: "pending",
+        })
+        .select();
 
-      if (error) throw error;
+      if (bookingErr) throw bookingErr;
 
       // Send booking notification to Telegram
       if (data && data.length > 0) {
@@ -129,7 +199,6 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
           notes: formData.notes,
         };
 
-        // Send to Telegram (non-blocking)
         sendBookingToTelegram(bookingData).catch((err) =>
           console.error("[v0] Failed to send Telegram notification:", err)
         );
@@ -146,18 +215,32 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
   const { subtotal, gstAmount, total, deposit, discount, discountAmount } =
     calculatePrice();
 
-  // Get current month in YYYY-MM format for min value
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  // Get current exact date in YYYY-MM-DD format for min value
+  const currentDate = new Date().toISOString().split("T")[0];
+
+  // Calculate dynamic start & end dates
+  const getDates = () => {
+    if (!formData.startDate) return { start: null, end: null };
+    const start = new Date(formData.startDate);
+    if (isNaN(start.getTime())) return { start: null, end: null };
+    const end = new Date(start);
+    end.setMonth(end.getMonth() + formData.durationMonths);
+    return { start, end };
+  };
+  const { start: calculatedStart, end: calculatedEnd } = getDates();
+
+  const selectedPlan = plans.find((p) => String(p.id) === String(selectedPlanId));
 
   return (
     <div className="grid gap-8 md:grid-cols-2">
+      {/* Product Details Card */}
       <div>
-        <Card>
-          <CardHeader>
+        <Card className="shadow-lg border-slate-100 overflow-hidden">
+          <CardHeader className="bg-slate-50 border-b border-slate-100">
             <CardTitle>Product Details</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="relative aspect-video rounded-lg overflow-hidden border">
+          <CardContent className="space-y-6 pt-6">
+            <div className="relative aspect-video rounded-xl overflow-hidden border shadow-sm">
               <img
                 src={product.image_url && product.image_url.trim() !== ""
                   ? product.image_url
@@ -167,88 +250,219 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
               />
             </div>
             <div>
-              <h3 className="text-2xl font-bold">{product.name}</h3>
-              <p className="text-muted-foreground">{product.capacity}</p>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
+                <h3 className="text-2xl font-bold text-slate-900">{product.name}</h3>
+                <Badge className="bg-primary/10 text-primary hover:bg-primary/20 uppercase tracking-widest font-black text-[10px] px-2.5 py-1">
+                  Season: {product.season ? product.season.toUpperCase() : "YEAR ROUND"}
+                </Badge>
+              </div>
+              <p className="text-sm font-semibold text-slate-500">{product.capacity}</p>
+              <p className="mt-3 text-sm text-slate-600 leading-relaxed">
                 {product.description}
               </p>
             </div>
             <div className="space-y-2">
-              <h4 className="font-semibold">Features:</h4>
-              <ul className="space-y-1 text-sm text-muted-foreground">
+              <h4 className="font-bold text-slate-900 text-sm">Key Features:</h4>
+              <ul className="space-y-1.5 text-sm text-slate-500">
                 {product.features?.map((feature: string, index: number) => (
-                  <li key={index}>• {feature}</li>
+                  <li key={index} className="flex items-start gap-2">
+                    <span className="text-primary font-black">•</span>
+                    <span>{feature}</span>
+                  </li>
                 ))}
               </ul>
             </div>
-            <div className="space-y-2 pt-4 border-t">
-              <div className="flex justify-between">
-                <span className="font-medium">Monthly Rate:</span>
-                <span className="text-lg font-semibold text-primary">
+            <div className="space-y-2.5 pt-5 border-t border-slate-100">
+              <div className="flex justify-between items-center text-sm">
+                <span className="font-semibold text-slate-500">Monthly Rate:</span>
+                <span className="text-lg font-black text-slate-950">
                   ₹{product.price_per_month}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="font-medium">Deposit:</span>
-                <span>₹{product.deposit_amount}</span>
+              <div className="flex justify-between items-center text-sm">
+                <span className="font-semibold text-slate-500">Security Deposit:</span>
+                <span className="text-sm font-bold text-slate-950">₹{product.deposit_amount}</span>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
+      {/* Booking Form Card */}
       <div>
-        <Card>
-          <CardHeader>
-            <CardTitle>Monthly Rental Booking</CardTitle>
+        <Card className="shadow-xl border-slate-100">
+          <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+            <CardTitle>Rental Booking</CardTitle>
             <CardDescription>
-              Select your rental duration and details
+              Select your rental preference and exact billing dates
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-2">
+              
+              {/* Rental Type Selection (Preferred Season Plan first) */}
+              {plans.length > 0 && (
+                <div className="space-y-3">
+                  <Label className="text-xs font-bold uppercase tracking-wider text-slate-400">Rental Type</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const defaultPlan = plans[0];
+                        setSelectedPlanId(defaultPlan.id);
+                        setFormData({
+                          ...formData,
+                          rentalType: "seasonal",
+                          durationMonths: defaultPlan.duration_months,
+                        });
+                      }}
+                      className={`p-4 rounded-xl border-2 text-left transition-all relative ${
+                        formData.rentalType === "seasonal"
+                          ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                          : "border-slate-100 hover:border-slate-200"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="font-black text-slate-900 text-sm">Seasonal Plan</span>
+                        <Badge className="bg-primary text-white text-[10px] font-black py-0.5 px-2 uppercase tracking-wide animate-pulse">
+                          PREFERABLE
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        Pre-configured seasonal packages with up to {plans[0].discount_percentage || 15}% built-in savings.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData({
+                          ...formData,
+                          rentalType: "monthly",
+                          durationMonths: 1,
+                        });
+                      }}
+                      className={`p-4 rounded-xl border-2 text-left transition-all ${
+                        formData.rentalType === "monthly"
+                          ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                          : "border-slate-100 hover:border-slate-200"
+                      }`}
+                    >
+                      <span className="font-black text-slate-900 text-sm block mb-1.5">Custom Duration</span>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        Select any custom duration from 1 to 12 months with flexible extensions.
+                      </p>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Exact Dates & Duration Grid */}
+              <div className="grid gap-4 md:grid-cols-2 pt-2">
+                
+                {/* Duration Picker */}
+                {formData.rentalType === "seasonal" ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="seasonalPlan" className="text-slate-700 font-bold text-sm">Select Season Plan</Label>
+                    <Select
+                      value={selectedPlanId?.toString() || ""}
+                      onValueChange={handlePlanChange}
+                    >
+                      <SelectTrigger id="seasonalPlan" className="bg-white border-slate-200">
+                        <SelectValue placeholder="Select plan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {plans.map((p) => (
+                          <SelectItem key={p.id} value={p.id.toString()}>
+                            {p.name} ({p.duration_months} M - ₹{p.base_price.toLocaleString()})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label htmlFor="durationMonths" className="text-slate-700 font-bold text-sm">Duration (Months)</Label>
+                    <Select
+                      value={formData.durationMonths.toString()}
+                      onValueChange={(value) =>
+                        setFormData({
+                          ...formData,
+                          durationMonths: Number.parseInt(value),
+                        })}
+                    >
+                      <SelectTrigger id="durationMonths" className="bg-white border-slate-200">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => {
+                          let label = `${m} Month${m > 1 ? 's' : ''}`;
+                          if (m === 3) label += " (10% off)";
+                          else if (m === 6) label += " (15% off)";
+                          else if (m === 12) label += " (20% off)";
+                          return (
+                            <SelectItem key={m} value={m.toString()}>
+                              {label}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Exact Start Date Input */}
                 <div className="space-y-2">
-                  <Label htmlFor="startMonth">Start Month</Label>
+                  <Label htmlFor="startDate" className="text-slate-700 font-bold text-sm">Start Date</Label>
                   <div className="relative">
                     <Input
-                      id="startMonth"
-                      type="month"
+                      id="startDate"
+                      type="date"
                       required
-                      value={formData.startMonth}
+                      value={formData.startDate}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          startMonth: e.target.value,
+                          startDate: e.target.value,
                         })}
-                      min={currentMonth}
+                      min={currentDate}
+                      className="bg-white border-slate-200 pr-10"
                     />
                     <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="durationMonths">Duration (Months)</Label>
-                  <Select
-                    value={formData.durationMonths.toString()}
-                    onValueChange={(value) =>
-                      setFormData({
-                        ...formData,
-                        durationMonths: Number.parseInt(value),
-                      })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1 Month</SelectItem>
-                      <SelectItem value="3">3 Months (10% off)</SelectItem>
-                      <SelectItem value="6">6 Months (15% off)</SelectItem>
-                      <SelectItem value="12">12 Months (20% off)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
 
+              {/* Exact Dates Banner (Dynamic Start and End Dates Shown) */}
+              {calculatedStart && calculatedEnd && (
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex flex-col sm:flex-row justify-between gap-4 text-sm font-semibold text-slate-700 shadow-inner animate-fadeIn">
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">Billing Start</span>
+                    <span className="text-slate-900 font-black text-sm">
+                      {calculatedStart.toLocaleDateString("en-IN", {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                  <div className="hidden sm:block border-r border-slate-200" />
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">Billing End</span>
+                    <span className="text-slate-900 font-black text-sm text-primary">
+                      {calculatedEnd.toLocaleDateString("en-IN", {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Quantity */}
               <div className="space-y-2">
                 <Label htmlFor="quantity">Quantity</Label>
                 <div className="relative">
@@ -256,7 +470,7 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
                     id="quantity"
                     type="number"
                     min="1"
-                    max={product.available_quantity}
+                    max={product.available_quantity || 10}
                     required
                     value={formData.quantity}
                     onChange={(e) =>
@@ -264,11 +478,13 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
                         ...formData,
                         quantity: Number.parseInt(e.target.value),
                       })}
+                    className="bg-white border-slate-200"
                   />
                   <Package className="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
 
+              {/* Delivery Address Fields */}
               <div className="space-y-2">
                 <Label htmlFor="deliveryAddress">Delivery Address</Label>
                 <Textarea
@@ -282,6 +498,7 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
                     })}
                   rows={3}
                   placeholder="Enter your complete delivery address"
+                  className="bg-white border-slate-200"
                 />
               </div>
 
@@ -297,6 +514,7 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
                         ...formData,
                         deliveryCity: e.target.value,
                       })}
+                    className="bg-white border-slate-200"
                   />
                 </div>
                 <div className="space-y-2">
@@ -310,6 +528,7 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
                         ...formData,
                         deliveryState: e.target.value,
                       })}
+                    className="bg-white border-slate-200"
                   />
                 </div>
                 <div className="space-y-2">
@@ -323,10 +542,12 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
                         ...formData,
                         deliveryPincode: e.target.value,
                       })}
+                    className="bg-white border-slate-200"
                   />
                 </div>
               </div>
 
+              {/* Special Instructions */}
               <div className="space-y-2">
                 <Label htmlFor="notes">Special Instructions (Optional)</Label>
                 <Textarea
@@ -336,43 +557,56 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
                     setFormData({ ...formData, notes: e.target.value })}
                   rows={3}
                   placeholder="Any special delivery instructions or preferences..."
+                  className="bg-white border-slate-200"
                 />
               </div>
 
+              {/* Price Summary Banner */}
               {subtotal > 0 && (
-                <div className="space-y-3 rounded-lg border-2 border-primary/20 bg-primary/5 p-4">
-                  <h4 className="font-semibold text-lg">Price Summary</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
+                <div className="space-y-3 rounded-2xl border border-primary/20 bg-primary/[0.02] p-5 shadow-sm">
+                  <h4 className="font-black text-slate-900 text-sm uppercase tracking-wider flex items-center gap-2">
+                    <Info className="w-4 h-4 text-primary" />
+                    Estimated Invoice Summary
+                  </h4>
+                  <div className="space-y-2 text-sm pt-2">
+                    <div className="flex justify-between text-slate-500 font-medium">
                       <span>
-                        Base Price ({formData.durationMonths} months):
+                        Rental Amount ({formData.durationMonths} Months × {formData.quantity}):
                       </span>
-                      <span>
-                        ₹{(product.price_per_month * formData.durationMonths *
-                          formData.quantity).toFixed(2)}
+                      <span className="font-bold text-slate-800">
+                        ₹{formData.rentalType === "seasonal" && selectedPlan
+                          ? (selectedPlan.base_price * formData.quantity).toFixed(2)
+                          : (product.price_per_month * formData.durationMonths * formData.quantity).toFixed(2)
+                        }
                       </span>
                     </div>
-                    {discount > 0 && (
-                      <div className="flex justify-between text-green-600 dark:text-green-400">
+                    {formData.rentalType === "monthly" && discount > 0 && (
+                      <div className="flex justify-between text-green-600 dark:text-green-400 font-semibold">
                         <span>Discount ({discount}%):</span>
                         <span>-₹{discountAmount?.toFixed(2)}</span>
                       </div>
                     )}
-                    <div className="flex justify-between">
+                    {formData.rentalType === "seasonal" && selectedPlan && selectedPlan.discount_percentage > 0 && (
+                      <div className="flex justify-between text-green-600 dark:text-green-400 font-semibold">
+                        <span>Built-in Season Discount ({selectedPlan.discount_percentage}%):</span>
+                        <span>Included</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-slate-500 font-medium pt-1.5 border-t border-slate-100">
                       <span>Subtotal:</span>
-                      <span>₹{subtotal.toFixed(2)}</span>
+                      <span className="font-bold text-slate-800">₹{subtotal.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between text-slate-500 font-medium">
                       <span>GST (18%):</span>
-                      <span>₹{gstAmount.toFixed(2)}</span>
+                      <span className="font-bold text-slate-800">₹{gstAmount.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between font-semibold text-base pt-2 border-t-2">
-                      <span>Total Amount:</span>
-                      <span className="text-primary">₹{total.toFixed(2)}</span>
+                    <div className="flex justify-between font-black text-base pt-3 border-t-2 border-slate-100">
+                      <span className="text-slate-900">Total Rental Amount:</span>
+                      <span className="text-primary text-lg">₹{total.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between text-orange-600 dark:text-orange-400 pt-2 border-t">
-                      <span className="font-medium">Refundable Deposit:</span>
-                      <span className="font-semibold">
+                    <div className="flex justify-between text-orange-600 font-bold pt-2.5 border-t border-dashed border-slate-200">
+                      <span className="font-bold">Refundable Security Deposit:</span>
+                      <span className="font-black">
                         ₹{deposit.toFixed(2)}
                       </span>
                     </div>
@@ -381,21 +615,21 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
               )}
 
               {error && (
-                <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
+                <div className="rounded-xl bg-red-50 p-4 text-sm font-semibold text-red-600 border border-red-100">
                   {error}
                 </div>
               )}
 
+              {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white"
-                size="lg"
+                className="w-full h-14 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold text-base shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all"
                 disabled={isLoading}
               >
                 {isLoading
                   ? "Processing..."
                   : user
-                  ? "Confirm Monthly Rental"
+                  ? "Confirm Rental Booking"
                   : "Login to Book"}
               </Button>
             </form>
