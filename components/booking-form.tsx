@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Package, Flame, Zap, RotateCcw, Info } from "lucide-react";
+import { Calendar, Package, Flame, Zap, RotateCcw, Info, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -39,9 +39,53 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
   const [error, setError] = useState<string | null>(null);
   const supabase = useSupabaseClient();
 
-  // State for loaded plans
   const [plans, setPlans] = useState<any[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string | number | null>(null);
+
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("");
+
+  // Fetch saved addresses from user_addresses table
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      if (!supabase || !user) return;
+      try {
+        const { data, error } = await supabase
+          .from("user_addresses")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("is_default", { ascending: false });
+
+        if (!error && data) {
+          setSavedAddresses(data);
+          // Auto-populate with default address or the first address in list
+          const defaultAddr = data.find((addr) => addr.is_default);
+          if (defaultAddr) {
+            setSelectedAddressId(defaultAddr.id.toString());
+            setFormData((prev) => ({
+              ...prev,
+              deliveryAddress: defaultAddr.address,
+              deliveryCity: defaultAddr.city,
+              deliveryState: defaultAddr.state,
+              deliveryPincode: defaultAddr.pincode,
+            }));
+          } else if (data.length > 0) {
+            setSelectedAddressId(data[0].id.toString());
+            setFormData((prev) => ({
+              ...prev,
+              deliveryAddress: data[0].address,
+              deliveryCity: data[0].city,
+              deliveryState: data[0].state,
+              deliveryPincode: data[0].pincode,
+            }));
+          }
+        }
+      } catch (err) {
+        console.error("[BookingForm] Error fetching addresses:", err);
+      }
+    };
+    fetchAddresses();
+  }, [supabase, user]);
 
   const [formData, setFormData] = useState({
     startDate: new Date().toISOString().split("T")[0], // Exact date instead of month
@@ -509,6 +553,58 @@ export function BookingForm({ product, user, profile }: BookingFormProps) {
                   <Package className="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
+
+              {/* Saved Address Selector */}
+              {savedAddresses.length > 0 && (
+                <div className="space-y-2 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                  <div className="flex items-center gap-2 mb-1">
+                    <MapPin className="h-4 w-4 text-blue-600 animate-pulse" />
+                    <Label htmlFor="savedAddress" className="text-slate-800 font-extrabold text-sm">
+                      Use Saved Address
+                    </Label>
+                  </div>
+                  <Select
+                    value={selectedAddressId}
+                    onValueChange={(addrId) => {
+                      setSelectedAddressId(addrId);
+                      if (addrId === "new") {
+                        setFormData((prev) => ({
+                          ...prev,
+                          deliveryAddress: "",
+                          deliveryCity: "",
+                          deliveryState: "",
+                          deliveryPincode: "",
+                        }));
+                      } else {
+                        const addr = savedAddresses.find((a) => String(a.id) === addrId);
+                        if (addr) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            deliveryAddress: addr.address,
+                            deliveryCity: addr.city,
+                            deliveryState: addr.state,
+                            deliveryPincode: addr.pincode,
+                          }));
+                        }
+                      }
+                    }}
+                  >
+                    <SelectTrigger id="savedAddress" className="bg-white border-slate-200">
+                      <SelectValue placeholder="Choose a saved address" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {savedAddresses.map((addr) => (
+                        <SelectItem key={addr.id} value={addr.id.toString()}>
+                          {addr.label || "Home"} - {addr.address.substring(0, 30)}... ({addr.pincode})
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="new">
+                        + Add / Type New Address
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {/* Delivery Address Fields */}
               <div className="space-y-2">
